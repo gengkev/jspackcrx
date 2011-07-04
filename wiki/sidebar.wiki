@@ -4,3 +4,5 @@
   * [http://code.google.com/p/jspackcrx/w/list Wiki Pages]
     * [Documentation]
   * [http://code.google.com/p/jspackcrx/source/browse/ Browse Source]
+
+  * [http://code.google.com/p/OpenToChromeApp OpenToChromeApp]
