@@ -1,0 +1,21 @@
+#summary How to use JSPackCrx in your web app.
+
+
+= Documentation =
+
+== Embedding the script ==
+
+  * Link to embed.js as an external script, wither on your own server or on our project at http://jspackcrx.googlecode.com/svn/trunk/embed.js for the latest version.
+  * You may choose to load the script asynchronously, but if your script runs immediately it should be synchronous.
+
+== How to use JSPackCrx ==
+
+JSPackCrx's API closely resembles that of [http://jszip.stuartk.co.uk/ JSZip's], because it is based on the code. The only differences is that JSPackCrx somewhat validates manifests and packages files in the crx format.
+
+=== new JSCrx([compressionMethod,validateManifests]) ===
+Creates a new crx file.
+  * `compressionMethod` The compression method to use.
+    Available methods:
+      * `STORE` no compression, the default.
+      * `DEFLATE` default zip compression. Deflate algorithm will be loaded as needed.
+  * `validateManifests` Toggles validating manifests. Defaults to true.
