@@ -5,4 +5,5 @@
     * [Documentation]
   * [http://code.google.com/p/jspackcrx/source/browse/ Browse Source]
 
-  * [http://code.google.com/p/OpenToChromeApp OpenToChromeApp]
+
+  * [http://code.google.com/p/opentochromeapp/ OpenToChromeApp]
