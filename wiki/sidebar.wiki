@@ -1,0 +1,5 @@
+<g:plusone size="medium"></g:plusone>
+
+  * [http://code.google.com/p/jspackcrx/ Project Home]
+  * [http://code.google.com/p/jspackcrx/w/list Wiki Pages]
+    * [Documentation]
