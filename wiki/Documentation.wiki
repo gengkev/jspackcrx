@@ -10,12 +10,112 @@
 
 == How to use JSPackCrx ==
 
-JSPackCrx's API closely resembles that of [http://jszip.stuartk.co.uk/ JSZip's], because it is based on the code. The only differences is that JSPackCrx somewhat validates manifests and packages files in the crx format.
+JSPackCrx's API closely resembles that of [http://jszip.stuartk.co.uk/ JSZip's], because it is based on the code. Some of this documentation is *directly copied* (well, it's allowed under the GPLv3). But a lot of thanks to Stuart for writing JSZip!
 
-=== new JSCrx([compressionMethod,validateManifests]) ===
+A lot of the functions are the same, and all of them except for `find` and `generate` support chaining: that is, they return their `this` object, meaning you can do stuff like `crx.add("test.txt","Hello!").remove("test.txt");`
+
+=== new JSCrx(validateManifests=true[,compressionMethod]) ===
 Creates a new crx file.
+
+  * `validateManifests` Toggles validating manifests. Defaults to true.
   * `compressionMethod` The compression method to use.
     Available methods:
       * `STORE` no compression, the default.
       * `DEFLATE` default zip compression. Deflate algorithm will be loaded as needed.
-  * `validateManifests` Toggles validating manifests. Defaults to true.
+
+{{{
+var crx=new JSCrx(); //defaults to STORE
+var crx=new JSCrx("DEFLATE",false);
+}}}
+
+=== onerror(error) ===
+Returns an error if validating one of the manifests failed, or some other strange thing happened. The JSPackCrx() is still usable, but the operation that caused the error will be reverted.
+
+=== addManifest(data) ===
+Adds manifest.json to the crx in plaintext.
+If `validateManifests==true`, the manifest will be validated and an error will be thrown trying to create a file named `manifest.json', otherwise this function can be ignored.
+
+{{{
+crx.addManifest("{\n\"name\": \"Nothing\",\n\"version\": \"0\"\n}");
+}}}
+
+=== addLocale(locale,data) ===
+Adds a `messages.json` file for each `locale` in plaintext.
+If `validateManifests==true`, the manifest will be validated and an error will be thrown trying to create a file named `manifest.json', otherwise this function can be ignored.
+
+{{{
+crx.addLocale("en","{\n\"name\":{\"message\":\"message\"}}");
+}}}
+
+=== add(name,data,options) ===
+Adds a file to the zip file. Supports chaining.
+Options:
+  * `base64`, boolean. Set to `true` if the data is base64 encoded. For example image data from a <canvas> element. Plain text and HTML do not need this option.
+  * `binary`, boolean. Defaults to `true` if the data is base64 encoded, `false` otherwise. If set to `false` then UTF-8 characters will be encoded.
+  * `date`, Date. Use it to specify the last modification date. If not set the current date is used.
+
+{{{
+crx.add("Hello.txt", "Hello World\n");
+crx.add("smile.gif", "R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=", {base64: true});
+crx.add("magic.txt", "U2VjcmV0IGNvZGU=", {base64: true, binary: false});
+crx.add("Xmas.txt", "Ho ho ho !", {date : new Date("December 25, 2007 00:00:01")});
+
+crx.add("animals.txt", "dog,platypus\n").add("people.txt", "james,sebastian\n");
+}}}
+Result: `Hello.txt`, `smile.gif`, `magic.txt`, `Xmas.txt`, `animals.txt`, `people.txt`
+
+=== folder(name) ===
+Add a directory to the zip file. Supports chaining.
+
+{{{
+crx.folder("images");
+crx.folder("css").add("style.css", "body {background: #FF0000}");
+// or specify an absolute path (using forward slashes)
+crx.add("css/font.css", "body {font-family: sans-serif}")
+}}}
+Result: `images/`, `css/`, `css/style.css`, `css/font.css`
+
+=== find(needle) ===
+Compare a string or regular expression against all of the filenames and returns an informational object for each that matches.
+
+{{{
+crx.add("Readme", "Hello World!\n");
+crx.add("Readme.French", "Bonjour tout le monde!\n");
+crx.add("Readme.Pirate", "Ahoy m'hearty!\n");
+
+crx.find("Readme"); // only finds "Readme"
+crx.find(/^Readme/); // Regular expression finds all three
+}}}
+Result: Array of matched file objects in the form: `{name: "Readme", data: "Hello World!", dir: false}`
+
+=== remove(name) ===
+Delete a file or folder.
+
+{{{
+crx.add("Hello.txt", "Hello World\n");
+crx.add("temp.txt", "nothing").remove("temp.txt");
+}}}
+Result: `Hello.txt`
+
+{{{
+crx.add("Hello.txt", "Hello World\n");
+crx.folder("css").add("style.css", "body {background: #FF0000}");
+crx.remove("Hello.txt").remove("css");
+}}}
+Result: Empty zip.
+
+=== generate(asBytes=false) ===
+Generates the complete zip file. By default encoded as base64, pass true to get the raw byte string
+
+{{{
+content = crx.generate();
+location.href="data:application/zip;base64,"+content;
+}}}
+{{{
+content = zip.generate(true);
+for (var c = 0; c < content.length; c++)
+{
+    console.log(content.charCodeAt(c));
+    // do other things
+}
+}}}
