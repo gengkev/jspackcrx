@@ -1,9 +1,9 @@
 <g:plusone size="medium"></g:plusone>
 
-  * [http://code.google.com/p/jspackcrx JSPackCrx]
-    * [http://code.google.com/p/jspackcrx/w/list Wiki Pages]
-      * [Documentation]
-    * [http://code.google.com/p/jspackcrx/source/browse/ Browse Source]
+  * [http://code.google.com/p/jspackcrx Project Home]
+  * [http://code.google.com/p/jspackcrx/w/list Wiki Pages]
+    * [Documentation]
+  * [http://code.google.com/p/jspackcrx/source/browse/ Browse Source]
 
 
-  * [http://code.google.com/p/opentochromeapp OpenToChromeApp]
+  * [http://code.google.com/p/opentochromeapp Parent Project: OpenToChromeApp]
