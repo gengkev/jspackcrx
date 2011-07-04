@@ -50,7 +50,7 @@ crx.addLocale("en","{\n\"name\":{\"message\":\"message\"}}");
 === add(name,data,options) ===
 Adds a file to the zip file. Supports chaining.
 Options:
-  * `base64`, boolean. Set to `true` if the data is base64 encoded. For example image data from a <canvas> element. Plain text and HTML do not need this option.
+  * `base64`, boolean. Set to `true` if the data is base64 encoded. For example image data from a `<canvas>` element. Plain text and HTML do not need this option.
   * `binary`, boolean. Defaults to `true` if the data is base64 encoded, `false` otherwise. If set to `false` then UTF-8 characters will be encoded.
   * `date`, Date. Use it to specify the last modification date. If not set the current date is used.
 
