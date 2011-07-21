@@ -118,11 +118,10 @@ content = crx.generate();
 location.href="data:application/zip;base64,"+content;
 }}}
 {{{
-content = zip.generate(true,null,function(data) {
-for (var c = 0; c < content.length; c++)
-{
-    console.log(content.charCodeAt(c));
+crx.generate(true,null,function(data) {
+  for (var c = 0; c < data.length; c++) {
+    console.log(data.charCodeAt(c));
     // do other things
-}
+  }
 });
 }}}
