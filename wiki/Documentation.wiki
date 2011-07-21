@@ -106,22 +106,23 @@ crx.remove("Hello.txt").remove("css");
 }}}
 Result: Empty zip.
 
-=== generate(asBytes=false,pemFile,randomData) ===
-Generates the complete zip file.
+=== generate(asBytes=false,pemFile,callback) ===
+Generates the complete zip file. This is an asynchronous function and will return the JSCrx object.
 Options:
   * `asBytes`, boolean. By default encoded as base64, pass true to get the raw byte string
-  * `pemFile`, string. Pass a pem file to be used in creating the crx.
-  * `randomData`, string. Give us some random data to help us generate the RSA key!
+  * `pemFile`, string. Pass a pem file to be used in creating the crx. IF undefined, generates a new one.
+  * `callback`, function. Called when the operation is complete with the data.
 
 {{{
 content = crx.generate();
 location.href="data:application/zip;base64,"+content;
 }}}
 {{{
-content = zip.generate(true);
+content = zip.generate(true,null,function(data) {
 for (var c = 0; c < content.length; c++)
 {
     console.log(content.charCodeAt(c));
     // do other things
 }
+});
 }}}
