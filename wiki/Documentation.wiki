@@ -44,7 +44,7 @@ Adds a `messages.json` file for each `locale` in plaintext.
 If `validateManifests==true`, the manifest will be validated and an error will be thrown trying to create a file named `manifest.json', otherwise this function can be ignored.
 
 {{{
-crx.addLocale("en","{\n\"name\":{\"message\":\"message\"}}");
+crx.locale("en","{\n\"name\":{\"message\":\"message\"}}");
 }}}
 
 === add(name,data,options) ===
