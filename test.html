@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<meta charset="UTF-8" />
+<title>JSPackCrx Test Page</title>
+<script type="text/javascript" src="jspackcrx.js"></script>
+<script type="text/javascript">
+function package() {
+  var image =                "iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAHUUlEQVR4nO2da4gWVRjHf6%2BXbFdSWytX0qxVM1wQiz5YgeaHLKmQbtAFiqiI1SIoROmDRRBJEGIRRRJC4ofu"
+    + "QWkRZWUZgRWullFGWVTeIls1L7k4fXgcel33fXfed85z5nKeH5wvujtzzvx%2Fc9mZZ85UoijCCJdBWXfAyBYTIHBMgMAxAQLHBAgcEyBwTIDAMQECxwQIHBMgcEyAwBmS5IcqlYp2P7KgBZh0vE0BxgJjgNb"
+	+ "j%2Fx8B%2B4FdwO%2FANuAHYDtwxHNfmyLJc55EApSI84DZwBzgYuBcYHADv%2F8vIsBGYB3wMfCTyw56J4qiAVvBGQZcD7yJ7NGRw3YAeBe4A2jzNaCkJMq2xAIMB%2BYDm3Ebeq32G7AUmOhjcEkIWYDLkH"
+	+ "N2rbB2ImLsqfMzzbYe4GnkdJMpSbKtJAm4gBeB5wDvAWcj5%2BjtwFZgE3JBNxm4CZgJnKbUh73AU4gM%2B5XWUZdEO29JjwAAo4D2Pv82B3gH6MXPaSECvgWu0RlifUI%2BBVTTjlwLdOMv9P7aCjxfKJoAw"
+	+ "gNkG3x12wrM0h3u%2F4R8DVDNUGAlMB34CziK3P9oBU4HzgRGeOzPUWARsEx7RYmyDUCAmCHIub%2BaFkSCDmAqMA2YAXQCpyr3ZyVyajqstYLQLwLTMAm4G1gLHETvlPAhcJbWIOwawA3nA48Bv6IjwSZggk"
+	+ "bHTQC3tAGLgd24l%2BA7FG4cmQA6TABWoyPBeJcdNQF0uQ%2F3N5S6gXGuOmgC6HMzOZbABPDDEtyfDrpxcGFoAvihBXng5FqCt9J2LEm2VhOYnkNIUYhrRiss8yRMADfsVljmKBorV2sKE8ANnQrL7EDqGVQ"
+	+ "xAdIzGZirsNxWpeWeiF0EpqIVqQx2fQEYt82kqNy2vwJ0aUUeFmmFH7dFzXbQBNDDV%2FgR8i7Ctc100gTQwWf4cTsI3N5oR00A92QRfnVbDVyYtLNJsg2pIigtrcBr%2BLgyr08v8BmwHnn3YR%2FwBf3ci0"
+	+ "i089oRIBFZ7%2FkDtU30c8%2FAjgBucLXnHwKeRf6s60AO5S6f%2F3cDVyMvvgB2BHCBqz3%2FICe%2FHDISuAHY4GD5ceum6khgF4HpGI5e%2BNUMBh52sJ5qCcaBCZCG4cgTPu3wq%2BlysL64bQEuMAGaI"
+	+ "4vwY55zsN643WoCNE6W4YPUAOxwsP4usFNAo2QdfszSlOvvihdkAiQnL%2BGDvJp2rMn1d1UvyARIRp7CB3lXsZmZS7r6LsgEGJi8hQ%2FyNvPPDa7%2FpPDBBBiIPIYPUEHeHE4VPpgA9RiPzPOXt%2FBjhg"
+	+ "GvJFh%2FzfDBBKjFjTR%2BiPUZfsxQ4OU6668bPpgA1bQA9wKfkD54H%2BHHDKF%2FCQYMH0yAmDOQiRhcBO8z%2FJi%2BEiQKH0wAkPkCv6S44cfEEjzYyC%2BFLkAn9WcLLUr4TROyAJcCfxBw%2BBCuAHO"
+	+ "Bvwk8fAhTgNuQjzm4Cv8fCho%2BhCfA%2FTT%2FEKXWnj%2FH6wgcE5IAj%2BAu%2BLjN9zoCBUIRYDnuw1%2FvdQRKlF2AU4BVuA8%2FAuZ5HIcaZRZgJLAGnfB3ofcRCa%2BUVYCxyKtRGuH3IrX6paCMAk"
+	+ "xESp41wo%2BAe%2FwNRZ%2ByCXAR8u0frfAXexuJJ8okwGx0vvAVtyf9DcUfZRHgOuQDjVrhv%2BhvKH4pgwB3IZ9Y0Qr%2FDTzMxZcVRRdgIXrBR8BHSGFoaSmyAE%2BgG%2F7XeJqKNUuKKMBg4AV0w%2F8"
+	+ "RqRQqPUUToAV4Fd3wd6IzrWsuKZIAo4EP0A2%2FB7jEx2DyQlEEGA9sRDf8I2Q%2Fu5d3iiDAVOB7dMM%2FhlQKBUfeBZiBzGilGX6EVAoFSZ4FuArYi374j2p0vijkVYBbkO%2Flaof%2FjOuOF408CrAAt4"
+	+ "Wbtdpq5DXroMmbABqfV%2BuvrUVerw6ePAmwDD%2Fhf46UixnkQ4ChwEv4Cf8boD1NZ8tG1gKMAN7GT%2Fi%2FIOViRhVZCtAOfIqf8P%2BkgY8ohERWAnQgX7vyEf4B4PImt0%2FpyUKA6biZfydJ60XKxYw"
+	+ "a%2BBZgFvJShY%2FwI6RczKiDTwHmAfvxF%2F5CFxuo7PgS4E50Czf7tqWuNlDZ8SHAQ%2FgLPgJWuNxAZUdbgMfxG%2F7rlLiEWwMtAQYBz%2BM3%2FHXIB5yMBtAQoIVkc9i6bF8BbXqbqby4FqANeB%2B%"
+	+ "2F4W%2FD7bf1gsKlAFOQPdFn%2BDuQmkGjSZJkOyjhstqBaZqd7UMPcpdvq8d1hkkDp4Ar8HOz5zBSM2ikROMiUFuCY0jNoOEArT8DNSVYoLpFAkNLABAJ9uE2%2FCWK2yJINAUAt0eC5WpbIWC0BQA3EqxSG"
+	+ "n%2Fw%2BBAA0kmwBpnx01DAlwDQnAQbkMJRQwmfAkBjEmwBxrgesHEivgWAZBJsRwpHDWWyEADqS7AHKRw1PJCVACBf2ugrwQFgprvhGQORpQBwogRHKckc%2FEUiawEArkRKxUs1C3dRyIMAILN8GxmQJNuK"
+	+ "g4CNApO0IMQoKSZA4JgAgWMCBI4JEDgmQOCYAIFjAgSOCRA4JkDgmACB8x%2BhiWxZotqSWwAAAABJRU5ErkJggg%3D%3D";
+  var manifest=document.getElementById("manifest").value;
+  var crx=new JSCrx(true,"DEFLATE");
+  crx.onerror=function(e) {
+    alert((e.error)?e.error:e);
+  }
+  crx.manifest(manifest);
+  crx.folder("img");
+  crx.add("img/logo_128.png",image,{base64:true});
+  var content=crx.package(false,undefined,image);
+  location.href="data:application/x-chrome-extention;base64,"+content;
+</script>
+<button onclick="package()">Package CRX!</button>
+<br /><br />
+Manifest:
+<br />
+<textarea id="manifest" rows="10" cols="20">
+{
+  "name": "Manifest Checker",
+  "description": "A development tool and demonstration app that helps you check your open web app manifests.",
+  "version": "1",
+  "app": {
+    "launch": {
+	  "web_url": "http://appmanifest.org/"
+	}
+  }
+  "icons": {
+    "128": "/img/logo_128.png"
+  },
+  "homepage_url": "http://mozillalabs.com"
+}
+</textarea>
