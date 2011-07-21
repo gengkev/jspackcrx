@@ -104,8 +104,12 @@ crx.remove("Hello.txt").remove("css");
 }}}
 Result: Empty zip.
 
-=== generate(asBytes=false) ===
-Generates the complete zip file. By default encoded as base64, pass true to get the raw byte string
+=== generate(asBytes=false,pemFile,randomData) ===
+Generates the complete zip file.
+Options:
+  * `asBytes`, boolean. By default encoded as base64, pass true to get the raw byte string
+  * `pemFile`, string. Pass a pem file to be used in creating the crx.
+  * `randomData`, string. Give us some random data to help us generate the RSA key!
 
 {{{
 content = crx.generate();
