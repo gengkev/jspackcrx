@@ -127,3 +127,6 @@ crx.generate(true,null,function(data) {
   }
 });
 }}}
+
+=== generateZip(asBytes=false,zipfile,pemFile,callback) ===
+If you already have a zip file, you can use this function instead through the global JSCrx object. Pass the zip file through zipfile and see `generate()` for the rest of the parameters. Nothing will be validated.
