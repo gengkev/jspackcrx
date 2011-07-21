@@ -14,9 +14,11 @@ JSPackCrx's API closely resembles that of [http://jszip.stuartk.co.uk/ JSZip's],
 
 A lot of the functions are the same, and all of them except for `find` and `generate` support chaining: that is, they return their `this` object, meaning you can do stuff like `crx.add("test.txt","Hello!").remove("test.txt");`
 
-*Notice: Unlike JSZip, JSCrx does not implement chaining currently. This will be added in the future.*
+*Notice: Unlike JSZip, JSCrx does not implement chaining folders. It will return the JSCrx object instead.*
 
-=== new JSCrx(validateManifests=true[,compressionMethod]) ===
+*Notice: Unlike JSZip, JSCrx's `generate()` function is asynchronous. See more details below.*
+
+=== new JSCrx(validateManifests=true[,!compressionMethod]) ===
 Creates a new crx file.
 
   * `validateManifests` Toggles validating manifests. Defaults to true.
