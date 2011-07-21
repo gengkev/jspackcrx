@@ -31,15 +31,15 @@ var crx=new JSCrx("DEFLATE",false);
 === onerror(error) ===
 Returns an error if validating one of the manifests failed, or some other strange thing happened. The JSPackCrx() is still usable, but the operation that caused the error will be reverted.
 
-=== addManifest(data) ===
+=== manifest(data) ===
 Adds manifest.json to the crx in plaintext.
 If `validateManifests==true`, the manifest will be validated and an error will be thrown trying to create a file named `manifest.json', otherwise this function can be ignored.
 
 {{{
-crx.addManifest("{\n\"name\": \"Nothing\",\n\"version\": \"0\"\n}");
+crx.manifest("{\n\"name\": \"Nothing\",\n\"version\": \"0\"\n}");
 }}}
 
-=== addLocale(locale,data) ===
+=== locale(locale,data) ===
 Adds a `messages.json` file for each `locale` in plaintext.
 If `validateManifests==true`, the manifest will be validated and an error will be thrown trying to create a file named `manifest.json', otherwise this function can be ignored.
 
