@@ -1,8 +1,14 @@
 <!DOCTYPE html>
 <meta charset="UTF-8" />
 <title>JSPackCrx Test Page</title>
-<script type="text/javascript" src="jspackcrx.js"></script>
+<script type="text/javascript" src="jspackcrx.js" async="true"></script>
 <script type="text/javascript">
+//load JSPackCrx asyncronously
+
+(function(d,s){var t=document.createElement(s),f=d.getElementsByTagName(s)[0];
+  t.type='text/javascript';s.async=!!s.src='jspackcrx.js';d.head.insertBefore(t,f);
+})();
+
 function package() {
   var image =                "iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAHUUlEQVR4nO2da4gWVRjHf6%2BXbFdSWytX0qxVM1wQiz5YgeaHLKmQbtAFiqiI1SIoROmDRRBJEGIRRRJC4ofu"
     + "QWkRZWUZgRWullFGWVTeIls1L7k4fXgcel33fXfed85z5nKeH5wvujtzzvx%2Fc9mZZ85UoijCCJdBWXfAyBYTIHBMgMAxAQLHBAgcEyBwTIDAMQECxwQIHBMgcEyAwBmS5IcqlYp2P7KgBZh0vE0BxgJjgNb"
