@@ -2,131 +2,33 @@
 
 
 = Documentation =
+*This documentation is subject to change. Drastically and unexpectedly. At any time.*
+
 
 == Embedding the script ==
 
   * Link to embed.js as an external script, wither on your own server or on our project at http://jspackcrx.googlecode.com/svn/trunk/embed.js for the latest version.
-  * You may choose to load the script asynchronously, but if your script runs immediately it should be synchronous.
+  * You may choose to load the script asynchronously, but make sure you don't call JSPackCrx before it loads!
 
 == How to use JSPackCrx ==
 
-JSPackCrx's API closely resembles that of [http://jszip.stuartk.co.uk/ JSZip's], because it is based on the code. Some of this documentation is *directly copied* (well, it's allowed under the GPLv3). But a lot of thanks to Stuart for writing JSZip!
+JSPackCrx's API is an extension to [http://jszip.stuartk.co.uk/ stuartk's JSZip library]. The only addition is a new `_JSZip_.generateCRX()` function that can be used instead of the standard generate(), *but is asynchronous!*
 
-A lot of the functions are the same, and all of them except for `find` and `generate` support chaining: that is, they return their `this` object, meaning you can do stuff like `crx.add("test.txt","Hello!").remove("test.txt");`
+=== generateCRX(pemFile, callback [, fileFormat]) ===
+Generates the complete crx file. This is an asynchronous function and will return the JSZip object immediately.
 
-*Notice: Unlike JSZip, JSCrx does not implement chaining folders. It will return the JSCrx object instead.*
-
-*Notice: Unlike JSZip, JSCrx's `generate()` function is asynchronous. See more details below.*
-
-=== new JSCrx(validateManifests=true[,!compressionMethod]) ===
-Creates a new crx file.
-
-  * `validateManifests` Toggles validating manifests. Defaults to true.
-  * `compressionMethod` The compression method to use.
-    Available methods:
-      * `STORE` no compression, the default.
-      * `DEFLATE` default zip compression. Deflate algorithm will be loaded as needed.
-
-{{{
-var crx=new JSCrx(); //defaults to STORE
-var crx=new JSCrx("DEFLATE",false);
-}}}
-
-=== onerror(error) ===
-Returns an error if validating one of the manifests failed, or some other strange thing happened. The JSPackCrx() is still usable, but the operation that caused the error will be reverted.
-
-=== manifest(data) ===
-Adds manifest.json to the crx in plaintext.
-If `validateManifests==true`, the manifest will be validated and an error will be thrown trying to create a file named `manifest.json', otherwise this function can be ignored.
-
-{{{
-crx.manifest("{\n\"name\": \"Nothing\",\n\"version\": \"0\"\n}");
-}}}
-
-=== locale(locale,data) ===
-Adds a `messages.json` file for each `locale` in plaintext.
-If `validateManifests==true`, the manifest will be validated and an error will be thrown trying to create a file named `manifest.json', otherwise this function can be ignored.
-
-{{{
-crx.locale("en","{\n\"name\":{\"message\":\"message\"}}");
-}}}
-
-=== add(name,data,options) ===
-Adds a file to the zip file. Supports chaining.
 Options:
-  * `base64`, boolean. Set to `true` if the data is base64 encoded. For example image data from a `<canvas>` element. Plain text and HTML do not need this option.
-  * `binary`, boolean. Defaults to `true` if the data is base64 encoded, `false` otherwise. If set to `false` then UTF-8 characters will be encoded.
-  * `date`, Date. Use it to specify the last modification date. If not set the current date is used.
+  * `pemFile`, string OR File OR Blob. Pass a pem file to be used in creating the crx. If it's invalid, JSPackCrx will generate one.
+  * `fileFormat`, the format the CRX output will be returned as:
+    * `"base64"` (default), a base64 encoding in a string.
+    * `"byteString"`, the raw bytes in a string.
+    * `"Blob"`, as a Blob object.
+    * `"objectURL"`, returns a object URL of the file as a string.
+    * any other string: this will download the finished CRX file automatically when it is done.
+  * `callback`, function. Called when the operation is complete, with the data as a string in the specified format.
 
 {{{
-crx.add("Hello.txt", "Hello World\n");
-crx.add("smile.gif", "R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=", {base64: true});
-crx.add("magic.txt", "U2VjcmV0IGNvZGU=", {base64: true, binary: false});
-crx.add("Xmas.txt", "Ho ho ho !", {date : new Date("December 25, 2007 00:00:01")});
-
-crx.add("animals.txt", "dog,platypus\n").add("people.txt", "james,sebastian\n");
-}}}
-Result: `Hello.txt`, `smile.gif`, `magic.txt`, `Xmas.txt`, `animals.txt`, `people.txt`
-
-=== folder(name) ===
-Add a directory to the zip file. Supports chaining.
-
-{{{
-crx.folder("images");
-crx.folder("css").add("style.css", "body {background: #FF0000}");
-// or specify an absolute path (using forward slashes)
-crx.add("css/font.css", "body {font-family: sans-serif}")
-}}}
-Result: `images/`, `css/`, `css/style.css`, `css/font.css`
-
-=== find(needle) ===
-Compare a string or regular expression against all of the filenames and returns an informational object for each that matches.
-
-{{{
-crx.add("Readme", "Hello World!\n");
-crx.add("Readme.French", "Bonjour tout le monde!\n");
-crx.add("Readme.Pirate", "Ahoy m'hearty!\n");
-
-crx.find("Readme"); // only finds "Readme"
-crx.find(/^Readme/); // Regular expression finds all three
-}}}
-Result: Array of matched file objects in the form: `{name: "Readme", data: "Hello World!", dir: false}`
-
-=== remove(name) ===
-Delete a file or folder.
-
-{{{
-crx.add("Hello.txt", "Hello World\n");
-crx.add("temp.txt", "nothing").remove("temp.txt");
-}}}
-Result: `Hello.txt`
-
-{{{
-crx.add("Hello.txt", "Hello World\n");
-crx.folder("css").add("style.css", "body {background: #FF0000}");
-crx.remove("Hello.txt").remove("css");
-}}}
-Result: Empty zip.
-
-=== generate(asBytes=false,pemFile,callback) ===
-Generates the complete zip file. This is an asynchronous function and will return the JSCrx object.
-Options:
-  * `asBytes`, boolean. By default encoded as base64, pass true to get the raw byte string
-  * `pemFile`, string. Pass a pem file to be used in creating the crx. IF undefined, generates a new one.
-  * `callback`, function. Called when the operation is complete with the data.
-
-{{{
-content = crx.generate();
-location.href="data:application/zip;base64,"+content;
-}}}
-{{{
-crx.generate(true,null,function(data) {
-  for (var c = 0; c < data.length; c++) {
-    console.log(data.charCodeAt(c));
-    // do other things
-  }
+crx.generate(false,"base64",function(data) {
+  location.href = "data:application/x-chrome-extension;base64," + data;
 });
 }}}
-
-=== generateZip(asBytes=false,zipfile,pemFile,callback) ===
-If you already have a zip file, you can use this function instead through the global JSCrx object. Pass the zip file through zipfile and see `generate()` for the rest of the parameters. Nothing will be validated.
