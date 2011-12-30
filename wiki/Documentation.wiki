@@ -4,6 +4,8 @@
 = Documentation =
 *This documentation is subject to change. Drastically and unexpectedly. At any time.*
 
+*This is only documentation so that I can build the product on it. Don't think any of this is implemented.*
+
 
 == Embedding the script ==
 
@@ -28,7 +30,7 @@ Options:
   * `callback`, function. Called when the operation is complete, with the data as a string in the specified format.
 
 {{{
-crx.generate(false,"base64",function(data) {
+crx.generate(null,"base64",function(data) {
   location.href = "data:application/x-chrome-extension;base64," + data;
 });
 }}}
