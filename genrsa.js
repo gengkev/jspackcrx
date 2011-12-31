@@ -4,7 +4,7 @@ self.onMessage=function(evt) {
   switch(evt.name) {
     case "libdir":
 	  var l=evt.message;
-	  var s=["base64.min.js","jsbn.min.js","rng.min.js","rsa.min.js","sha1.min.js","rsa-sign.min.js"];
+	  var s=["base64.min.js","jsbn-mod.min.js","jsbn2.min.js","rng.min.js","rsa.min.js","sha1.min.js","rsa-sign.min.js"];
 	  for (var i=0;i<s.length;i++) {
 	    importScripts(l+s[i]);
 	  }
@@ -28,7 +28,14 @@ function rsakeygen(pemFile) {
   
   */
   var rsa=new RSAKey();
-  if (typeof pemFile=="undefined") {
+  var publicKeyPEM,publicKeyRaw,privateKeyPEM = pemFile,privateKeyRaw;
+
+  if (typeof privateKeyPEM=="undefined") {
     //we are going to generate one!
+    rsa.generate(1024,10001);
+  }
+
+  else { //need to read
+    rsa.readPrivateKeyFromPEMString(pemFile);
   }
 }
