@@ -1,10 +1,18 @@
+/**
+ * @fileoverview The main script loaded into pages using JSPackCrx.
+ *   It loads scripts and adds the generateCRX function to JSZip.
+ * @author gengkev@gmail.com
+ */
+
+
+
+
 // ok so first we need to load scripts.js
 //Options
-loadDeflate=true; //load DEFLATE algorithm for JSZip
-libdir="/libs/"; //either specify undefined to get from code hosting or a directory to obtain scripts
+var libdir="/libs/"; //either specify undefined to get from code hosting or a directory to obtain scripts
 //end options
 
-
+if (!JSZip) throw new Error("Need JSZip!");
 
 if (typeof libdir=="undefined") libdir=(location.protocol=="https")?"https":"http"+"://jspackcrx.googlecode.com/svn/trunk/libs/";
 else if (libdir.test(new RegExp("/$"))==false) libdir+="/";
@@ -19,90 +27,8 @@ else if (libdir.test(new RegExp("/$"))==false) libdir+="/";
 })(document,'script');
 
 
-function JSCrx(validateManifests,compression) {
-  if (typeof validateManifests=="undefined") {
-    this.validateManifests=true;
-  }
-  else {
-    this.validateManifests=validateManifests;
-  }
-  this.compression=(compression||"STORE").toUpperCase();
-  
-  if (!JSZip.compressions[this.compression]) {
-    throw compression + " is not a valid compression method !";
-    this.JSZip=new JSZip(compressionMethod);
-  }
-  this.onerror=Function();
-}
-JSCrx.prototype.manifest=function(data) {
-  if (this.validateManifests==true) {
-    //validate here I supposes
-  }
-  this.JSZip.add("manifest.json",data);
-  return this;
-}
-JSCrx.prototype.locale=function(locale,data) {
-  var supportedLocales=["ar","bg","ca","cs","da","de","el","en","en_GB","en_US","es",
-    "es_419","et","fi","fil","fr","he","hi","hr","hu","id","it","ja","ko","lt","lv",
-	"nl","no","pl","pt_BR","pt_PT","ro","ru","sk","sl","sr","sv","th","tr","uk","vi",
-	"zh_CN","zh_TW"];
-  for (var i=0,valid=false;i<supportedLocales.length;i++) {
-    if (locale==supportedLocales[i]) {
-	  valid=true;
-	  break;
-	}
-  }
-  if (valid==false) {
-    this.onerror(locale+" locale not supported! (Must be case-sensitive)");
-	return this;
-  }
-  else if (!(this.JSZip.find("_locales")[0].name=="_locales")) {
-    this.JSZip.folder("_locales");
-  }
-  else if (this.JSZip.find("_locales/"+locale)!={}) {
-    this.JSZip.remove("_locales/"+locale);
-  }
-  if (this.validateManifests==true) {
-    //validate here I suppose
-  }
-  this.JSZip.folder("_locales/"+locale);
-  this.JSZip.add("_locales/"+locale+"/messages.json",data);
-  
-  return this;
-}
-JSCrx.prototype.add=function(name,data,options) {
-  if (name.indexOf("manifest.json")!=-1||name.indexOf("_locales")!=-1) {
-    this.onerror("Tried to add manifest or locale using add function. Please use manifest() and locale() as appropriate instead.");
-	return this;
-  }
-  this.JSZip.add(name,data,options);
-  return this;
-}
-JSCrx.prototype.folder=function(name) {
-  if (name.indexOf("_locales")!=-1) {
-    this.onerror("Tried to add _locales folder. Please use locale() instead.");
-    return this;
-  }
-  this.JSZip.folder(name);
-}
-JSCrx.prototype.find=function(needle) {
-  return this.JSZip.find(needle);
-}
-JSCrx.prototype.remove=function(name) {
-  this.JSZip.remove(name);
-  return this;
-}
-JSCrx.prototype.generate=function(asBytes,pemFile,callback) {
-  //first, validate the locales once more?
-  if (this.validateManifests==true) {
-  }
-  // ** SKIP FOR NOW **
-  
-  JSCrx.generateZip(asBytes,this.JSZip.generate(asBytes),pemFile,callback);
-  
-  return this;
-}
-JSCrx.generateZip=function(asBytes,zipFile,pemFile,callback)
+
+JSZip.prototype.generateCRX=function(asBytes,zipFile,pemFile,callback)
   //create RSA key, sign, append header, callback
   if (!window.Worker) {
     this.onerror("Web Workers are not supported!");
