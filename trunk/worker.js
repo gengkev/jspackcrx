@@ -1,7 +1,10 @@
-
-self.postMessage({name:"loadready"});
 self.onMessage=function(evt) {
   switch(evt.name) {
+    case "Hello World!":
+      postMessage({name:"World Hello!"});
+      break;
+
+
     case "libdir":
 	  var l=evt.message;
 	  var s=["base64.min.js","jsbn-mod.min.js","jsbn2.min.js","rng.min.js","rsa.min.js","sha1.min.js","rsa-sign.min.js"];
@@ -32,7 +35,7 @@ function rsakeygen(pemFile) {
 
   if (typeof privateKeyPEM=="undefined") {
     //we are going to generate one!
-    rsa.generate(1024,10001);
+    rsa.generate(1024,exponent.toString(16));
   }
 
   else { //need to read

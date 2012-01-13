@@ -29,7 +29,7 @@ function package() {
 	+ "n%2Fw%2BBAA0kmwBpnx01DAlwDQnAQbkMJRQwmfAkBjEmwBxrgesHEivgWAZBJsRwpHDWWyEADqS7AHKRw1PJCVACBf2ugrwQFgprvhGQORpQBwogRHKckc%2FEUiawEArkRKxUs1C3dRyIMAILN8GxmQJNuK"
 	+ "g4CNApO0IMQoKSZA4JgAgWMCBI4JEDgmQOCYAIFjAgSOCRA4JkDgmACB8x%2BhiWxZotqSWwAAAABJRU5ErkJggg%3D%3D";
   var manifest=document.getElementById("manifest").value;
-  var crx=new JSCrx(true,"DEFLATE");
+  var crx=new JSPackCrx(true,"DEFLATE");
   crx.onerror=function(e) {
     alert((e.error)?e.error:e);
   }
@@ -38,6 +38,7 @@ function package() {
   crx.add("img/logo_128.png",image,{base64:true});
   var content=crx.package(false,undefined,image);
   location.href="data:application/x-chrome-extention;base64,"+content;
+}
 </script>
 <button onclick="package()">Package CRX!</button>
 <br /><br />
