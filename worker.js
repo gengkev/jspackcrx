@@ -1,10 +1,20 @@
+var scripts = {};
 self.onMessage=function(evt) {
   switch(evt.name) {
     case "Hello World!":
       postMessage({name:"World Hello!"});
       break;
+    case "generatePrivateKey":
+      
+      break;
 
+    case "generateSignature":
+    case "generateCrx":
+      
+    default:
+      break;
 
+/*
     case "libdir":
 	  var l=evt.message;
 	  var s=["base64.min.js","jsbn-mod.min.js","jsbn2.min.js","rng.min.js","rsa.min.js","sha1.min.js","rsa-sign.min.js"];
@@ -17,28 +27,26 @@ self.onMessage=function(evt) {
 	case "genrsadetails":
 	  rsakeygen(evt.message);
 	  break;
-	default:
-	  break;
+*/
   }
 }
 
-function rsakeygen(pemFile) {
+function generatePrivateKey() {
+  scripts.base64 && importScripts("base64.min.js");
+  scripts.jsbn && importScripts("libs/jsbn-mod.min.js");
+  scripts.jsbn2 && importScripts("libs/jsbn2.min.js");
+  scripts.rng && importScripts("libs/rng.min.js");
+  scripts.rsa && importScripts("libs/rsa.min.js");
+  scripts.sha1 && importScripts("libs/sha1.min.js");
+  scripts.rsaSign && importScripts("libs/rsa-sign.min.js");
   /*
-  Do one of two things:
-  If we have a .pem file, read it and use it to find modulus and sign.
   
-  Otherwise, make a private key and continue from there.
   
   */
-  var rsa=new RSAKey();
+  var rsa = new RSAKey(), exponent = 65537;
   var publicKeyPEM,publicKeyRaw,privateKeyPEM = pemFile,privateKeyRaw;
 
-  if (typeof privateKeyPEM=="undefined") {
-    //we are going to generate one!
-    rsa.generate(1024,exponent.toString(16));
-  }
+  rsa.generate(1024,exponent.toString(16));
 
-  else { //need to read
-    rsa.readPrivateKeyFromPEMString(pemFile);
-  }
+
 }

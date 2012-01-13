@@ -16,14 +16,14 @@ var libdir = "/libs/";
 if (typeof libdir=="undefined") libdir=(location.protocol=="https")?"https":"http"+"://jspackcrx.googlecode.com/svn/trunk/libs/";
 else if (!libdir.test(///$/)) libdir+="/";
 
-//load script.js
-(function(d,s){var t=d.createElement(s);f=d.getElementsByTagName(s)[0];t.async=!!t.type='text/javascript';
-  t.src=libdir+"script.min.js";t.onload=function(){
-    $script(libdir+"jszip.min.js");
-	(loadDeflate)?$script(libdir+"jszipdeflate.min.js");
-  }
-  f.parentNode.insertBefore(t,f);
-})(document,'script');
+var callbackStack = [];
+function callbackRun(callback,_this) {
+  if (!callback || !callbackStack[callback]) return;
+
+  callbackStack[callback].call(_this);
+
+  callbackStack[callback] = undefined;
+}
 
 
 function JSCrx() {
@@ -31,17 +31,23 @@ function JSCrx() {
   this.zip.string="";
 
   this.privateKey={};
-  this.privateKey.string="";
+  // this.privateKey.string="";
   // this.privateKey.pem="";
+  this.privateKey.der="";
 
   this.publicKey={};
-  this.publicKey.modulus="";
-  this.publicKey.exponent=0;
+  // this.publicKey.modulus="";
+  // this.publicKey.exponent=0;
   this.publicKey.der="";
 
   this.sign={};
-  this.sign.string="";
+  // this.sign.string="";
   this.sign.der="";
+
+  this.crx = {};
+  this.crx.string = "";
+  this.crx.hex = "";
+  this.crx.base64 = "";
 
   this.worker = new Worker("worker.js");
   this.worker.postMessage({name:"Hello World!"});
@@ -51,23 +57,23 @@ function JSCrx() {
       case "World Hello!":
         break;
       case "generateRSAKey":
-        this.publicKey.modulus = e.modulus;
+        // this.publicKey.modulus = e.modulus;
+        // this.publicKey.exponent = e.exponent;
+        this.publicKey.der = e.publicKey;
+        this.privateKey.string = e.privateKey;
+        callbackRun(e.callback,this);
         break;
+      case "generateSignature":
+        this.sign.der = e.der;
+        callbackRun(e.callback,this);
       default:
         break;
   }
 }
-JSCrx.prototype.generateRSAKey = function(exponent) {
-  if (exponent!==65537) throw new Error("Exponent not supported");
-  
-  this.worker.postMessage({name:"generateRSAKey",exponent:65537});
-}
-JSCrx.prototype.formatRSAKey = function() {
-  if (!this.publicKey.modulus) throw new Error("Modulus must be generated!");
+JSCrx.prototype.add = {};
+JSCrx.prototype.generate = {};
 
-  this.worker.postMessage({name:"formatRSAKey",modulus:this.publicKey.modulus});
-}
-JSCrx.prototype.addZip = function(zipString,encoding) {
+JSCrx.prototype.add.zip = function(zipString,encoding) {
   var rawZip="";
 
   switch(encoding) {
@@ -75,17 +81,51 @@ JSCrx.prototype.addZip = function(zipString,encoding) {
       break;
     case "base64":
       break;
-    case "raw":
+    case "string":
     default:
       rawZip = zipString;
       break;
   }
 
   this.zip.string = rawZip;
+  return this;
 }
-JSCrx.prototype.signZip = function() {
-  if (!this.private
+JSCrx.prototype.generate.privateKey = function(options,callback) {
+  callbackStack.push(callback);
+  this.worker.postMessage({
+    name:"generatePrivateKey",
+    exponent:65537,
+    callback:callbackStack.length
+  });
+}
+JSCrx.prototype.generate.signature = function(options,callback) {
+  if (!this.privateKey.der) throw new Error("Need private key in order to sign");
+  else if (!this.zip.string) throw new Error("Need zip file in order to sign");
 
+  callbackStack.push(callback);
+  this.worker.postMessage({
+    name:"generateSignature",
+    privateKey:this.privateKey.der,
+    zip:this.zip.string,
+    callback:callbackStack.length;
+  });
+}
+JSCrx.prototype.generate.crx = function(format,callback) {
+  if (!this.publicKey.der) throw new Error("Need public key in order to package");
+  else if (!this.sign.der) throw new Error("Need signature in order to package");
+  else if (!this.zip.string) throw new Error("Need zip file in order to sign");
+
+  callbackStack.push(callback);
+  this.worker.postMessage({
+    name:"generateCrx",
+    publicKey:this.publicKey.der,
+    signature:this.sign.der,
+    zip:this.zip.string,
+    callback:callbackStack.length;
+  });
+}
+
+/*
 JSZip.prototype.generateCRX=function(asBytes,zipFile,pemFile,callback)
   //create RSA key, sign, append header, callback
   var worker=new Worker("genrsa.js");
@@ -107,5 +147,7 @@ JSZip.prototype.generateCRX=function(asBytes,zipFile,pemFile,callback)
   }
   
 }
+*/
 
+window.JSCrx = JSCrx;
 });
