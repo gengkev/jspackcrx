@@ -2,12 +2,9 @@
 <meta charset="UTF-8" />
 <title>JSPackCrx Test Page</title>
 <script type="text/javascript" src="jspackcrx.js" async="true"></script>
+<script type="text/javascript" src="libs/jszip.min.js" async="true"></script>
 <script type="text/javascript">
 //load JSPackCrx asyncronously
-
-(function(d,s){var t=document.createElement(s),f=d.getElementsByTagName(s)[0];
-  t.type='text/javascript';s.async=!!s.src='jspackcrx.js';d.head.insertBefore(t,f);
-})();
 
 function package() {
   var image =                "iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAHUUlEQVR4nO2da4gWVRjHf6%2BXbFdSWytX0qxVM1wQiz5YgeaHLKmQbtAFiqiI1SIoROmDRRBJEGIRRRJC4ofu"
@@ -29,15 +26,29 @@ function package() {
 	+ "n%2Fw%2BBAA0kmwBpnx01DAlwDQnAQbkMJRQwmfAkBjEmwBxrgesHEivgWAZBJsRwpHDWWyEADqS7AHKRw1PJCVACBf2ugrwQFgprvhGQORpQBwogRHKckc%2FEUiawEArkRKxUs1C3dRyIMAILN8GxmQJNuK"
 	+ "g4CNApO0IMQoKSZA4JgAgWMCBI4JEDgmQOCYAIFjAgSOCRA4JkDgmACB8x%2BhiWxZotqSWwAAAABJRU5ErkJggg%3D%3D";
   var manifest=document.getElementById("manifest").value;
-  var crx=new JSPackCrx(true,"DEFLATE");
-  crx.onerror=function(e) {
-    alert((e.error)?e.error:e);
-  }
+
+  var zip = new JSZip("DEFLATE");
+  zip.add("manifest.json",manifest);
+  zip.folder("img");
+  zip.add("img/logo_128.png",image,{base64:true});
+
+  var crx = new JSCrx("live");
+  crx.add.zip(zip.generate(true),"string");
+  crx.generate.privateKey({exponent:65537},function(){
+    crx.generate.signature({},function(){
+      crx.generate.crx("base64",function(){
+        location.href = "data:application/x-chrome-extension;base64," + this.crx.base64;
+      });
+    });
+  });
+    
+  /*
   crx.manifest(manifest);
   crx.folder("img");
   crx.add("img/logo_128.png",image,{base64:true});
   var content=crx.package(false,undefined,image);
   location.href="data:application/x-chrome-extention;base64,"+content;
+  */
 }
 </script>
 <button onclick="package()">Package CRX!</button>
