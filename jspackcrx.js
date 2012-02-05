@@ -11,7 +11,6 @@ if (!window.Worker) {
   return;
 }
 
-var libdir = "/libs/";
 
 if (typeof libdir=="undefined") libdir=(location.protocol=="https")?"https":"http"+"://jspackcrx.googlecode.com/svn/trunk/libs/";
 else if (!libdir.test(///$/)) libdir+="/";
@@ -70,6 +69,7 @@ function JSCrx() {
         break;
   }
 }
+JSCrx.prototype.libdir = "http://jspackcrx.googlecode.com/svn/trunk/libs/";
 JSCrx.prototype.add = {};
 JSCrx.prototype.generate = {};
 

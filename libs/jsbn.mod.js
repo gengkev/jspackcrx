@@ -11,8 +11,6 @@
  * I do not condone the use of UA sniffing.
  *
  * List of items that still enter the global scope...
- * (I was too lazy to create a giant closure or heavily rewrite the
- *   code to remove intAt and nbits)
  * - BigInteger
  * - intAt
  * - nbits
@@ -40,56 +38,59 @@ function BigInteger(a,b,c) {
 // c is initial carry, returns final carry.
 // c < 3*dvalue, x < 2*dvalue, this_i < dvalue
 // We need to select the fastest one that works in this environment.
+(function(appName){
+  var test = (0xdeadbeefcafe&0xffffff)==0xefcafe;
 
-if(((0xdeadbeefcafe&0xffffff)==0xefcafe) && (navigator.appName == "Microsoft Internet Explorer")) {
-  // am2 avoids a big mult-and-extract completely.
-  // Max digit bits should be <= 30 because we do bitwise ops
-  // on values up to 2*hdvalue^2-hdvalue-1 (< 2^31)
-  BigInteger.prototype.am = function(i,x,w,j,c,n) {
-    var xl = x&0x7fff, xh = x>>15;
-    while(--n >= 0) {
-      var l = this[i]&0x7fff;
-      var h = this[i++]>>15;
-      var m = xh*l+h*xl;
-      l = xl*l+((m&0x7fff)<<15)+w[j]+(c&0x3fffffff);
-      c = (l>>>30)+(m>>>15)+xh*h+(c>>>30);
-      w[j++] = l&0x3fffffff;
+  if(test && (appName == "Microsoft Internet Explorer")) {
+    // am2 avoids a big mult-and-extract completely.
+    // Max digit bits should be <= 30 because we do bitwise ops
+    // on values up to 2*hdvalue^2-hdvalue-1 (< 2^31)
+    BigInteger.prototype.am = function(i,x,w,j,c,n) {
+      var xl = x&0x7fff, xh = x>>15;
+      while(--n >= 0) {
+        var l = this[i]&0x7fff;
+        var h = this[i++]>>15;
+        var m = xh*l+h*xl;
+        l = xl*l+((m&0x7fff)<<15)+w[j]+(c&0x3fffffff);
+        c = (l>>>30)+(m>>>15)+xh*h+(c>>>30);
+        w[j++] = l&0x3fffffff;
+      }
+      return c;
     }
-    return c;
+    BigInteger.prototype.DB = 30;
   }
-  BigInteger.prototype.DB = 30;
-}
-else if(((0xdeadbeefcafe&0xffffff)==0xefcafe) && (navigator.appName != "Netscape")) {
-  // am1: use a single mult and divide to get the high bits,
-  // max digit bits should be 26 because
-  // max internal value = 2*dvalue^2-2*dvalue (< 2^53)
-  function am1(i,x,w,j,c,n) {
-    while(--n >= 0) {
-      var v = x*this[i++]+w[j]+c;
-      c = Math.floor(v/0x4000000);
-      w[j++] = v&0x3ffffff;
+  else if(test && (appName != "Netscape")) {
+    // am1: use a single mult and divide to get the high bits,
+    // max digit bits should be 26 because
+    // max internal value = 2*dvalue^2-2*dvalue (< 2^53)
+    function am1(i,x,w,j,c,n) {
+      while(--n >= 0) {
+        var v = x*this[i++]+w[j]+c;
+        c = Math.floor(v/0x4000000);
+        w[j++] = v&0x3ffffff;
+      }
+      return c;
     }
-    return c;
+    BigInteger.prototype.DB = 26;
   }
-  BigInteger.prototype.DB = 26;
-}
-else { // Mozilla/Netscape seems to prefer am3
-  // Alternately, set max digit bits to 28 since some
-  // browsers slow down when dealing with 32-bit numbers.
-  BigInteger.prototype.am = function(i,x,w,j,c,n) {
-    var xl = x&0x3fff, xh = x>>14;
-    while(--n >= 0) {
-      var l = this[i]&0x3fff;
-      var h = this[i++]>>14;
-      var m = xh*l+h*xl;
-      l = xl*l+((m&0x3fff)<<14)+w[j]+c;
-      c = (l>>28)+(m>>14)+xh*h;
-      w[j++] = l&0xfffffff;
+  else { // Mozilla/Netscape seems to prefer am3
+    // Alternately, set max digit bits to 28 since some
+    // browsers slow down when dealing with 32-bit numbers.
+    BigInteger.prototype.am = function(i,x,w,j,c,n) {
+      var xl = x&0x3fff, xh = x>>14;
+      while(--n >= 0) {
+        var l = this[i]&0x3fff;
+        var h = this[i++]>>14;
+        var m = xh*l+h*xl;
+        l = xl*l+((m&0x3fff)<<14)+w[j]+c;
+        c = (l>>28)+(m>>14)+xh*h;
+        w[j++] = l&0xfffffff;
+      }
+      return c;
     }
-    return c;
+    BigInteger.prototype.DB = 28;
   }
-  BigInteger.prototype.DB = 28;
-}
+}(navigator.appName));
 
 BigInteger.prototype.DV = 1<<BigInteger.prototype.DB;
 BigInteger.prototype.DM = BigInteger.prototype.DV-1;
@@ -114,7 +115,6 @@ var intAt = (function(){
     return (c==null)?-1:c;
   };
 })();
-
 // (protected) copy this to r
 BigInteger.prototype.copyTo = function(r) {
   for(var i = this.t-1; i >= 0; --i) r[i] = this[i];
@@ -129,6 +129,9 @@ BigInteger.prototype.fromInt = function(x) {
   if(x > 0) this[0] = x;
   else if(x < -1) this[0] = x+DV;
   else this.t = 0;
+
+  //added
+  return this;
 }
 
 // (protected) set from string and radix
@@ -176,6 +179,9 @@ BigInteger.prototype.clamp = function() {
   while(this.t > 0 && this[this.t-1] == c) --this.t;
 }
 
+
+
+
 // (public) return string representation in given radix
 BigInteger.prototype.toString = function(b) {
   if(this.s < 0) return "-"+this.negate().toString(b);
@@ -208,6 +214,7 @@ BigInteger.prototype.toString = function(b) {
   }
   return m?r:"0";
 }
+
 
 // (public) -this
 BigInteger.prototype.negate = function() { var r = new BigInteger(null); BigInteger.ZERO.subTo(this,r); return r; }
@@ -531,8 +538,5 @@ BigInteger.prototype.modPowInt = function(e,m) {
 }
 
 // "constants"
-BigInteger.ZERO = new BigInteger(null);
-BigInteger.ONE = new BigInteger(null);
-
-BigInteger.ZERO.fromInt(0);
-BigInteger.ONE.fromInt(1);
+BigInteger.ZERO = new BigInteger(null).fromInt(0);
+BigInteger.ONE = new BigInteger(null).fromInt(1);
