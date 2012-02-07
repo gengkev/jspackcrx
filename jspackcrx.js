@@ -1,3 +1,12 @@
+/* JSPackCrx packages Chrome extension files using JavaScript.
+ * http://code.google.com/p/jspackcrx
+ * Copyright (C) 2011-12 gengkev.
+ * 
+ * This software is licensed under the terms of the GPLv3.
+ * It also contains code from other projects: see /docs/licence.txt
+ * See http://jspackcrx.googlecode.com/svn/LICENSE.html for details.
+ */
+
 /**
  * @fileoverview The main script loaded into pages using JSPackCrx.
  *   It loads scripts and adds the generateCRX function to JSZip.
