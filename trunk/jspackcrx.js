@@ -4,7 +4,7 @@
  * @author gengkev@gmail.com
  */
 
-
+// 
 (function(){
 if (!window.Worker) {
   throw new Error("Web Workers are not supported");
