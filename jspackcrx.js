@@ -14,16 +14,18 @@
  */
 
 // 
-(function(){
-if (!window.Worker) {
-  throw new Error("Web Workers are not supported");
-  return;
+;(function(){
+
+/* Requirements:
+ * Worker
+ * opt.: FileReader, Blob, (Webkit|Moz|)BlobBuilder
+ */
+//lets not do anything just yet...
+var support = {
+  worker: !!window.Worker,
+  filereader: window.File && window.Blob && window.FileList && window.FileReader,
+  blobbuilder: !!window.BlobBuilder || !!window.MozBlobBuilder || !!window.WebKitBlobBuilder;
 }
-
-
-if (typeof libdir=="undefined") libdir=(location.protocol=="https")?"https":"http"+"://jspackcrx.googlecode.com/svn/trunk/libs/";
-else if (!libdir.test(///$/)) libdir+="/";
-
 var callbackStack = [];
 function callbackRun(callback,_this) {
   if (!callback || !callbackStack[callback]) return;
@@ -37,6 +39,7 @@ function callbackRun(callback,_this) {
 function JSCrx() {
   this.zip={};
   this.zip.string="";
+  //this.zip.blob = null;
 
   this.privateKey={};
   // this.privateKey.string="";
@@ -58,7 +61,7 @@ function JSCrx() {
   this.crx.base64 = "";
 
   this.worker = new Worker("worker.js");
-  this.worker.postMessage({name:"Hello World!"});
+  this.worker.postMessage({name:"Hello World!",libdir:JSCrx.libdir});
 
   this.worker.onmessage=function(e) {
     switch(e.name) {
@@ -78,33 +81,46 @@ function JSCrx() {
         break;
   }
 }
-JSCrx.prototype.libdir = "http://jspackcrx.googlecode.com/svn/trunk/libs/";
+JSCrx.libdir = (location.protocol=="https")?"https":"http" +
+               "://jspackcrx.googlecode.com/svn/trunk/libs/";
+
 JSCrx.prototype.add = {};
 JSCrx.prototype.generate = {};
 
-JSCrx.prototype.add.zip = function(zipString,encoding) {
-  var rawZip="";
+JSCrx.prototype.add.zip = function(zipData,encoding) {
+  //var rawZip="";
 
   switch(encoding) {
-    case "hex":
+    case "blob":
+    case "file":
+      var reader = new FileReader();
+      reader.onload = function() {
+        this.zip.string = e.target.result;
+      }
+      reader.readAsBinaryString(); //???
+      break;
+    case "typedarray":
+      var buffer = zipData.buffer || zipData;
+      this.zip.string = String.fromCharCode.call(null,new Uint8Array(zipData));
       break;
     case "base64":
+      this.zip.string = window.btoa(zipData);
       break;
     case "string":
     default:
-      rawZip = zipString;
+      this.zip.string = zipData;
       break;
   }
 
-  this.zip.string = rawZip;
+  //this.zip.string = rawZip;
   return this;
 }
 JSCrx.prototype.generate.privateKey = function(options,callback) {
   callbackStack.push(callback);
   this.worker.postMessage({
-    name:"generatePrivateKey",
-    exponent:65537,
-    callback:callbackStack.length
+    name: "generatePrivateKey",
+    exponent: options.exponent || 3,
+    callback: callbackStack.length
   });
 }
 JSCrx.prototype.generate.signature = function(options,callback) {

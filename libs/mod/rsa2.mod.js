@@ -1,3 +1,16 @@
+/* Modified by Kevin Geng, 2011-12
+ * Released under the GPLv3; see /trunk/LICENSE for details.
+ * 
+ * Modified to reduce global scope pollution, blah blah blah
+ * see jsbn.js for details since I'm too lazy to retype it.
+ * 
+ * List of items that still enter the global scope:
+ * - pkcs1unpad2
+ * - RSAKey
+ *
+ * Also changed alerts to throws.
+ */
+
 // Depends on rsa.js and jsbn2.js
 
 // Version 1.1: support utf-8 decoding in pkcs1unpad2
@@ -38,7 +51,7 @@ RSAKey.prototype.setPrivate = function(N,E,D) {
     this.d = new BigInteger(D,16);
   }
   else
-    alert("Invalid RSA private key");
+    throw new Error("Invalid RSA private key");
 }
 
 // Set the private key fields N, e, d and CRT params from hex strings
@@ -54,7 +67,7 @@ RSAKey.prototype.setPrivateEx = function(N,E,D,P,Q,DP,DQ,C) {
     this.coeff = new BigInteger(C,16);
   }
   else
-    alert("Invalid RSA private key");
+    throw new Error("Invalid RSA private key");
 }
 
 // Generate a new random private key B bits long, using public expt E
