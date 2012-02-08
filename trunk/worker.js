@@ -7,55 +7,63 @@
  * See http://jspackcrx.googlecode.com/svn/LICENSE.html for details.
  */
 
-var scripts = {};
 self.onMessage=function(evt) {
-  switch(evt.name) {
-    case "Hello World!":
-      postMessage({name:"World Hello!"});
-      break;
-    case "generatePrivateKey":
-      
-      break;
+	switch(evt.name) {
+		case "Hello World!":
+			loadScripts(evt.libdir);
+			postMessage({name:"World Hello!"});
+			break;
+		case "generatePrivateKey":
+			
+			break;
 
-    case "generateSignature":
-    case "generateCrx":
-      
-    default:
-      break;
+		case "generateSignature":
+		case "generateCrx":
+			
+		default:
+			break;
 
 /*
-    case "libdir":
-	  var l=evt.message;
-	  var s=["base64.min.js","jsbn-mod.min.js","jsbn2.min.js","rng.min.js","rsa.min.js","sha1.min.js","rsa-sign.min.js"];
-	  for (var i=0;i<s.length;i++) {
-	    importScripts(l+s[i]);
-	  }
-	  rng_seed_time();
-	  postMessage({name:"processready"});
-	  break;
-	case "genrsadetails":
-	  rsakeygen(evt.message);
-	  break;
+		case "libdir":
+			var l=evt.message;
+			var s=["base64.min.js","jsbn-mod.min.js","jsbn2.min.js","rng.min.js","rsa.min.js","sha1.min.js","rsa-sign.min.js"];
+			for (var i=0;i<s.length;i++) {
+				importScripts(l+s[i]);
+			}
+			rng_seed_time();
+			postMessage({name:"processready"});
+			break;
+		case "genrsadetails":
+			rsakeygen(evt.message);
+			break;
 */
-  }
+	}
 }
 
-function generatePrivateKey() {
-  scripts.base64 && importScripts("base64.min.js");
-  scripts.jsbn && importScripts("libs/jsbn-mod.min.js");
-  scripts.jsbn2 && importScripts("libs/jsbn2.min.js");
-  scripts.rng && importScripts("libs/rng.min.js");
-  scripts.rsa && importScripts("libs/rsa.min.js");
-  scripts.sha1 && importScripts("libs/sha1.min.js");
-  scripts.rsaSign && importScripts("libs/rsa-sign.min.js");
-  /*
-  
-  
-  */
-  var rsa = new RSAKey(), exponent = 65537;
-  var publicKeyPEM,publicKeyRaw,privateKeyPEM = pemFile,privateKeyRaw;
+function loadScripts(libdir) {
+	var scripts = [
+		"/min/jsbn.mod.min.js",
+		"/min/rng.min.js",
+		"/min/base64.min.js",
+		"/min/rsa.mod.min.js",
+		"/min/sha1.min.js",
+		"/min/rsa-sign.min.js"
+	];
+	scripts.forEach(function(el){
+		el = libdir + el;
+	});
+	importScripts.apply(null,scripts);
+}
 
-  rsa.generate(1024,exponent.toString(16));
+function generatePrivateKey(exponent) {
+	/*
+	
+	
+	*/
+	var rsa = new RSAKey();
+	var publicKeyPEM,publicKeyRaw,privateKeyPEM = pemFile,privateKeyRaw;
+
+	rsa.generate(1024,exponent.toString(16));
 
 
 }
