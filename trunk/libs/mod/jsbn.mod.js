@@ -1,5 +1,5 @@
-﻿/* Modified by Kevin Geng, 2011 (with less than 2 days left!)
- * Released under the GPLv3.
+﻿/* Modified by Kevin Geng, 2011-12
+ * Released under the GPLv3; see /trunk/LICENSE for details.
  * 
  * Modified to reduce global scope pollution by utilizing closures,
  * removing function definitions that was used only to add to a

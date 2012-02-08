@@ -1,5 +1,5 @@
 /* Modified by Kevin Geng, 2011-12
- * Released under the GPLv3.
+ * Released under the GPLv3; see /trunk/LICENSE for details.
  *
  * This file depends on jsbn.js or jsbn.mod.js
  * 

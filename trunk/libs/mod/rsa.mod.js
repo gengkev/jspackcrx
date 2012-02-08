@@ -1,3 +1,16 @@
+/* Modified by Kevin Geng, 2011-12
+ * Released under the GPLv3; see /trunk/LICENSE for details.
+ * 
+ * Modified to reduce global scope pollution, blah blah blah
+ * see jsbn.js for details since I'm too lazy to retype it.
+ * 
+ * List of items that still enter the global scope:
+ * - pkcs1pad2
+ * - RSAKey
+ *
+ * Also changed alerts to throws.
+ */
+
 // Depends on jsbn.js and rng.js
 
 // Version 1.1: support utf-8 encoding in pkcs1pad2
@@ -29,7 +42,7 @@ function byte2Hex(b) {
 // PKCS#1 (type 2, random) pad input string s to n bytes, and return a bigint
 function pkcs1pad2(s,n) {
   if(n < s.length + 11) { // TODO: fix for utf-8
-    alert("Message too long for RSA");
+    throw new Error("Message too long for RSA");
     return null;
   }
   var ba = new Array();
@@ -81,7 +94,7 @@ RSAKey.prototype.setPublic = function(N,E) {
     this.e = parseInt(E,16);
   }
   else
-    alert("Invalid RSA public key");
+    throw new Error("Invalid RSA public key");
 }
 
 // Perform raw public operation on "x": return x^e (mod n)
