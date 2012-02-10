@@ -29,9 +29,9 @@ function packagecrx() {
 	zip.add("img/logo_128.png",image,{base64:true});
 
 	var crx = new JSCrx();
-	crx.add.zip(zip.generate(true),"string");
-	crx.generate.privateKeySignature({exponent:65537},function(){
-		crx.generate.crx("string",function(){
+	crx.addZip(zip.generate(true),"string");
+	crx.generatePrivateKeySignature({exponent:65537},function(){
+		crx.generateCrx("string",function(){
 			location.href = "data:application/x-chrome-extension;base64," + window.btoa(this.crx.header+this.zip.string);
 		});
 	});
