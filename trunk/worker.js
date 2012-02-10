@@ -45,7 +45,7 @@ function loadScripts(libdir) {
 		"/min/base64.min.js",
 		"/min/rsa.mod.min.js",
 		"/min/sha1.min.js",
-		"/min/rsa-sign.min.js"
+		"/mod/rsa-sign.mod.js"
 	];
 	for (var i=0;i<scripts.length;i++) {
 		scripts[i] = libdir + scripts[i];
