@@ -14,17 +14,22 @@ switch(e.name) {
 		rng_seed_time();
 		postMessage({name:"World Hello!"});
 		break;
-	case "generatePrivateKey":
-		var data = generatePrivateKey(e.exponent);
+	case "generatePrivateKeySign":
+		var data = generatePrivateKeySign(e.exponent,e.zip);
 		postMessage({
 			publicKey:data.publicKey,
-			privateKey:data.privateKey,
+			// privateKey:data.privateKey,
+			sign:data.sign,
 			callback:e.callback
 		});
 		break;
-	case "generateSignature":
-		break;
+	//case "generateSignature":
+	//	break;
 	case "generateCrx":
+		var data = packageCRXStuffings(e.publicKey,e.signature);
+		postMessage({
+			crxHeader: data
+		});
 		break;
 	default:
 		break;
@@ -46,7 +51,7 @@ function loadScripts(libdir) {
 	importScripts.apply(null,scripts);
 }
 
-function generatePrivateKey(exponent) {
+function generatePrivateKeySign(exponent) {
 	/*
 	
 	
@@ -58,11 +63,13 @@ function generatePrivateKey(exponent) {
 	
 	// idk, zero-pad or not?!
 
-	var modulus = rsa.n.toString(16);
-	var exp = rsa.e.toString(16); //or exponent.toString(16)
+	var modulus = hexZeroPad(rsa.n.toString(16),129*2);
+	var exp = hexZeroPad(rsa.e.toString(16),3*2); //or exponent.toString(16)
 	var publicKey = formatSPKI(modulus,exp);
 
-	// DERP
+	// so time to sign?
+	var sign = rsa.signString(zip,"SHA1"); //umm...zip might be a little big
+	return {publicKey:publicKey,sign:sign}; //I don't believe it's that easy
 }
 function formatSPKI(modulus,exponent) { //should be in string-hex format
 	// some asn.1 stuff at the beginning
@@ -72,12 +79,42 @@ function formatSPKI(modulus,exponent) { //should be in string-hex format
 	output += exponent;
 	return output;
 }
+function packageCRXStuffings(publicKey,signature) {
+	var output = "Cr24\x02\x00\x00\x00";
+	output += hex2char(
+		hex_endian_swap(hexZeroPad(publicKey.length.toString(16),8)) +
+		hex_endian_swap(hexZeroPad(signature.length.toString(16),8))
+	);
+	output += hex2char(publicKey + signature);
+	return output;
+}
 function hex2char(hex) { //me has to lol at this function
 	hex = hex.match(/[0-9a-f]{2}/igm);
 	hex = hex.map(function(el){
 		return String.fromCharCode(parseInt(el,16));
 	});
 	return hex.join("");
+}
+// stolen from antimatter15
+// for numbers
+function endian_swap(x){
+  return (
+    (x>>>24) | 
+    ((x<<8) & 0x00FF0000) |
+    ((x>>>8) & 0x0000FF00) |
+    (x<<24)
+  )
+}
+//mine!
+function hex_endian_swap(x) {
+	if (x.length%2!=0) throw new Error();
+
+	var output = "", pos = x.length;
+	while (pos) {
+		output += x.substr(pos-2,2);
+		pos -= 2;
+	}
+	return output;
 }
 function char2hex(chars,lowercase) { // also purty :)
 	chars = chars.toString();

@@ -28,13 +28,11 @@ function packagecrx() {
 	zip.folder("img");
 	zip.add("img/logo_128.png",image,{base64:true});
 
-	var crx = new JSCrx("live");
+	var crx = new JSCrx();
 	crx.add.zip(zip.generate(true),"string");
-	crx.generate.privateKey({exponent:65537},function(){
-		crx.generate.signature({},function(){
-			crx.generate.crx("base64",function(){
-				location.href = "data:application/x-chrome-extension;base64," + this.crx.base64;
-			});
+	crx.generate.privateKeySignature({exponent:65537},function(){
+		crx.generate.crx("string",function(){
+			location.href = "data:application/x-chrome-extension;base64," + window.btoa(this.crx.header+this.zip.string);
 		});
 	});
     
