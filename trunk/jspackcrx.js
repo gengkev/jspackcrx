@@ -58,27 +58,33 @@ function JSCrx() {
 	this.sign.der="";
 
 	this.crx = {};
-	this.crx.string = "";
-	this.crx.hex = "";
-	this.crx.base64 = "";
+	//this.crx.string = "";
+	//this.crx.hex = "";
+	//this.crx.base64 = "";
 
 	this.worker = new Worker("worker.js");
+	this.worker.onerror = function(e) { throw e; };
 	this.worker.postMessage({name:"Hello World!",libdir:JSCrx.libdir});
 
 	this.worker.onmessage=function(e) {
 	switch(e.name) {
 		case "World Hello!":
 			break;
-		case "generatePrivateKey":
+		case "generatePrivateKeySign":
 			// this.publicKey.modulus = e.modulus;
 			// this.publicKey.exponent = e.exponent;
 			this.publicKey.der = e.publicKey;
-			this.privateKey.string = e.privateKey;
-			callbackRun(e.callback,this);
-			break;
-		case "generateSignature":
+			// this.privateKey.string = e.privateKey;
 			this.sign.der = e.der;
 			callbackRun(e.callback,this);
+			break;
+		//case "generateSignature":
+		//	this.sign.der = e.der;
+		//	callbackRun(e.callback,this);
+		case "generateCRX":
+			this.crx.header = e.crxHeader;
+			callbackRun(e.callback,this);
+			break;
 		default:
 			break;
 	}
@@ -117,14 +123,18 @@ JSCrx.prototype.add.zip = function(zipData,encoding) {
 	//this.zip.string = rawZip;
 	return this;
 }
-JSCrx.prototype.generate.privateKey = function(options,callback) {
+JSCrx.prototype.generate.privateKeySignature = function(options,callback) {
+	if (!this.zip.string) throw new Error("Need zip file in order to sign");
+
 	callbackStack.push(callback);
 	this.worker.postMessage({
-		name: "generatePrivateKey",
+		name: "generatePrivateKeySign",
 		exponent: options.exponent || 3,
+		// zip: this.zip.string,
 		callback: callbackStack.length
 	});
 }
+/*
 JSCrx.prototype.generate.signature = function(options,callback) {
 	if (!this.privateKey.der) throw new Error("Need private key in order to sign");
 	else if (!this.zip.string) throw new Error("Need zip file in order to sign");
@@ -137,6 +147,7 @@ JSCrx.prototype.generate.signature = function(options,callback) {
 		callback:callbackStack.length
 	});
 }
+*/
 JSCrx.prototype.generate.crx = function(format,callback) {
 	if (!this.publicKey.der) throw new Error("Need public key in order to package");
 	else if (!this.sign.der) throw new Error("Need signature in order to package");
@@ -147,7 +158,7 @@ JSCrx.prototype.generate.crx = function(format,callback) {
 		name:"generateCrx",
 		publicKey:this.publicKey.der,
 		signature:this.sign.der,
-		zip:this.zip.string,
+		// zip:this.zip.string,
 		callback:callbackStack.length
 	});
 }
