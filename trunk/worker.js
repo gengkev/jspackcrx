@@ -15,7 +15,7 @@ switch(e.data.name) {
 		postMessage({name:"World Hello!"});
 		break;
 	case "generatePrivateKeySign":
-		var data = generatePrivateKeySign(e.data.exponent,e.zip);
+		var data = generatePrivateKeySign(e.data.exponent,e.data.zip);
 		postMessage({
 			publicKey:data.publicKey,
 			// privateKey:data.privateKey,
@@ -53,7 +53,7 @@ function loadScripts(libdir) {
 	importScripts.apply(null,scripts);
 }
 
-function generatePrivateKeySign(exponent) {
+function generatePrivateKeySign(exponent,zip) {
 	var rsa = new RSAKey();
 	// var publicKeyPEM,publicKeyRaw,privateKeyPEM = pemFile,privateKeyRaw;
 
