@@ -92,10 +92,8 @@ function JSCrx() {
 }
 JSCrx.libdir = (location.protocol=="https")?"https":"http" + "://jspackcrx.googlecode.com/svn/trunk/libs/";
 
-JSCrx.prototype.add = {};
-JSCrx.prototype.generate = {};
 
-JSCrx.prototype.add.zip = function(zipData,encoding) {
+JSCrx.prototype.addZip = function(zipData,encoding) {
 	//var rawZip="";
 
 	switch(encoding) {
@@ -123,7 +121,7 @@ JSCrx.prototype.add.zip = function(zipData,encoding) {
 	//this.zip.string = rawZip;
 	return this;
 }
-JSCrx.prototype.generate.privateKeySignature = function(options,callback) {
+JSCrx.prototype.generatePrivateKeySignature = function(options,callback) {
 	if (!this.zip.string) throw new Error("Need zip file in order to sign");
 
 	callbackStack.push(callback);
@@ -135,7 +133,7 @@ JSCrx.prototype.generate.privateKeySignature = function(options,callback) {
 	});
 }
 /*
-JSCrx.prototype.generate.signature = function(options,callback) {
+JSCrx.prototype.generateSignature = function(options,callback) {
 	if (!this.privateKey.der) throw new Error("Need private key in order to sign");
 	else if (!this.zip.string) throw new Error("Need zip file in order to sign");
 
@@ -148,7 +146,7 @@ JSCrx.prototype.generate.signature = function(options,callback) {
 	});
 }
 */
-JSCrx.prototype.generate.crx = function(format,callback) {
+JSCrx.prototype.generateCrx = function(format,callback) {
 	if (!this.publicKey.der) throw new Error("Need public key in order to package");
 	else if (!this.sign.der) throw new Error("Need signature in order to package");
 	else if (!this.zip.string) throw new Error("Need zip file in order to sign");
