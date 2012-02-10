@@ -38,6 +38,7 @@ switch(e.data.name) {
 }
 
 function loadScripts(libdir) {
+	libdir = libdir.replace(/\/$/,""); //no ending slash
 	var scripts = [
 		"/min/jsbn.mod.min.js",
 		"/min/rng.min.js",
@@ -46,9 +47,9 @@ function loadScripts(libdir) {
 		"/min/sha1.min.js",
 		"/min/rsa-sign.min.js"
 	];
-	scripts.forEach(function(el){
-		el = libdir + el;
-	});
+	for (var i=0;i<scripts.length;i++) {
+		scripts[i] = libdir + scripts[i];
+	}
 	importScripts.apply(null,scripts);
 }
 
