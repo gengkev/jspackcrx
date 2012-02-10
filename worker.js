@@ -8,27 +8,28 @@
  */
 
 onmessage=function(e) {
-switch(e.name) {
+switch(e.data.name) {
 	case "Hello World!":
-		loadScripts(e.libdir);
+		loadScripts(e.data.libdir);
 		rng_seed_time();
 		postMessage({name:"World Hello!"});
 		break;
 	case "generatePrivateKeySign":
-		var data = generatePrivateKeySign(e.exponent,e.zip);
+		var data = generatePrivateKeySign(e.data.exponent,e.zip);
 		postMessage({
 			publicKey:data.publicKey,
 			// privateKey:data.privateKey,
 			sign:data.sign,
-			callback:e.callback
+			callback:e.data.callback
 		});
 		break;
 	//case "generateSignature":
 	//	break;
 	case "generateCrx":
-		var data = packageCRXStuffings(e.publicKey,e.signature);
+		var data = packageCRXStuffings(e.data.publicKey,e.data.signature);
 		postMessage({
-			crxHeader: data
+			crxHeader: data,
+			callback:e.data.callback
 		});
 		break;
 	default:

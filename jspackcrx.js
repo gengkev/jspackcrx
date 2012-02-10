@@ -67,23 +67,23 @@ function JSCrx() {
 	this.worker.postMessage({name:"Hello World!",libdir:JSCrx.libdir});
 
 	this.worker.onmessage=function(e) {
-	switch(e.name) {
+	switch(e.data.name) {
 		case "World Hello!":
 			break;
 		case "generatePrivateKeySign":
-			// this.publicKey.modulus = e.modulus;
-			// this.publicKey.exponent = e.exponent;
-			this.publicKey.der = e.publicKey;
-			// this.privateKey.string = e.privateKey;
-			this.sign.der = e.der;
-			callbackRun(e.callback,this);
+			// this.publicKey.modulus = e.data.modulus;
+			// this.publicKey.exponent = e.data.exponent;
+			this.publicKey.der = e.data.publicKey;
+			// this.privateKey.string = e.data.privateKey;
+			this.sign.der = e.data.der;
+			callbackRun(e.data.callback,this);
 			break;
 		//case "generateSignature":
-		//	this.sign.der = e.der;
-		//	callbackRun(e.callback,this);
+		//	this.sign.der = e.data.der;
+		//	callbackRun(e.data.callback,this);
 		case "generateCRX":
-			this.crx.header = e.crxHeader;
-			callbackRun(e.callback,this);
+			this.crx.header = e.data.crxHeader;
+			callbackRun(e.data.callback,this);
 			break;
 		default:
 			break;
