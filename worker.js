@@ -54,12 +54,8 @@ function loadScripts(libdir) {
 }
 
 function generatePrivateKeySign(exponent) {
-	/*
-	
-	
-	*/
 	var rsa = new RSAKey();
-	var publicKeyPEM,publicKeyRaw,privateKeyPEM = pemFile,privateKeyRaw;
+	// var publicKeyPEM,publicKeyRaw,privateKeyPEM = pemFile,privateKeyRaw;
 
 	rsa.generate(1024,exponent.toString(16));
 	
