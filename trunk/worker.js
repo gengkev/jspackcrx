@@ -7,7 +7,7 @@
  * See http://jspackcrx.googlecode.com/svn/LICENSE.html for details.
  */
 
-self.onMessage=function(e) {
+onmessage=function(e) {
 switch(e.name) {
 	case "Hello World!":
 		loadScripts(e.libdir);
