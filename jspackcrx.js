@@ -25,7 +25,7 @@
 var support = {
 	worker: !!window.Worker,
 	filereader: window.File && window.Blob && window.FileList && window.FileReader,
-	blobbuilder: !!window.BlobBuilder || !!window.MozBlobBuilder || !!window.WebKitBlobBuilder;
+	blobbuilder: !!window.BlobBuilder || !!window.MozBlobBuilder || !!window.WebKitBlobBuilder
 }
 var callbackStack = [];
 function callbackRun(callback,_this) {
@@ -38,6 +38,7 @@ function callbackRun(callback,_this) {
 
 
 function JSCrx() {
+	if (this == window) return new JSCrx();
 	this.zip={};
 	this.zip.string="";
 	//this.zip.blob = null;
@@ -65,21 +66,22 @@ function JSCrx() {
 	this.worker.postMessage({name:"Hello World!",libdir:JSCrx.libdir});
 
 	this.worker.onmessage=function(e) {
-		switch(e.name) {
-			case "World Hello!":
-				break;
-			case "generateRSAKey":
-				// this.publicKey.modulus = e.modulus;
-				// this.publicKey.exponent = e.exponent;
-				this.publicKey.der = e.publicKey;
-				this.privateKey.string = e.privateKey;
-				callbackRun(e.callback,this);
-				break;
-			case "generateSignature":
-				this.sign.der = e.der;
-				callbackRun(e.callback,this);
-			default:
-				break;
+	switch(e.name) {
+		case "World Hello!":
+			break;
+		case "generatePrivateKey":
+			// this.publicKey.modulus = e.modulus;
+			// this.publicKey.exponent = e.exponent;
+			this.publicKey.der = e.publicKey;
+			this.privateKey.string = e.privateKey;
+			callbackRun(e.callback,this);
+			break;
+		case "generateSignature":
+			this.sign.der = e.der;
+			callbackRun(e.callback,this);
+		default:
+			break;
+	}
 	}
 }
 JSCrx.libdir = (location.protocol=="https")?"https":"http" + "://jspackcrx.googlecode.com/svn/trunk/libs/";
@@ -132,7 +134,7 @@ JSCrx.prototype.generate.signature = function(options,callback) {
 		name:"generateSignature",
 		privateKey:this.privateKey.der,
 		zip:this.zip.string,
-		callback:callbackStack.length;
+		callback:callbackStack.length
 	});
 }
 JSCrx.prototype.generate.crx = function(format,callback) {
@@ -146,9 +148,9 @@ JSCrx.prototype.generate.crx = function(format,callback) {
 		publicKey:this.publicKey.der,
 		signature:this.sign.der,
 		zip:this.zip.string,
-		callback:callbackStack.length;
+		callback:callbackStack.length
 	});
 }
 
 window.JSCrx = JSCrx;
-});
+}());
