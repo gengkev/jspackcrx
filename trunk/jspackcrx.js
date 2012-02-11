@@ -77,14 +77,14 @@ function JSCrx() {
 				_this.publicKey.der = e.data.publicKey;
 				// this.privateKey.string = e.data.privateKey;
 				_this.sign.der = e.data.sign;
-				callbackRun(e.data.callback,this);
+				callbackRun(e.data.callback,_this);
 				break;
 			//case "generateSignature":
 			//	_this.sign.der = e.data.der;
-			//	callbackRun(e.data.callback,this);
+			//	callbackRun(e.data.callback,_this);
 			case "generateCRX":
 				_this.crx.header = e.data.crxHeader;
-				callbackRun(e.data.callback,this);
+				callbackRun(e.data.callback,_this);
 				break;
 			default:
 				break;

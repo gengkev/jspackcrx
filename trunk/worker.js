@@ -82,8 +82,8 @@ function formatSPKI(modulus,exponent) { //should be in string-hex format
 function packageCRXStuffings(publicKey,signature) {
 	var output = "Cr24\x02\x00\x00\x00";
 	output += hex2char(
-		hex_endian_swap(hexZeroPad(publicKey.length.toString(16),8)) +
-		hex_endian_swap(hexZeroPad(signature.length.toString(16),8))
+		hex_endian_swap(hexZeroPad((publicKey.length/2).toString(16),8)) +
+		hex_endian_swap(hexZeroPad((signature.length/2).toString(16),8))
 	);
 	output += hex2char(publicKey + signature);
 	return output;
