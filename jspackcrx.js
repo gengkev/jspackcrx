@@ -76,7 +76,7 @@ function JSCrx() {
 				// _this.publicKey.exponent = e.data.exponent;
 				_this.publicKey.der = e.data.publicKey;
 				// this.privateKey.string = e.data.privateKey;
-				_this.sign.der = e.data.der;
+				_this.sign.der = e.data.sign;
 				callbackRun(e.data.callback,this);
 				break;
 			//case "generateSignature":
@@ -162,6 +162,13 @@ JSCrx.prototype.generateCrx = function(format,callback) {
 		callback:callbackStack.length-1
 	});
 };
+JSCrx.prototype.terminate = function(){
+	try {
+		this.worker.terminate();
+		delete this.worker, this.zip, this.privateKey, this.publicKey, this.sign, this.crx;
+		this = null;
+	} catch(e) { } //swallowed! because it doesn't really matter
+}
 
 window.JSCrx = JSCrx;
 }());
