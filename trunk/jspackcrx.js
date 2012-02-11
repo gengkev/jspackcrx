@@ -26,10 +26,10 @@ var support = {
 	worker: !!window.Worker,
 	filereader: window.File && window.Blob && window.FileList && window.FileReader,
 	blobbuilder: !!window.BlobBuilder || !!window.MozBlobBuilder || !!window.WebKitBlobBuilder
-}
+};
 var callbackStack = [];
 function callbackRun(callback,_this) {
-	if (!callback || !callbackStack[callback]) return;
+	if (!callback || !callbackStack[callback]) { return; }
 
 	callbackStack[callback].call(_this);
 
@@ -38,7 +38,7 @@ function callbackRun(callback,_this) {
 
 
 function JSCrx() {
-	if (this == window) return new JSCrx();
+	if (this === window) { return new JSCrx(); }
 	this.zip={};
 	this.zip.string="";
 	//this.zip.blob = null;
@@ -88,9 +88,9 @@ function JSCrx() {
 		default:
 			break;
 	}
-	}
+	};
 }
-JSCrx.libdir = (location.protocol=="https")?"https":"http" + "://jspackcrx.googlecode.com/svn/trunk/libs/";
+JSCrx.libdir = (location.protocol.length-4)?"https":"http" + "://jspackcrx.googlecode.com/svn/trunk/libs/";
 
 
 JSCrx.prototype.addZip = function(zipData,encoding) {
@@ -100,9 +100,9 @@ JSCrx.prototype.addZip = function(zipData,encoding) {
 		case "blob":
 		case "file":
 			var reader = new FileReader();
-			reader.onload = function() {
+			reader.onload = function(e) {
 				this.zip.string = e.target.result;
-			}
+			};
 			reader.readAsBinaryString(); //???
 			break;
 		case "typedarray":
@@ -120,9 +120,9 @@ JSCrx.prototype.addZip = function(zipData,encoding) {
 
 	//this.zip.string = rawZip;
 	return this;
-}
+};
 JSCrx.prototype.generatePrivateKeySignature = function(options,callback) {
-	if (!this.zip.string) throw new Error("Need zip file in order to sign");
+	if (!this.zip.string) { throw new Error("Need zip file in order to sign"); }
 
 	callbackStack.push(callback);
 	this.worker.postMessage({
@@ -131,11 +131,11 @@ JSCrx.prototype.generatePrivateKeySignature = function(options,callback) {
 		// zip: this.zip.string,
 		callback: callbackStack.length
 	});
-}
+};
 /*
 JSCrx.prototype.generateSignature = function(options,callback) {
-	if (!this.privateKey.der) throw new Error("Need private key in order to sign");
-	else if (!this.zip.string) throw new Error("Need zip file in order to sign");
+	if (!this.privateKey.der) { throw new Error("Need private key in order to sign"); }
+	else if (!this.zip.string) { throw new Error("Need zip file in order to sign"); }
 
 	callbackStack.push(callback);
 	this.worker.postMessage({
@@ -147,9 +147,9 @@ JSCrx.prototype.generateSignature = function(options,callback) {
 }
 */
 JSCrx.prototype.generateCrx = function(format,callback) {
-	if (!this.publicKey.der) throw new Error("Need public key in order to package");
-	else if (!this.sign.der) throw new Error("Need signature in order to package");
-	else if (!this.zip.string) throw new Error("Need zip file in order to sign");
+	if (!this.publicKey.der) { throw new Error("Need public key in order to package"); }
+	else if (!this.sign.der) { throw new Error("Need signature in order to package"); }
+	else if (!this.zip.string) { throw new Error("Need zip file in order to sign"); }
 
 	callbackStack.push(callback);
 	this.worker.postMessage({
@@ -159,7 +159,7 @@ JSCrx.prototype.generateCrx = function(format,callback) {
 		// zip:this.zip.string,
 		callback:callbackStack.length
 	});
-}
+};
 
 window.JSCrx = JSCrx;
 }());
