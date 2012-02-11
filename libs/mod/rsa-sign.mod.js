@@ -58,7 +58,7 @@ function _rsasign_getHexPaddedDigestInfoForString(s, keySize, hashAlg) {
 
 RSAKey.prototype.signString = function(s, hashAlg) {
   var hPM = _rsasign_getHexPaddedDigestInfoForString(s, this.n.bitLength(), hashAlg);
-  var biPaddedMessage = parseBigInt(hPM, 16);
+  var biPaddedMessage = new BigInteger(hPM, 16);
   var biSign = this.doPrivate(biPaddedMessage);
   var hexSign = biSign.toString(16);
   return hexSign;
@@ -66,7 +66,7 @@ RSAKey.prototype.signString = function(s, hashAlg) {
 
 RSAKey.prototype.signStringWithSHA1 = function(s) {
   var hPM = _rsasign_getHexPaddedDigestInfoForString(s, this.n.bitLength(), 'sha1');  
-  var biPaddedMessage = parseBigInt(hPM, 16);
+  var biPaddedMessage = new BigInteger(hPM, 16);
   var biSign = this.doPrivate(biPaddedMessage);
   var hexSign = biSign.toString(16);
   return hexSign;
@@ -74,7 +74,7 @@ RSAKey.prototype.signStringWithSHA1 = function(s) {
 
 RSAKey.prototype.signStringWithSHA256 = function(s) {
   var hPM = _rsasign_getHexPaddedDigestInfoForString(s, this.n.bitLength(), 'sha256');
-  var biPaddedMessage = parseBigInt(hPM, 16);
+  var biPaddedMessage = new BigInteger(hPM, 16);
   var biSign = this.doPrivate(biPaddedMessage);
   var hexSign = biSign.toString(16);
   return hexSign;
@@ -121,7 +121,7 @@ function _rsasign_verifySignatureWithArgs(sMsg, biSig, hN, hE) {
 }
 
 RSAKey.prototype.verifyHexSignatureForMessage = function(hSig, sMsg) {
-  var biSig = parseBigInt(hSig, 16);
+  var biSig = new BigInteger(hSig, 16);
   var result = _rsasign_verifySignatureWithArgs(sMsg, biSig,
 						this.n.toString(16),
 						this.e.toString(16));
@@ -130,7 +130,7 @@ RSAKey.prototype.verifyHexSignatureForMessage = function(hSig, sMsg) {
 
 RSAKey.prototype.verifyString = function(sMsg, hSig) {
   hSig = hSig.replace(/[ \n]+/g, "");
-  var biSig = parseBigInt(hSig, 16);
+  var biSig = new BigInteger(hSig, 16);
   var biDecryptedSig = this.doPublic(biSig);
   var hDigestInfo = biDecryptedSig.toString(16).replace(/^1f+00/, '');
   var digestInfoAry = _rsasign_getAlgNameAndHashFromHexDisgestInfo(hDigestInfo);
@@ -309,9 +309,9 @@ function _asnhex_getIntOfL_AtObj(s, pos) {
   if (hLength == '') return -1;
   var bi;
   if (parseInt(hLength.substring(0, 1)) < 8) {
-     bi = parseBigInt(hLength, 16);
+     bi = new BigInteger(hLength, 16);
   } else {
-     bi = parseBigInt(hLength.substring(2), 16);
+     bi = new BigInteger(hLength.substring(2), 16);
   }
   return bi.intValue();
 }
