@@ -85,7 +85,7 @@ function packageCRXStuffings(publicKey,signature) {
 		hex_endian_swap(hexZeroPad((publicKey.length/2).toString(16),8)) +
 		hex_endian_swap(hexZeroPad((signature.length/2).toString(16),8))
 	);
-	output += hex2char(publicKey + hex_endian_swap(signature));
+	output += hex2char(publicKey + signature);
 	return output;
 }
 function hex2char(hex) { //me has to lol at this function
