@@ -120,7 +120,7 @@ function _rsasign_verifySignatureWithArgs(sMsg, biSig, hN, hE) {
   return (diHashValue == msgHashValue);
 }
 
-RSAKey.prototype.verifyHexSignatureForMessage = functio(hSig, sMsg) {
+RSAKey.prototype.verifyHexSignatureForMessage = function(hSig, sMsg) {
   var biSig = parseBigInt(hSig, 16);
   var result = _rsasign_verifySignatureWithArgs(sMsg, biSig,
 						this.n.toString(16),

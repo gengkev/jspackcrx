@@ -35,7 +35,7 @@ switch(e.data.name) {
 	default:
 		break;
 }
-}
+};
 
 function loadScripts(libdir) {
 	libdir = libdir.replace(/\/$/,""); //no ending slash
@@ -101,11 +101,11 @@ function endian_swap(x){
     ((x<<8) & 0x00FF0000) |
     ((x>>>8) & 0x0000FF00) |
     (x<<24)
-  )
+  );
 }
 //mine!
 function hex_endian_swap(x) {
-	if (x.length%2!=0) throw new Error();
+	if (x.length % 2 !== 0) { throw new Error(); }
 
 	var output = "", pos = x.length;
 	while (pos) {
@@ -120,7 +120,7 @@ function char2hex(chars,lowercase) { // also purty :)
 	var hexstring = Array.prototype.map.call(chars,function(el){
 		el = el.charCodeAt(0) & 0xff; //two digits please?
 		var hex = el.toString(16);
-		if (hex.length<2) hex = "0"+hex;
+		if (hex.length<2) { hex = "0"+hex; }
 		return hex;
 	}).join("");
         if (lowercase) {
