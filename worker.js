@@ -17,6 +17,7 @@ switch(e.data.name) {
 	case "generatePrivateKeySign":
 		var data = generatePrivateKeySign(e.data.exponent,e.data.zip);
 		postMessage({
+			name: "generatePrivateKeySign",
 			publicKey:data.publicKey,
 			// privateKey:data.privateKey,
 			sign:data.sign,
@@ -28,6 +29,7 @@ switch(e.data.name) {
 	case "generateCrx":
 		var data = packageCRXStuffings(e.data.publicKey,e.data.signature);
 		postMessage({
+			name: "generateCRX", // Crx or CRX? lol
 			crxHeader: data,
 			callback:e.data.callback
 		});
