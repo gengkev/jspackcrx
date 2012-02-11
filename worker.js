@@ -77,7 +77,7 @@ function formatSPKI(modulus,exponent) { //should be in string-hex format
 	output += modulus; //umm this will only work with a 1034 bit key probably...
 	output += "0203";
 	output += exponent;
-	return output;
+	return output.toLowerCase();
 }
 function packageCRXStuffings(publicKey,signature) {
 	var output = "Cr24\x02\x00\x00\x00";
@@ -123,7 +123,7 @@ function char2hex(chars,lowercase) { // also purty :)
 function hexZeroPad(hex,len) {
 	hex = hex.toString();
 	while(hex.length < len) {
-		hex = "00" + hex;
+		hex = "0" + hex;
 	}
 	return hex;
 }
