@@ -128,7 +128,7 @@ JSCrx.prototype.generatePrivateKeySignature = function(options,callback) {
 	this.worker.postMessage({
 		name: "generatePrivateKeySign",
 		exponent: options.exponent || 3,
-		// zip: this.zip.string,
+		zip: this.zip.string,
 		callback: callbackStack.length
 	});
 };

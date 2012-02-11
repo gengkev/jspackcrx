@@ -93,17 +93,6 @@ function hex2char(hex) { //me has to lol at this function
 	});
 	return hex.join("");
 }
-// stolen from antimatter15
-// for numbers
-function endian_swap(x){
-  return (
-    (x>>>24) | 
-    ((x<<8) & 0x00FF0000) |
-    ((x>>>8) & 0x0000FF00) |
-    (x<<24)
-  );
-}
-//mine!
 function hex_endian_swap(x) {
 	if (x.length % 2 !== 0) { throw new Error(); }
 
