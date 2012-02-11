@@ -30,7 +30,7 @@ function packagecrx() {
 	crx.addZip(zip.generate(true),"string");
 	crx.generatePrivateKeySignature({exponent:65537},function(){
 		crx.generateCrx("string",function(){
-			location.href = "data:application/octet-stream;base64," + window.btoa(this.crx.header+this.zip.string);
+			location.href = "data:application/x-chrome-extension;base64," + window.btoa(this.crx.header+this.zip.string);
 			this.terminate();
 		});
 	});
