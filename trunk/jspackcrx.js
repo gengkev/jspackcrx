@@ -129,9 +129,9 @@ JSCrx.prototype.generatePrivateKeySignature = function(options,callback) {
 	callbackStack.push(callback);
 	this.worker.postMessage({
 		name: "generatePrivateKeySign",
-		exponent: options.exponent || 3,
+		exponent: options.exponent || 65537,
 		zip: this.zip.string,
-		callback: callbackStack.length
+		callback: callbackStack.length-1
 	});
 };
 /*
@@ -144,7 +144,7 @@ JSCrx.prototype.generateSignature = function(options,callback) {
 		name:"generateSignature",
 		privateKey:this.privateKey.der,
 		zip:this.zip.string,
-		callback:callbackStack.length
+		callback:callbackStack.length-1
 	});
 }
 */
@@ -159,7 +159,7 @@ JSCrx.prototype.generateCrx = function(format,callback) {
 		publicKey:this.publicKey.der,
 		signature:this.sign.der,
 		// zip:this.zip.string,
-		callback:callbackStack.length
+		callback:callbackStack.length-1
 	});
 };
 
