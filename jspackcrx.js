@@ -90,7 +90,7 @@ function JSCrx() {
 	}
 	};
 }
-JSCrx.libdir = (location.protocol.length-4)?"https":"http" + "://jspackcrx.googlecode.com/svn/trunk/libs/";
+JSCrx.libdir = (location.protocol.length-4?"https":"http") + "://jspackcrx.googlecode.com/svn/trunk/libs/";
 
 
 JSCrx.prototype.addZip = function(zipData,encoding) {
