@@ -29,7 +29,7 @@ var support = {
 };
 var callbackStack = [];
 function callbackRun(callback,_this) {
-	if (!callback || !callbackStack[callback]) { return; }
+	if (!callbackStack[callback]) { return; }
 
 	callbackStack[callback].call(_this);
 
