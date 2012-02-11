@@ -66,29 +66,31 @@ function JSCrx() {
 	this.worker.onerror = function(e) { throw e; };
 	this.worker.postMessage({name:"Hello World!",libdir:JSCrx.libdir});
 
-	this.worker.onmessage=function(e) {
-	switch(e.data.name) {
-		case "World Hello!":
-			break;
-		case "generatePrivateKeySign":
-			// this.publicKey.modulus = e.data.modulus;
-			// this.publicKey.exponent = e.data.exponent;
-			this.publicKey.der = e.data.publicKey;
-			// this.privateKey.string = e.data.privateKey;
-			this.sign.der = e.data.der;
-			callbackRun(e.data.callback,this);
-			break;
-		//case "generateSignature":
-		//	this.sign.der = e.data.der;
-		//	callbackRun(e.data.callback,this);
-		case "generateCRX":
-			this.crx.header = e.data.crxHeader;
-			callbackRun(e.data.callback,this);
-			break;
-		default:
-			break;
-	}
-	};
+	this.worker.onmessage=(function(_this){
+		return function(e) {
+		switch(e.data.name) {
+			case "World Hello!":
+				break;
+			case "generatePrivateKeySign":
+				// _this.publicKey.modulus = e.data.modulus;
+				// _this.publicKey.exponent = e.data.exponent;
+				_this.publicKey.der = e.data.publicKey;
+				// this.privateKey.string = e.data.privateKey;
+				_this.sign.der = e.data.der;
+				callbackRun(e.data.callback,this);
+				break;
+			//case "generateSignature":
+			//	_this.sign.der = e.data.der;
+			//	callbackRun(e.data.callback,this);
+			case "generateCRX":
+				_this.crx.header = e.data.crxHeader;
+				callbackRun(e.data.callback,this);
+				break;
+			default:
+				break;
+		}
+		};
+	}(this));
 }
 JSCrx.libdir = (location.protocol.length-4?"https":"http") + "://jspackcrx.googlecode.com/svn/trunk/libs/";
 
