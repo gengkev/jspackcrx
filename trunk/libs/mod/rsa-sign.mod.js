@@ -41,8 +41,10 @@ _RSASIGN_HASHHEXFUNC['sha1'] = hex_sha1;
 // ========================================================================
 
 function _rsasign_getHexPaddedDigestInfoForString(s, keySize, hashAlg) {
+  hashAlg = hashAlg.toLowerCase();
+
   var pmStrLen = keySize / 4;
-  var hashFunc = _RSASIGN_HASHHEXFUNC[hashAlg.toLowerCase()];
+  var hashFunc = _RSASIGN_HASHHEXFUNC[hashAlg];
   var sHashHex = hashFunc(s);
 
   var sHead = "0001";
