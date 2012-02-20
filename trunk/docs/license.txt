@@ -9,6 +9,8 @@ Thank you if you wrote a library that I used.
 The information notice and license for all projects used in the
 code of JSPackCrx are listed below:
 
+( aah I'll update this later, I used JSZip and FileSaver.js in the demo)
+
 ---------------------------------------------
 JSPackCrx http://code.google.com/p/jspackcrx
 

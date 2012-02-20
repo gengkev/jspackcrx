@@ -40,14 +40,16 @@ switch(e.data.name) {
 };
 
 function loadScripts(libdir) {
-	libdir = libdir.replace(/\/$/,""); //no ending slash
+	libdir = libdir.replace(/\/$/,"") + "/";
 	var scripts = [
-		"/min/jsbn.mod.min.js",
-		"/min/rng.min.js",
-		"/min/base64.min.js",
-		"/min/rsa.mod.min.js",
-		"/min/sha1.min.js",
-		"/mod/rsa-sign.mod.js"
+		"jsbn.mod.js",
+		"jsbn2.mod.js",
+		"rng.min.js",
+		"base64.min.js",
+		"rsa.mod.js",
+		"rsa2.mod.js",
+		"sha1.js",
+		"rsa-sign.mod.js"
 	];
 	for (var i=0;i<scripts.length;i++) {
 		scripts[i] = libdir + scripts[i];
@@ -68,13 +70,13 @@ function generatePrivateKeySign(exponent,zip) {
 	var publicKey = formatSPKI(modulus,exp);
 
 	// so time to sign?
-	var sign = rsa.signString(zip,"SHA1"); //umm...zip might be a little big
+	var sign = rsa.signString(zip,"sha1"); //umm...zip might be a little big
 	return {publicKey:publicKey,sign:sign}; //I don't believe it's that easy
 }
 function formatSPKI(modulus,exponent) { //should be in string-hex format
 	// some asn.1 stuff at the beginning
 	var output = "30819F300D06092A864886F70D010101050003818D00308189028181";
-	output += modulus; //umm this will only work with a 1034 bit key probably...
+	output += modulus; //umm this will only work with a 1024 bit key probably...
 	output += "0203";
 	output += exponent;
 	return output.toLowerCase();
@@ -89,6 +91,7 @@ function packageCRXStuffings(publicKey,signature) {
 	return output;
 }
 function hex2char(hex) { //me has to lol at this function
+	hex = hex.toLowerCase();
 	hex = hex.match(/[0-9a-f]{2}/igm);
 	hex = hex.map(function(el){
 		return String.fromCharCode(parseInt(el,16));

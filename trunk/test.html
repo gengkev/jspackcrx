@@ -12,7 +12,8 @@
 <meta charset="UTF-8" />
 <title>JSPackCrx Test Page</title>
 <script type="text/javascript" src="jspackcrx.js" async="true"></script>
-<script type="text/javascript" src="libs/jszip.js"></script>
+<script type="text/javascript" src="demo/jszip.js" async="true"></script>
+<script type="text/javascript" src="demo/FileSaver.min.js" async="true"></script>
 
 <script type="text/javascript">
 //load JSPackCrx asyncronously
@@ -26,26 +27,38 @@ function packagecrx() {
 	zip.folder("img");
 	zip.add("img/logo_128.png",image,{base64:true});
 
+	JSCrx.libdir = "libs/";
 	var crx = new JSCrx();
 	crx.addZip(zip.generate(true),"string");
 	crx.generatePrivateKeySignature({exponent:65537},function(){
 		crx.generateCrx("string",function(){
-			location.href = "data:application/x-chrome-extension;base64," + window.btoa(this.crx.header+this.zip.string);
+			// location.href = "data:application/x-chrome-extension;base64," + window.btoa(this.crx.header + this.zip.string);
+			downloadBlob(this.crx.header + this.zip.string);
 			this.terminate();
 		});
 	});
-    
-  /*
-  crx.manifest(manifest);
-  crx.folder("img");
-  crx.add("img/logo_128.png",image,{base64:true});
-  var content=crx.package(false,undefined,image);
-  location.href="data:application/x-chrome-extention;base64,"+content;
-  */
+}
+function downloadBlob(fileData) {
+	var bb = new (window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder)();
+	// turn fileData into an ArrayBuffer
+	var array = Array.prototype.map.call(fileData,function(el) {
+		return el.charCodeAt(0);
+	});
+	bb.append(new Uint8Array(array).buffer);
+	saveAs(bb.getBlob("application/x-chrome-extension"));
 }
 </script>
+
+<h2>A kind of functional demo of jspackcrx</h2>
+<p>
+(Note that this will give an error once in a while due to its hackishness and me being too lazy to properly
+implement ASN.1. Also you can't use/save a private key or anything so yeah. At least it kind of works.)
+<br />
+It's all very hackish right now and the API sucks.<br />
+And the crx will be packaged with an image in /img/logo_128.png stolen from Mozilla's Open Web Apps project.
+</p>
 <button onclick="packagecrx()">Package CRX!</button>
-<br /><br />
+<br />
 Manifest:
 <br />
 <textarea id="manifest" rows="20" cols="50">
@@ -57,10 +70,9 @@ Manifest:
     "launch": {
 	  "web_url": "http://appmanifest.org/"
 	}
-  }
+  },
   "icons": {
     "128": "/img/logo_128.png"
-  },
-  "homepage_url": "http://mozillalabs.com"
+  }
 }
 </textarea>

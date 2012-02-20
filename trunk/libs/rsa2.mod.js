@@ -106,7 +106,7 @@ RSAKey.prototype.generate = function(B,E) {
 
 // Perform raw private operation on "x": return x^d (mod n)
 RSAKey.prototype.doPrivate = function(x) {
-  if(this.p == null || this.q == null)
+  //if(this.p == null || this.q == null)
     return x.modPow(this.d, this.n);
 
   // TODO: re-calculate any missing CRT params

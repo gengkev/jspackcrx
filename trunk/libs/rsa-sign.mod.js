@@ -1,3 +1,5 @@
+/* Modifications: a lot, too lazy to list.. */
+
 //
 // rsa-sign.js - adding signing functions to RSAKey class.
 //
@@ -34,7 +36,7 @@ _RSASIGN_DIHEAD['sha1'] = "3021300906052b0e03021a05000414";
 var _RSASIGN_HASHHEXFUNC = {};
 //_RSASIGN_HASHHEXFUNC['sha1'] = sha1.hex;
 //_RSASIGN_HASHHEXFUNC['sha256'] = sha256.hex;
-_RSASIGN_HASHHEXFUNC['sha1'] = hex_sha1;
+_RSASIGN_HASHHEXFUNC['sha1'] = SHA1;
 
 // ========================================================================
 // Signature Generation
