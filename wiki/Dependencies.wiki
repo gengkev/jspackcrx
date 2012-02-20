@@ -13,7 +13,7 @@ Core library:
   * [http://antimatter15.com/wp/2010/01/javascript-sha1-and-sha256-in-1-kb/ antimatter15's SHA1] / [https://gist.github.com/267720 gist] Well, it's good it doesn't have UTF-8 encoding which is what caused jshash to not work
 
 Demo page:
-  * [ FileSaver.js] for downloading files, since assigning a location to a data URI did not work :(
+  * [https://github.com/eligrey/FileSaver.js FileSaver.js] for downloading files, since assigning a location to a data URI did not work :(
   * [http://jszip.stuartk.co.uk/ JSZip] for creating zip files in js, a big part of the original idea
 
 More credits and stuff:
@@ -22,6 +22,6 @@ More credits and stuff:
   * [http://blog.roomanna.com/12-12-2010/packaging-chrome-extensions Packaging Chrome Extensions] / [https://github.com/kurrik/chrome-extensions/tree/master/crx-appengine-packager crx-appengine-packager] Really, REALLY useful reference for messing with the crx format!
   * [https://www.dlitz.net/software/pycrypto/ pycrypto] for some baseline code and confusing me
   * [http://en.wikipedia.org/wiki/RSA_(algorithm) Wikipedia] yeah
-  * [http://code.google.com/chrome/extensions/crx.html Chrome reference] where all knowledge must come from
-  * [http://tools.ietf.org/html/rfc2313 all of] [http://tools.ietf.org/html/rfc3279 these] [http://tools.ietf.org/html/rfc5280 RFCs!!!] which are confusing but necessary
+  * [http://code.google.com/chrome/extensions/crx.html The Chrome CRX reference] where all knowledge must come from
+  * [http://tools.ietf.org/html/rfc2313 All of] [http://tools.ietf.org/html/rfc3279 these] [http://tools.ietf.org/html/rfc5280 RFCs!!!] which are confusing but necessary
   * [http://www.openssl.org/docs/apps/rsa.html OpenSSL] for testing and stuff
