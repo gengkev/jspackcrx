@@ -13,9 +13,7 @@
  * @author gengkev@gmail.com
  */
 
-// 
-;(function(){
-//yeah, I never knew that was called a closure
+;JSCrx = (function(){
 
 /* Requirements:
  * Worker
@@ -170,5 +168,5 @@ JSCrx.prototype.terminate = function(){
 	} catch(e) { } //swallowed! because it doesn't really matter
 }
 
-window.JSCrx = JSCrx;
+return JSCrx;
 }());
