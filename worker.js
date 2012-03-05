@@ -7,13 +7,8 @@
  * See http://jspackcrx.googlecode.com/svn/LICENSE.html for details.
  */
 
-onmessage=function(e) {
+self.onmessage=function(e) {
 switch(e.data.name) {
-	case "Hello World!":
-		loadScripts(e.data.libdir);
-		rng_seed_time();
-		postMessage({name:"World Hello!"});
-		break;
 	case "generatePrivateKeySign":
 		var data = generatePrivateKeySign(e.data.exponent,e.data.zip);
 		postMessage({
@@ -24,13 +19,11 @@ switch(e.data.name) {
 			callback:e.data.callback
 		});
 		break;
-	//case "generateSignature":
-	//	break;
 	case "generateCrx":
 		var data = packageCRXStuffings(e.data.publicKey,e.data.signature);
 		postMessage({
 			name: "generateCRX", // Crx or CRX? lol
-			crxHeader: data,
+			crxHeader:data,
 			callback:e.data.callback
 		});
 		break;
@@ -39,23 +32,6 @@ switch(e.data.name) {
 }
 };
 
-function loadScripts(libdir) {
-	libdir = libdir.replace(/\/$/,"") + "/";
-	var scripts = [
-		"jsbn.mod.js",
-		"jsbn2.mod.js",
-		"rng.min.js",
-		"base64.min.js",
-		"rsa.mod.js",
-		"rsa2.mod.js",
-		"sha1.js",
-		"rsa-sign.mod.js"
-	];
-	for (var i=0;i<scripts.length;i++) {
-		scripts[i] = libdir + scripts[i];
-	}
-	importScripts.apply(null,scripts);
-}
 
 function generatePrivateKeySign(exponent,zip) {
 	var rsa = new RSAKey();
@@ -117,7 +93,7 @@ function char2hex(chars,lowercase) { // also purty :)
 		if (hex.length<2) { hex = "0"+hex; }
 		return hex;
 	}).join("");
-        if (lowercase) {
+	if (lowercase) {
 		return hexstring.toLowerCase();
 	} else {
 		return hexstring.toUpperCase();
@@ -130,15 +106,27 @@ function hexZeroPad(hex,len) {
 	}
 	return hex;
 }
-/* actually the rsa-sign library has this stuff already
-function aBunchOfRandomCode() {
-        
-	digest = "3021300906052B0E03021A05000414"+hex_sha1(zipfile);
-	paddinglength = 128 - 3 - digest.length;
-	padding = "";
-	while(padding.length<paddinglength) {
-		padding += "FF";
-	}
-	paddedhexstr = "0001" + padding + "00" + digest;
-
-}*/
+function hex2b64(hex) {
+	return window.btoa(hex2char(hex));
+}
+function b64tohex(b64) {
+	return char2hex(window.atob(b64));
+}
+function b64toBA(string) {
+	return Array.prototype.map.call(window.atob(string),function(x){return x.charCodeAt(0)});
+}
+/* BEGIN EXCLUDE IF INCLUDED */
+if (!BigInteger || !RSAKey) { // :-/
+	importScripts.apply(null,[
+		"jsbn.mod",
+		"jsbn2.mod",
+		"rng.min",
+		"rsa.mod",
+		"rsa2.mod",
+		"sha1",
+		"rsa-sign.mod"
+	].map(function(x){
+		return "libs/" + x + ".js";
+	});
+}
+/* END EXCLUDE IF INCLUDED */

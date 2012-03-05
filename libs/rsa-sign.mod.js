@@ -30,13 +30,15 @@
 // 4096 / 1024
 
 // As for _RSASGIN_DIHEAD values for each hash algorithm, see PKCS#1 v2.1 spec (p38).
-var _RSASIGN_DIHEAD = {};
-_RSASIGN_DIHEAD['sha1'] = "3021300906052b0e03021a05000414";
-//_RSASIGN_DIHEAD['sha256'] = "3031300d060960864801650304020105000420";
-var _RSASIGN_HASHHEXFUNC = {};
-//_RSASIGN_HASHHEXFUNC['sha1'] = sha1.hex;
-//_RSASIGN_HASHHEXFUNC['sha256'] = sha256.hex;
-_RSASIGN_HASHHEXFUNC['sha1'] = SHA1;
+var _RSASIGN_DIHEAD = {
+	"sha1": "3021300906052b0e03021a05000414"
+	//"sha256": "3031300d060960864801650304020105000420"
+};
+var _RSASIGN_HASHHEXFUNC = {
+	//"sha1": = sha1.hex,
+	//"sha256": sha256.hex,
+	"sha1": SHA1
+};
 
 // ========================================================================
 // Signature Generation
@@ -62,22 +64,6 @@ function _rsasign_getHexPaddedDigestInfoForString(s, keySize, hashAlg) {
 
 RSAKey.prototype.signString = function(s, hashAlg) {
   var hPM = _rsasign_getHexPaddedDigestInfoForString(s, this.n.bitLength(), hashAlg);
-  var biPaddedMessage = new BigInteger(hPM, 16);
-  var biSign = this.doPrivate(biPaddedMessage);
-  var hexSign = biSign.toString(16);
-  return hexSign;
-}
-
-RSAKey.prototype.signStringWithSHA1 = function(s) {
-  var hPM = _rsasign_getHexPaddedDigestInfoForString(s, this.n.bitLength(), 'sha1');  
-  var biPaddedMessage = new BigInteger(hPM, 16);
-  var biSign = this.doPrivate(biPaddedMessage);
-  var hexSign = biSign.toString(16);
-  return hexSign;
-}
-
-RSAKey.prototype.signStringWithSHA256 = function(s) {
-  var hPM = _rsasign_getHexPaddedDigestInfoForString(s, this.n.bitLength(), 'sha256');
   var biPaddedMessage = new BigInteger(hPM, 16);
   var biSign = this.doPrivate(biPaddedMessage);
   var hexSign = biSign.toString(16);
