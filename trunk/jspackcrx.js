@@ -7,18 +7,9 @@
  * See http://jspackcrx.googlecode.com/svn/LICENSE.html for details.
  */
 
-/**
- * @fileoverview The main script loaded into pages using JSPackCrx.
- *   It loads scripts and adds the generateCRX function to JSZip.
- * @author gengkev@gmail.com
- */
 
-;JSCrx = (function(){
+var JSCrx = (function(workerCode){
 
-/* Requirements:
- * Worker
- * opt.: FileReader, Blob, (Webkit|Moz|)BlobBuilder
- */
 //lets not do anything just yet...
 var support = {
 	worker: !!window.Worker,
@@ -27,13 +18,20 @@ var support = {
 };
 var callbackStack = [];
 function callbackRun(callback,_this) {
-	if (!callbackStack[callback]) { return; }
-
-	callbackStack[callback].call(_this);
-
-	callbackStack[callback] = undefined;
+	if (callbackStack[callback]) {
+		callbackStack[callback].call(_this);
+		callbackStack[callback] = undefined;
+	}
 }
-
+function addCallback(callback) {
+	for (var i=0;i<=callbackStack.length;++i) { //index callbackStack.length will always be available
+		if (typeof callbackStack[i] == "undefined") {
+			callbackStack[i] = callback;
+			break;
+		}
+	}
+	return i;
+}
 
 function JSCrx() {
 	if (this === window) { return new JSCrx(); }
@@ -60,15 +58,12 @@ function JSCrx() {
 	//this.crx.hex = "";
 	//this.crx.base64 = "";
 
-	this.worker = new Worker("worker.js");
+	this.worker = new Worker(workerCode);
 	this.worker.onerror = function(e) { throw e; };
-	this.worker.postMessage({name:"Hello World!",libdir:JSCrx.libdir});
 
 	this.worker.onmessage=(function(_this){
 		return function(e) {
 		switch(e.data.name) {
-			case "World Hello!":
-				break;
 			case "generatePrivateKeySign":
 				// _this.publicKey.modulus = e.data.modulus;
 				// _this.publicKey.exponent = e.data.exponent;
@@ -90,11 +85,10 @@ function JSCrx() {
 		};
 	}(this));
 }
-JSCrx.libdir = (location.protocol.length-4?"https":"http") + "://jspackcrx.googlecode.com/svn/trunk/libs/";
+//JSCrx.libdir = (location.protocol.length-4?"https":"http") + "://jspackcrx.googlecode.com/svn/trunk/libs/";
 
 
 JSCrx.prototype.addZip = function(zipData,encoding) {
-	//var rawZip="";
 
 	switch(encoding) {
 		case "blob":
@@ -118,55 +112,77 @@ JSCrx.prototype.addZip = function(zipData,encoding) {
 			break;
 	}
 
-	//this.zip.string = rawZip;
 	return this;
 };
 JSCrx.prototype.generatePrivateKeySignature = function(options,callback) {
 	if (!this.zip.string) { throw new Error("Need zip file in order to sign"); }
 
-	callbackStack.push(callback);
+	var callbackIndex = addCallback(callback);
 	this.worker.postMessage({
 		name: "generatePrivateKeySign",
 		exponent: options.exponent || 65537,
 		zip: this.zip.string,
-		callback: callbackStack.length-1
+		callback: callbackIndex
 	});
 };
-/*
-JSCrx.prototype.generateSignature = function(options,callback) {
-	if (!this.privateKey.der) { throw new Error("Need private key in order to sign"); }
-	else if (!this.zip.string) { throw new Error("Need zip file in order to sign"); }
-
-	callbackStack.push(callback);
-	this.worker.postMessage({
-		name:"generateSignature",
-		privateKey:this.privateKey.der,
-		zip:this.zip.string,
-		callback:callbackStack.length-1
-	});
-}
-*/
 JSCrx.prototype.generateCrx = function(format,callback) {
 	if (!this.publicKey.der) { throw new Error("Need public key in order to package"); }
 	else if (!this.sign.der) { throw new Error("Need signature in order to package"); }
 	else if (!this.zip.string) { throw new Error("Need zip file in order to sign"); }
 
-	callbackStack.push(callback);
+	var callbackIndex = addCallback(callback);
 	this.worker.postMessage({
 		name:"generateCrx",
 		publicKey:this.publicKey.der,
 		signature:this.sign.der,
 		// zip:this.zip.string,
-		callback:callbackStack.length-1
+		callback:callbackIndex
 	});
 };
 JSCrx.prototype.terminate = function(){
-	try {
+	//try {
 		this.worker.terminate();
-		delete this.worker, this.zip, this.privateKey, this.publicKey, this.sign, this.crx;
-		this = null;
-	} catch(e) { } //swallowed! because it doesn't really matter
+	//	this = null;
+	//} catch(e) { } //swallowed! because it doesn't really matter
 }
 
 return JSCrx;
+
+})(function(){
+
+function worker() {
+/* INSERT libs/jsbn.mod.js */
+/* INSERT libs/jsbn2.mod.js */
+/* INSERT libs/rng.min.js */
+/* INSERT libs/rsa.mod.js */
+/* INSERT libs/rsa2.mod.js */
+/* INSERT libs/sha1.js */
+/* INSERT libs/rsa-sign.mod.js */
+
+/* INSERT worker.js */
+}
+return (function stringToObjectUrl(string) {
+
+	function createBlobBuilder() {
+		try { return new BlobBuilder(); } catch(e) {}
+		try { return new WebKitBlobBuilder(); } catch(e) {}
+		try { return new MozBlobBuilder(); } catch(e) {}
+		throw new Error("No BlobBuilder support");
+	}
+	
+	function makeObjectURL(f){
+		try { return window.URL.createObjectURL(f); } catch(e) {}
+		try { return window.webkitURL.createObjectURL(f); } catch(e) {}
+		try { return window.createObjectURL(f); } catch(e) {}
+		try { return window.createBlobURL(f); } catch(e) {}
+		throw new Error("No support for creating object URLs");
+	}
+
+	var bb = createBlobBuilder();
+	var array = new Uint8Array(string.split("").map(function(el) {
+		return el.charCodeAt(0);
+	}));
+	bb.append(array.buffer);
+	return makeObjectURL(bb.getBlob());
+})("(" + worker.toString() + "())");
 }());
