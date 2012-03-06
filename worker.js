@@ -67,8 +67,7 @@ function packageCRXStuffings(publicKey,signature) {
 	return output;
 }
 function hex2char(hex) { //me has to lol at this function
-	hex = hex.toLowerCase();
-	hex = hex.match(/[0-9a-f]{2}/igm);
+	hex = hex.toLowerCase().match(/[0-9a-f]{2}/igm);
 	hex = hex.map(function(el){
 		return String.fromCharCode(parseInt(el,16));
 	});
@@ -85,9 +84,9 @@ function hex_endian_swap(x) {
 	return output;
 }
 function char2hex(chars,lowercase) { // also purty :)
-	chars = chars.toString();
+	chars += "";
 
-	var hexstring = Array.prototype.map.call(chars,function(el){
+	var hexstring = chars.split("").map(function(el){
 		el = el.charCodeAt(0) & 0xff; //two digits please?
 		var hex = el.toString(16);
 		if (hex.length<2) { hex = "0"+hex; }
@@ -100,7 +99,7 @@ function char2hex(chars,lowercase) { // also purty :)
 	}
 }
 function hexZeroPad(hex,len) {
-	hex = hex.toString();
+	hex += ""; //implicit toString
 	while(hex.length < len) {
 		hex = "0" + hex;
 	}
@@ -113,9 +112,9 @@ function b64tohex(b64) {
 	return char2hex(window.atob(b64));
 }
 function b64toBA(string) {
-	return Array.prototype.map.call(window.atob(string),function(x){return x.charCodeAt(0)});
+	return window.atob(string).split("").map(function(x){return x.charCodeAt(0);});
 }
-/* BEGIN EXCLUDE IF INCLUDED */
+/**/ // will exclude in build
 if (!BigInteger || !RSAKey) { // :-/
 	importScripts.apply(null,[
 		"jsbn.mod",
@@ -127,6 +126,6 @@ if (!BigInteger || !RSAKey) { // :-/
 		"rsa-sign.mod"
 	].map(function(x){
 		return "libs/" + x + ".js";
-	});
+	}));
 }
-/* END EXCLUDE IF INCLUDED */
+/**/

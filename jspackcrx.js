@@ -7,6 +7,12 @@
  * See http://jspackcrx.googlecode.com/svn/LICENSE.html for details.
  */
 
+/* This script should probably be compiled by running build.js on
+ * top of Node (see nodejs.org). However, it will still run as long
+ * as you have worker.js and all of the libraries listed in INCLUDE
+ * comments. kthxbye
+ */
+
 
 var JSCrx = (function(workerCode){
 
@@ -25,7 +31,7 @@ function callbackRun(callback,_this) {
 }
 function addCallback(callback) {
 	for (var i=0;i<=callbackStack.length;++i) { //index callbackStack.length will always be available
-		if (typeof callbackStack[i] == "undefined") {
+		if (typeof callbackStack[i] === "undefined") {
 			callbackStack[i] = callback;
 			break;
 		}
@@ -85,7 +91,6 @@ function JSCrx() {
 		};
 	}(this));
 }
-//JSCrx.libdir = (location.protocol.length-4?"https":"http") + "://jspackcrx.googlecode.com/svn/trunk/libs/";
 
 
 JSCrx.prototype.addZip = function(zipData,encoding) {
@@ -97,16 +102,18 @@ JSCrx.prototype.addZip = function(zipData,encoding) {
 			reader.onload = function(e) {
 				this.zip.string = e.target.result;
 			};
-			reader.readAsBinaryString(); //???
+			reader.readAsBinaryString();
 			break;
 		case "typedarray":
 			var buffer = zipData.buffer || zipData;
-			this.zip.string = String.fromCharCode.call(window,new Uint8Array(zipData));
+			this.zip.string = String.fromCharCode.call(null,new Uint8Array(zipData));
 			break;
 		case "base64":
 			this.zip.string = window.btoa(zipData);
 			break;
 		case "string":
+			this.zip.string = zipData;
+			break;
 		default:
 			this.zip.string = zipData;
 			break;
@@ -144,7 +151,7 @@ JSCrx.prototype.terminate = function(){
 		this.worker.terminate();
 	//	this = null;
 	//} catch(e) { } //swallowed! because it doesn't really matter
-}
+};
 
 return JSCrx;
 
@@ -161,8 +168,7 @@ function worker() {
 
 /* INSERT worker.js */
 }
-return (function stringToObjectUrl(string) {
-
+function stringToObjectUrl(string) {
 	function createBlobBuilder() {
 		try { return new BlobBuilder(); } catch(e) {}
 		try { return new WebKitBlobBuilder(); } catch(e) {}
@@ -177,12 +183,16 @@ return (function stringToObjectUrl(string) {
 		try { return window.createBlobURL(f); } catch(e) {}
 		throw new Error("No support for creating object URLs");
 	}
-
+	
 	var bb = createBlobBuilder();
 	var array = new Uint8Array(string.split("").map(function(el) {
 		return el.charCodeAt(0);
 	}));
 	bb.append(array.buffer);
 	return makeObjectURL(bb.getBlob());
-})("(" + worker.toString() + "())");
+}
+var debug = false; /**/ debug = true; /**/ // will be removed by compiler
+
+if (debug) return "worker.js";
+else return stringToObjectUrl("(" + worker.toString() + "())");
 }());

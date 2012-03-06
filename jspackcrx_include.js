@@ -1,111 +1,1574 @@
-/* JSPackCrx packages Chrome extension files using JavaScript.
- * http://code.google.com/p/jspackcrx
- * Copyright (C) 2011-12 gengkev.
- * 
- * This software is licensed under the terms of the GPLv3.
- * It also contains code from other projects: see /docs/licence.txt
- * See http://jspackcrx.googlecode.com/svn/LICENSE.html for details.
- */
 
-/* BEGIN JSPACKCRX.JS */
-
-JSCrx=(function(f){function e(a,b){c[a]&&(c[a].call(b),c[a]=void 0)}function d(){if(this===window)return new d;this.zip={};this.zip.string="";this.privateKey={};this.privateKey.der="";this.publicKey={};this.publicKey.der="";this.sign={};this.sign.der="";this.crx={};this.worker=new Worker(f);this.worker.onerror=function(a){throw a;};this.worker.onmessage=function(a){return function(b){switch(b.data.name){case "generatePrivateKeySign":a.publicKey.der=b.data.publicKey;a.sign.der=b.data.sign;e(b.data.callback,
-a);break;case "generateCRX":a.crx.header=b.data.crxHeader,e(b.data.callback,a)}}}(this)}var c=[];d.prototype.addZip=function(a,b){switch(b){case "blob":case "file":var c=new FileReader;c.onload=function(a){this.zip.string=a.target.result};c.readAsBinaryString();break;case "typedarray":this.zip.string=String.fromCharCode.call(window,new Uint8Array(a));break;case "base64":this.zip.string=window.btoa(a);break;default:this.zip.string=a}return this};d.prototype.generatePrivateKeySignature=function(a,b){if(!this.zip.string)throw Error("Need zip file in order to sign");
-c.push(b);this.worker.postMessage({name:"generatePrivateKeySign",exponent:a.exponent||65537,zip:this.zip.string,callback:c.length-1})};d.prototype.generateCrx=function(a,b){if(this.publicKey.der)if(this.sign.der){if(!this.zip.string)throw Error("Need zip file in order to sign");}else throw Error("Need signature in order to package");else throw Error("Need public key in order to package");c.push(b);this.worker.postMessage({name:"generateCrx",publicKey:this.publicKey.der,signature:this.sign.der,callback:c.length-
-1})};d.prototype.terminate=function(){this.worker.terminate()};return d})
-(function(){
-
-function worker() {
-/* BEGIN ALL_LIBS.JS CODE */
-
-function BigInteger(a,b,c){null!=a&&("number"==typeof a?this.fromNumber(a,b,c):null==b&&"string"!=typeof a?this.fromString(a,256):this.fromString(a,b))}
-(function(a){"Microsoft Internet Explorer"==a?(BigInteger.prototype.am=function(a,c,d,f,e,h){for(var g=c&32767,c=c>>15;0<=--h;){var i=this[a]&32767,l=this[a++]>>15,k=c*i+l*g,i=g*i+((k&32767)<<15)+d[f]+(e&1073741823),e=(i>>>30)+(k>>>15)+c*l+(e>>>30);d[f++]=i&1073741823}return e},BigInteger.prototype.DB=30):"Netscape"!=a?BigInteger.prototype.DB=26:(BigInteger.prototype.am=function(a,c,d,f,e,h){for(var g=c&16383,c=c>>14;0<=--h;){var i=this[a]&16383,l=this[a++]>>14,k=c*i+l*g,i=g*i+((k&16383)<<14)+d[f]+
-e,e=(i>>28)+(k>>14)+c*l;d[f++]=i&268435455}return e},BigInteger.prototype.DB=28)})(navigator.appName);BigInteger.prototype.DV=1<<BigInteger.prototype.DB;BigInteger.prototype.DM=BigInteger.prototype.DV-1;BigInteger.prototype.FV=Math.pow(2,52);BigInteger.prototype.F1=52-BigInteger.prototype.DB;BigInteger.prototype.F2=104-BigInteger.prototype.DB-52;
-var intAt=function(){var a=[],b,c;b=48;for(c=0;9>=c;++c)a[b++]=c;b=97;for(c=10;36>c;++c)a[b++]=c;b=65;for(c=10;36>c;++c)a[b++]=c;return function(b,c){var e=a[b.charCodeAt(c)];return null==e?-1:e}}();BigInteger.prototype.copyTo=function(a){for(var b=this.t-1;0<=b;--b)a[b]=this[b];a.t=this.t;a.s=this.s};BigInteger.prototype.fromInt=function(a){this.t=1;this.s=0>a?-1:0;0<a?this[0]=a:-1>a?this[0]=a+DV:this.t=0;return this};
-BigInteger.prototype.fromString=function(a,b){var c;if(16==b)c=4;else if(8==b)c=3;else if(256==b)c=8;else if(2==b)c=1;else if(32==b)c=5;else if(4==b)c=2;else{this.fromRadix(a,b);return}this.s=this.t=0;for(var d=a.length,f=!1,e=0;0<=--d;){var h=8==c?a[d]&255:intAt(a,d);0>h?"-"==a.charAt(d)&&(f=!0):(f=!1,0==e?this[this.t++]=h:e+c>this.DB?(this[this.t-1]|=(h&(1<<this.DB-e)-1)<<e,this[this.t++]=h>>this.DB-e):this[this.t-1]|=h<<e,e+=c,e>=this.DB&&(e-=this.DB))}8==c&&0!=(a[0]&128)&&(this.s=-1,0<e&&(this[this.t-
-1]|=(1<<this.DB-e)-1<<e));this.clamp();f&&BigInteger.ZERO.subTo(this,this)};BigInteger.prototype.clamp=function(){for(var a=this.s&this.DM;0<this.t&&this[this.t-1]==a;)--this.t};
-BigInteger.prototype.toString=function(a){if(0>this.s)return"-"+this.negate().toString(a);if(16==a)a=4;else if(8==a)a=3;else if(2==a)a=1;else if(32==a)a=5;else if(4==a)a=2;else return this.toRadix(a);var b=(1<<a)-1,c,d=!1,f="",e=this.t,h=this.DB-e*this.DB%a;if(0<e--){h<this.DB&&0<this[e]>>h&&(d=!0,f="0123456789abcdefghijklmnopqrstuvwxyz".charAt(n));for(;0<=e;)h<a?(c=(this[e]&(1<<h)-1)<<a-h,c|=this[--e]>>(h+=this.DB-a)):(c=this[e]>>(h-=a)&b,0>=h&&(h+=this.DB,--e)),0<c&&(d=!0),d&&(f+="0123456789abcdefghijklmnopqrstuvwxyz".charAt(c))}return d?
-f:"0"};BigInteger.prototype.negate=function(){var a=new BigInteger(null);BigInteger.ZERO.subTo(this,a);return a};BigInteger.prototype.abs=function(){return 0>this.s?this.negate():this};BigInteger.prototype.compareTo=function(a){var b=this.s-a.s;if(0!=b)return b;var c=this.t,b=c-a.t;if(0!=b)return b;for(;0<=--c;)if(0!=(b=this[c]-a[c]))return b;return 0};
-function nbits(a){var b=1,c;if(0!=(c=a>>>16))a=c,b+=16;if(0!=(c=a>>8))a=c,b+=8;if(0!=(c=a>>4))a=c,b+=4;if(0!=(c=a>>2))a=c,b+=2;0!=a>>1&&(b+=1);return b}BigInteger.prototype.bitLength=function(){return 0>=this.t?0:this.DB*(this.t-1)+nbits(this[this.t-1]^this.s&this.DM)};BigInteger.prototype.dlShiftTo=function(a,b){var c;for(c=this.t-1;0<=c;--c)b[c+a]=this[c];for(c=a-1;0<=c;--c)b[c]=0;b.t=this.t+a;b.s=this.s};
-BigInteger.prototype.drShiftTo=function(a,b){for(var c=a;c<this.t;++c)b[c-a]=this[c];b.t=Math.max(this.t-a,0);b.s=this.s};BigInteger.prototype.lShiftTo=function(a,b){var c=a%this.DB,d=this.DB-c,f=(1<<d)-1,e=Math.floor(a/this.DB),h=this.s<<c&this.DM,g;for(g=this.t-1;0<=g;--g)b[g+e+1]=this[g]>>d|h,h=(this[g]&f)<<c;for(g=e-1;0<=g;--g)b[g]=0;b[e]=h;b.t=this.t+e+1;b.s=this.s;b.clamp()};
-BigInteger.prototype.rShiftTo=function(a,b){b.s=this.s;var c=Math.floor(a/this.DB);if(c>=this.t)b.t=0;else{var d=a%this.DB,f=this.DB-d,e=(1<<d)-1;b[0]=this[c]>>d;for(var h=c+1;h<this.t;++h)b[h-c-1]|=(this[h]&e)<<f,b[h-c]=this[h]>>d;0<d&&(b[this.t-c-1]|=(this.s&e)<<f);b.t=this.t-c;b.clamp()}};
-BigInteger.prototype.subTo=function(a,b){for(var c=0,d=0,f=Math.min(a.t,this.t);c<f;)d+=this[c]-a[c],b[c++]=d&this.DM,d>>=this.DB;if(a.t<this.t){for(d-=a.s;c<this.t;)d+=this[c],b[c++]=d&this.DM,d>>=this.DB;d+=this.s}else{for(d+=this.s;c<a.t;)d-=a[c],b[c++]=d&this.DM,d>>=this.DB;d-=a.s}b.s=0>d?-1:0;-1>d?b[c++]=this.DV+d:0<d&&(b[c++]=d);b.t=c;b.clamp()};
-BigInteger.prototype.multiplyTo=function(a,b){var c=this.abs(),d=a.abs(),f=c.t;for(b.t=f+d.t;0<=--f;)b[f]=0;for(f=0;f<d.t;++f)b[f+c.t]=c.am(0,d[f],b,f,0,c.t);b.s=0;b.clamp();this.s!=a.s&&BigInteger.ZERO.subTo(b,b)};BigInteger.prototype.squareTo=function(a){for(var b=this.abs(),c=a.t=2*b.t;0<=--c;)a[c]=0;for(c=0;c<b.t-1;++c){var d=b.am(c,b[c],a,2*c,0,1);if((a[c+b.t]+=b.am(c+1,2*b[c],a,2*c+1,d,b.t-c-1))>=b.DV)a[c+b.t]-=b.DV,a[c+b.t+1]=1}0<a.t&&(a[a.t-1]+=b.am(c,b[c],a,2*c,0,1));a.s=0;a.clamp()};
-BigInteger.prototype.divRemTo=function(a,b,c){var d=a.abs();if(!(0>=d.t)){var f=this.abs();if(f.t<d.t)null!=b&&b.fromInt(0),null!=c&&this.copyTo(c);else{null==c&&(c=new BigInteger(null));var e=new BigInteger(null),h=this.s,a=a.s,g=this.DB-nbits(d[d.t-1]);0<g?(d.lShiftTo(g,e),f.lShiftTo(g,c)):(d.copyTo(e),f.copyTo(c));d=e.t;f=e[d-1];if(0!=f){var i=f*(1<<this.F1)+(1<d?e[d-2]>>this.F2:0),l=this.FV/i,i=(1<<this.F1)/i,k=1<<this.F2,o=c.t,j=o-d,m=null==b?new BigInteger(null):b;e.dlShiftTo(j,m);0<=c.compareTo(m)&&
-(c[c.t++]=1,c.subTo(m,c));BigInteger.ONE.dlShiftTo(d,m);for(m.subTo(e,e);e.t<d;)e[e.t++]=0;for(;0<=--j;){var p=c[--o]==f?this.DM:Math.floor(c[o]*l+(c[o-1]+k)*i);if((c[o]+=e.am(0,p,c,j,0,d))<p){e.dlShiftTo(j,m);for(c.subTo(m,c);c[o]<--p;)c.subTo(m,c)}}null!=b&&(c.drShiftTo(d,b),h!=a&&BigInteger.ZERO.subTo(b,b));c.t=d;c.clamp();0<g&&c.rShiftTo(g,c);0>h&&BigInteger.ZERO.subTo(c,c)}}}};
-BigInteger.prototype.mod=function(a){var b=new BigInteger(null);this.abs().divRemTo(a,null,b);0>this.s&&0<b.compareTo(BigInteger.ZERO)&&a.subTo(b,b);return b};function Classic(a){this.m=a}Classic.prototype.convert=function(a){return 0>a.s||0<=a.compareTo(this.m)?a.mod(this.m):a};Classic.prototype.revert=function(a){return a};Classic.prototype.reduce=function(a){a.divRemTo(this.m,null,a)};Classic.prototype.mulTo=function(a,b,c){a.multiplyTo(b,c);this.reduce(c)};
-Classic.prototype.sqrTo=function(a,b){a.squareTo(b);this.reduce(b)};BigInteger.prototype.invDigit=function(){if(1>this.t)return 0;var a=this[0];if(0==(a&1))return 0;var b=a&3,b=b*(2-(a&15)*b)&15,b=b*(2-(a&255)*b)&255,b=b*(2-((a&65535)*b&65535))&65535,b=b*(2-a*b%this.DV)%this.DV;return 0<b?this.DV-b:-b};function Montgomery(a){this.m=a;this.mp=a.invDigit();this.mpl=this.mp&32767;this.mph=this.mp>>15;this.um=(1<<a.DB-15)-1;this.mt2=2*a.t}
-Montgomery.prototype.convert=function(a){var b=new BigInteger(null);a.abs().dlShiftTo(this.m.t,b);b.divRemTo(this.m,null,b);0>a.s&&0<b.compareTo(BigInteger.ZERO)&&this.m.subTo(b,b);return b};Montgomery.prototype.revert=function(a){var b=new BigInteger(null);a.copyTo(b);this.reduce(b);return b};
-Montgomery.prototype.reduce=function(a){for(;a.t<=this.mt2;)a[a.t++]=0;for(var b=0;b<this.m.t;++b){var c=a[b]&32767,d=c*this.mpl+((c*this.mph+(a[b]>>15)*this.mpl&this.um)<<15)&a.DM,c=b+this.m.t;for(a[c]+=this.m.am(0,d,a,b,0,this.m.t);a[c]>=a.DV;)a[c]-=a.DV,a[++c]++}a.clamp();a.drShiftTo(this.m.t,a);0<=a.compareTo(this.m)&&a.subTo(this.m,a)};Montgomery.prototype.sqrTo=function(a,b){a.squareTo(b);this.reduce(b)};Montgomery.prototype.mulTo=function(a,b,c){a.multiplyTo(b,c);this.reduce(c)};
-BigInteger.prototype.isEven=function(){return 0==(0<this.t?this[0]&1:this.s)};BigInteger.prototype.exp=function(a,b){if(4294967295<a||1>a)return BigInteger.ONE;var c=new BigInteger(null),d=new BigInteger(null),f=b.convert(this),e=nbits(a)-1;for(f.copyTo(c);0<=--e;)if(b.sqrTo(c,d),0<(a&1<<e))b.mulTo(d,f,c);else var h=c,c=d,d=h;return b.revert(c)};BigInteger.prototype.modPowInt=function(a,b){var c;c=256>a||b.isEven()?new Classic(b):new Montgomery(b);return this.exp(a,c)};BigInteger.ZERO=(new BigInteger(null)).fromInt(0);
-BigInteger.ONE=(new BigInteger(null)).fromInt(1);BigInteger.prototype.clone=function(){var a=new BigInteger(null);this.copyTo(a);return a};BigInteger.prototype.intValue=function(){if(0>this.s){if(1==this.t)return this[0]-this.DV;if(0==this.t)return-1}else{if(1==this.t)return this[0];if(0==this.t)return 0}return(this[1]&(1<<32-this.DB)-1)<<this.DB|this[0]};BigInteger.prototype.byteValue=function(){return 0==this.t?this.s:this[0]<<24>>24};
-BigInteger.prototype.shortValue=function(){return 0==this.t?this.s:this[0]<<16>>16};BigInteger.prototype.chunkSize=function(a){return Math.floor(Math.LN2*this.DB/Math.log(a))};BigInteger.prototype.signum=function(){return 0>this.s?-1:0>=this.t||1==this.t&&0>=this[0]?0:1};
-BigInteger.prototype.toRadix=function(a){null==a&&(a=10);if(0==this.signum()||2>a||36<a)return"0";var b=this.chunkSize(a),b=Math.pow(a,b),c=(new BigInteger(null)).fromInt(b),d=new BigInteger(null),f=new BigInteger(null),e="";for(this.divRemTo(c,d,f);0<d.signum();)e=(b+f.intValue()).toString(a).substr(1)+e,d.divRemTo(c,d,f);return f.intValue().toString(a)+e};
-BigInteger.prototype.fromRadix=function(a,b){this.fromInt(0);null==b&&(b=10);for(var c=this.chunkSize(b),d=Math.pow(b,c),f=!1,e=0,h=0,g=0;g<a.length;++g){var i=intAt(a,g);0>i?"-"==a.charAt(g)&&0==this.signum()&&(f=!0):(h=b*h+i,++e>=c&&(this.dMultiply(d),this.dAddOffset(h,0),h=e=0))}0<e&&(this.dMultiply(Math.pow(b,e)),this.dAddOffset(h,0));f&&BigInteger.ZERO.subTo(this,this)};
-BigInteger.prototype.fromNumber=function(a,b,c){if("number"==typeof b)if(2>a)this.fromInt(1);else{this.fromNumber(a,c);this.testBit(a-1)||this.bitwiseTo(BigInteger.ONE.shiftLeft(a-1),function(a,b){return a|b},this);for(this.isEven()&&this.dAddOffset(1,0);!this.isProbablePrime(b);)this.dAddOffset(2,0),this.bitLength()>a&&this.subTo(BigInteger.ONE.shiftLeft(a-1),this)}else{var c=[],d=a&7;c.length=(a>>3)+1;b.nextBytes(c);c[0]=0<d?c[0]&(1<<d)-1:0;this.fromString(c,256)}};
-BigInteger.prototype.toByteArray=function(){var a=this.t,b=[];b[0]=this.s;var c=this.DB-a*this.DB%8,d,f=0;if(0<a--){if(c<this.DB&&(d=this[a]>>c)!=(this.s&this.DM)>>c)b[f++]=d|this.s<<this.DB-c;for(;0<=a;)if(8>c?(d=(this[a]&(1<<c)-1)<<8-c,d|=this[--a]>>(c+=this.DB-8)):(d=this[a]>>(c-=8)&255,0>=c&&(c+=this.DB,--a)),0!=(d&128)&&(d|=-256),0==f&&(this.s&128)!=(d&128)&&++f,0<f||d!=this.s)b[f++]=d}return b};BigInteger.prototype.equals=function(a){return 0==this.compareTo(a)};
-BigInteger.prototype.min=function(a){return 0>this.compareTo(a)?this:a};BigInteger.prototype.max=function(a){return 0<this.compareTo(a)?this:a};BigInteger.prototype.bitwiseTo=function(a,b,c){var d,f,e=Math.min(a.t,this.t);for(d=0;d<e;++d)c[d]=b(this[d],a[d]);if(a.t<this.t){f=a.s&this.DM;for(d=e;d<this.t;++d)c[d]=b(this[d],f);c.t=this.t}else{f=this.s&this.DM;for(d=e;d<a.t;++d)c[d]=b(f,a[d]);c.t=a.t}c.s=b(this.s,a.s);c.clamp()};
-BigInteger.prototype.and=function(a){var b=new BigInteger(null);this.bitwiseTo(a,function(a,b){return a&b},b);return b};BigInteger.prototype.or=function(a){var b=new BigInteger(null);this.bitwiseTo(a,function(a,b){return a|b},b);return b};BigInteger.prototype.xor=function(a){var b=new BigInteger(null);this.bitwiseTo(a,function(a,b){return a^b},b);return b};BigInteger.prototype.andNot=function(a){var b=new BigInteger(null);this.bitwiseTo(a,function(a,b){return a&~b},b);return b};
-BigInteger.prototype.not=function(){for(var a=new BigInteger(null),b=0;b<this.t;++b)a[b]=this.DM&~this[b];a.t=this.t;a.s=~this.s;return a};BigInteger.prototype.shiftLeft=function(a){var b=new BigInteger(null);0>a?this.rShiftTo(-a,b):this.lShiftTo(a,b);return b};BigInteger.prototype.shiftRight=function(a){var b=new BigInteger(null);0>a?this.lShiftTo(-a,b):this.rShiftTo(a,b);return b};
-BigInteger.prototype.getLowestSetBit=function(a){return function(){for(var b=0;b<this.t;++b)if(0!=this[b])return b*this.DB+a(this[b]);return 0>this.s?this.t*this.DB:-1}}(function(a){if(0==a)return-1;var b=0;0==(a&65535)&&(a>>=16,b+=16);0==(a&255)&&(a>>=8,b+=8);0==(a&15)&&(a>>=4,b+=4);0==(a&3)&&(a>>=2,b+=2);0==(a&1)&&++b;return b});
-BigInteger.prototype.bitCount=function(a){return function(){for(var b=0,c=this.s&this.DM,d=0;d<this.t;++d)b+=a(this[d]^c);return b}}(function(a){for(var b=0;0!=a;)a&=a-1,++b;return b});BigInteger.prototype.testBit=function(a){var b=Math.floor(a/this.DB);return b>=this.t?0!=this.s:0!=(this[b]&1<<a%this.DB)};BigInteger.prototype.changeBit=function(a,b){var c=BigInteger.ONE.shiftLeft(a);this.bitwiseTo(c,b,c);return c};
-BigInteger.prototype.setBit=function(a){return this.changeBit(a,function(a,c){return a|c})};BigInteger.prototype.clearBit=function(a){return this.changeBit(a,function(a,c){return a&~c})};BigInteger.prototype.flipBit=function(a){return this.changeBit(a,function(a,c){return a^c})};
-BigInteger.prototype.addTo=function(a,b){for(var c=0,d=0,f=Math.min(a.t,this.t);c<f;)d+=this[c]+a[c],b[c++]=d&this.DM,d>>=this.DB;if(a.t<this.t){for(d+=a.s;c<this.t;)d+=this[c],b[c++]=d&this.DM,d>>=this.DB;d+=this.s}else{for(d+=this.s;c<a.t;)d+=a[c],b[c++]=d&this.DM,d>>=this.DB;d+=a.s}b.s=0>d?-1:0;0<d?b[c++]=d:-1>d&&(b[c++]=this.DV+d);b.t=c;b.clamp()};BigInteger.prototype.add=function(a){var b=new BigInteger(null);this.addTo(a,b);return b};
-BigInteger.prototype.subtract=function(a){var b=new BigInteger(null);this.subTo(a,b);return b};BigInteger.prototype.multiply=function(a){var b=new BigInteger(null);this.multiplyTo(a,b);return b};BigInteger.prototype.square=function(){var a=new BigInteger(null);this.squareTo(a);return a};BigInteger.prototype.divide=function(a){var b=new BigInteger(null);this.divRemTo(a,b,null);return b};BigInteger.prototype.remainder=function(a){var b=new BigInteger(null);this.divRemTo(a,null,b);return b};
-BigInteger.prototype.divideAndRemainder=function(a){var b=new BigInteger(null),c=new BigInteger(null);this.divRemTo(a,b,c);return[b,c]};BigInteger.prototype.dMultiply=function(a){this[this.t]=this.am(0,a-1,this,0,0,this.t);++this.t;this.clamp()};BigInteger.prototype.dAddOffset=function(a,b){if(0!=a){for(;this.t<=b;)this[this.t++]=0;for(this[b]+=a;this[b]>=this.DV;)this[b]-=this.DV,++b>=this.t&&(this[this.t++]=0),++this[b]}};function NullExp(){}NullExp.prototype.convert=function(a){return a};
-NullExp.prototype.revert=function(a){return a};NullExp.prototype.mulTo=function(a,b,c){a.multiplyTo(b,c)};NullExp.prototype.sqrTo=function(a,b){a.squareTo(b)};BigInteger.prototype.pow=function(a){return this.exp(a,new NullExp)};BigInteger.prototype.multiplyLowerTo=function(a,b,c){var d=Math.min(this.t+a.t,b);c.s=0;for(c.t=d;0<d;)c[--d]=0;var f;for(f=c.t-this.t;d<f;++d)c[d+this.t]=this.am(0,a[d],c,d,0,this.t);for(f=Math.min(a.t,b);d<f;++d)this.am(0,a[d],c,d,0,b-d);c.clamp()};
-BigInteger.prototype.multiplyUpperTo=function(a,b,c){--b;var d=c.t=this.t+a.t-b;for(c.s=0;0<=--d;)c[d]=0;for(d=Math.max(b-this.t,0);d<a.t;++d)c[this.t+d-b]=this.am(b-d,a[d],c,0,0,this.t+d-b);c.clamp();c.drShiftTo(1,c)};function Barrett(a){this.r2=new BigInteger(null);this.q3=new BigInteger(null);BigInteger.ONE.dlShiftTo(2*a.t,this.r2);this.mu=this.r2.divide(a);this.m=a}
-Barrett.prototype.convert=function(a){if(0>a.s||a.t>2*this.m.t)return a.mod(this.m);if(0>a.compareTo(this.m))return a;var b=new BigInteger(null);a.copyTo(b);this.reduce(b);return b};Barrett.prototype.revert=function(a){return a};
-Barrett.prototype.reduce=function(a){a.drShiftTo(this.m.t-1,this.r2);a.t>this.m.t+1&&(a.t=this.m.t+1,a.clamp());this.mu.multiplyUpperTo(this.r2,this.m.t+1,this.q3);for(this.m.multiplyLowerTo(this.q3,this.m.t+1,this.r2);0>a.compareTo(this.r2);)a.dAddOffset(1,this.m.t+1);for(a.subTo(this.r2,a);0<=a.compareTo(this.m);)a.subTo(this.m,a)};Barrett.prototype.sqrTo=function(a,b){a.squareTo(b);this.reduce(b)};Barrett.prototype.mulTo=function(a,b,c){a.multiplyTo(b,c);this.reduce(c)};
-BigInteger.prototype.modPow=function(a,b){var c=a.bitLength(),d,f=(new BigInteger(null)).fromInt(1),e;if(0>=c)return f;d=18>c?1:48>c?3:144>c?4:768>c?5:6;e=8>c?new Classic(b):b.isEven()?new Barrett(b):new Montgomery(b);var h=[],g=3,i=d-1,l=(1<<d)-1;h[1]=e.convert(this);if(1<d){c=new BigInteger(null);for(e.sqrTo(h[1],c);g<=l;)h[g]=new BigInteger(null),e.mulTo(c,h[g-2],h[g]),g+=2}for(var k=a.t-1,o,j=!0,m=new BigInteger(null),c=nbits(a[k])-1;0<=k;){c>=i?o=a[k]>>c-i&l:(o=(a[k]&(1<<c+1)-1)<<i-c,0<k&&(o|=
-a[k-1]>>this.DB+c-i));for(g=d;0==(o&1);)o>>=1,--g;if(0>(c-=g))c+=this.DB,--k;if(j)h[o].copyTo(f),j=!1;else{for(;1<g;)e.sqrTo(f,m),e.sqrTo(m,f),g-=2;0<g?e.sqrTo(f,m):(g=f,f=m,m=g);e.mulTo(m,h[o],f)}for(;0<=k&&0==(a[k]&1<<c);)e.sqrTo(f,m),g=f,f=m,m=g,0>--c&&(c=this.DB-1,--k)}return e.revert(f)};
-BigInteger.prototype.gcd=function(a){var b=0>this.s?this.negate():this.clone(),a=0>a.s?a.negate():a.clone();if(0>b.compareTo(a))var c=b,b=a,a=c;var c=b.getLowestSetBit(),d=a.getLowestSetBit();if(0>d)return b;c<d&&(d=c);0<d&&(b.rShiftTo(d,b),a.rShiftTo(d,a));for(;0<b.signum();)0<(c=b.getLowestSetBit())&&b.rShiftTo(c,b),0<(c=a.getLowestSetBit())&&a.rShiftTo(c,a),0<=b.compareTo(a)?(b.subTo(a,b),b.rShiftTo(1,b)):(a.subTo(b,a),a.rShiftTo(1,a));0<d&&a.lShiftTo(d,a);return a};
-BigInteger.prototype.modInt=function(a){if(0>=a)return 0;var b=this.DV%a,c=0>this.s?a-1:0;if(0<this.t)if(0==b)c=this[0]%a;else for(var d=this.t-1;0<=d;--d)c=(b*c+this[d])%a;return c};
-BigInteger.prototype.modInverse=function(a){var b=a.isEven();if(this.isEven()&&b||0==a.signum())return BigInteger.ZERO;for(var c=a.clone(),d=this.clone(),f=(new BigInteger(null)).fromInt(1),e=(new BigInteger(null)).fromInt(0),h=(new BigInteger(null)).fromInt(0),g=(new BigInteger(null)).fromInt(1);0!=c.signum();){for(;c.isEven();){c.rShiftTo(1,c);if(b){if(!f.isEven()||!e.isEven())f.addTo(this,f),e.subTo(a,e);f.rShiftTo(1,f)}else e.isEven()||e.subTo(a,e);e.rShiftTo(1,e)}for(;d.isEven();){d.rShiftTo(1,
-d);if(b){if(!h.isEven()||!g.isEven())h.addTo(this,h),g.subTo(a,g);h.rShiftTo(1,h)}else g.isEven()||g.subTo(a,g);g.rShiftTo(1,g)}0<=c.compareTo(d)?(c.subTo(d,c),b&&f.subTo(h,f),e.subTo(g,e)):(d.subTo(c,d),b&&h.subTo(f,h),g.subTo(e,g))}if(0!=d.compareTo(BigInteger.ONE))return BigInteger.ZERO;if(0<=g.compareTo(a))return g.subtract(a);if(0>g.signum())g.addTo(a,g);else return g;return 0>g.signum()?g.add(a):g};
-(function(){var a=[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103,107,109,113,127,131,137,139,149,151,157,163,167,173,179,181,191,193,197,199,211,223,227,229,233,239,241,251,257,263,269,271,277,281,283,293,307,311,313,317,331,337,347,349,353,359,367,373,379,383,389,397,401,409,419,421,431,433,439,443,449,457,461,463,467,479,487,491,499,503,509,521,523,541,547,557,563,569,571,577,587,593,599,601,607,613,617,619,631,641,643,647,653,659,661,673,677,683,691,701,709,719,
-727,733,739,743,751,757,761,769,773,787,797,809,811,821,823,827,829,839,853,857,859,863,877,881,883,887,907,911,919,929,937,941,947,953,967,971,977,983,991,997],b=67108864/a[a.length-1];BigInteger.prototype.isProbablePrime=function(c){var d,f=this.abs();if(1==f.t&&f[0]<=a[a.length-1]){for(d=0;d<a.length;++d)if(f[0]==a[d])return!0;return!1}if(f.isEven())return!1;for(d=1;d<a.length;){for(var e=a[d],h=d+1;h<a.length&&e<b;)e*=a[h++];for(e=f.modInt(e);d<h;)if(0==e%a[d++])return!1}return f.millerRabin(c)};
-BigInteger.prototype.millerRabin=function(b){var d=this.subtract(BigInteger.ONE),f=d.getLowestSetBit();if(0>=f)return!1;var e=d.shiftRight(f),b=b+1>>1;b>a.length&&(b=a.length);for(var h=new BigInteger(null),g=0;g<b;++g){h.fromInt(a[Math.floor(Math.random()*a.length)]);var i=h.modPow(e,this);if(0!=i.compareTo(BigInteger.ONE)&&0!=i.compareTo(d)){for(var l=1;l++<f&&0!=i.compareTo(d);)if(i=i.modPowInt(2,this),0==i.compareTo(BigInteger.ONE))return!1;if(0!=i.compareTo(d))return!1}}return!0}})();
-var rng_state,rng_pool,rng_pptr;function rng_seed_int(a){rng_pool[rng_pptr++]^=a&255;rng_pool[rng_pptr++]^=a>>8&255;rng_pool[rng_pptr++]^=a>>16&255;rng_pool[rng_pptr++]^=a>>24&255;rng_pptr>=rng_psize&&(rng_pptr-=rng_psize)}function rng_seed_time(){rng_seed_int((new Date).getTime())}
-if(null==rng_pool){rng_pool=[];rng_pptr=0;var t;if("Netscape"==navigator.appName&&"5">navigator.appVersion&&window.crypto){var z=window.crypto.random(32);for(t=0;t<z.length;++t)rng_pool[rng_pptr++]=z.charCodeAt(t)&255}for(;rng_pptr<rng_psize;)t=Math.floor(65536*Math.random()),rng_pool[rng_pptr++]=t>>>8,rng_pool[rng_pptr++]=t&255;rng_pptr=0;rng_seed_time()}
-function rng_get_byte(){if(null==rng_state){rng_seed_time();rng_state=prng_newstate();rng_state.init(rng_pool);for(rng_pptr=0;rng_pptr<rng_pool.length;++rng_pptr)rng_pool[rng_pptr]=0;rng_pptr=0}return rng_state.next()}function rng_get_bytes(a){var b;for(b=0;b<a.length;++b)a[b]=rng_get_byte()}function SecureRandom(){}SecureRandom.prototype.nextBytes=rng_get_bytes;function Arcfour(){this.j=this.i=0;this.S=[]}
-function ARC4init(a){var b,c,d;for(b=0;256>b;++b)this.S[b]=b;for(b=c=0;256>b;++b)c=c+this.S[b]+a[b%a.length]&255,d=this.S[b],this.S[b]=this.S[c],this.S[c]=d;this.j=this.i=0}function ARC4next(){var a;this.i=this.i+1&255;this.j=this.j+this.S[this.i]&255;a=this.S[this.i];this.S[this.i]=this.S[this.j];this.S[this.j]=a;return this.S[a+this.S[this.i]&255]}Arcfour.prototype.init=ARC4init;Arcfour.prototype.next=ARC4next;function prng_newstate(){return new Arcfour}var rng_psize=256;
-function pkcs1pad2(a,b){if(b<a.length+11)throw Error("Message too long for RSA");for(var c=[],d=a.length-1;0<=d&&0<b;){var f=a.charCodeAt(d--);128>f?c[--b]=f:127<f&&2048>f?(c[--b]=f&63|128,c[--b]=f>>6|192):(c[--b]=f&63|128,c[--b]=f>>6&63|128,c[--b]=f>>12|224)}c[--b]=0;d=new SecureRandom;for(f=[];2<b;){for(f[0]=0;0==f[0];)d.nextBytes(f);c[--b]=f[0]}c[--b]=2;c[--b]=0;return new BigInteger(c)}function RSAKey(){this.n=null;this.e=0;this.coeff=this.dmq1=this.dmp1=this.q=this.p=this.d=null}
-RSAKey.prototype.setPublic=function(a,b){if(null!=a&&null!=b&&0<a.length&&0<b.length)this.n=new BigInteger(a,16),this.e=parseInt(b,16);else throw Error("Invalid RSA public key");};RSAKey.prototype.doPublic=function(a){return a.modPowInt(this.e,this.n)};RSAKey.prototype.encrypt=function(a){a=pkcs1pad2(a,this.n.bitLength()+7>>3);if(null==a)return null;a=this.doPublic(a);if(null==a)return null;a=a.toString(16);return 0==(a.length&1)?a:"0"+a};
-function pkcs1unpad2(a,b){for(var c=a.toByteArray(),d=0;d<c.length&&0==c[d];)++d;if(c.length-d!=b-1||2!=c[d])return null;for(++d;0!=c[d];)if(++d>=c.length)return null;for(var f="";++d<c.length;){var e=c[d]&255;128>e?f+=String.fromCharCode(e):191<e&&224>e?(f+=String.fromCharCode((e&31)<<6|c[d+1]&63),++d):(f+=String.fromCharCode((e&15)<<12|(c[d+1]&63)<<6|c[d+2]&63),d+=2)}return f}
-RSAKey.prototype.setPrivate=function(a,b,c){if(null!=a&&null!=b&&0<a.length&&0<b.length)this.n=new BigInteger(a,16),this.e=parseInt(b,16),this.d=new BigInteger(c,16);else throw Error("Invalid RSA private key");};
-RSAKey.prototype.setPrivateEx=function(a,b,c,d,f,e,h,g){if(null!=a&&null!=b&&0<a.length&&0<b.length)this.n=new BigInteger(a,16),this.e=parseInt(b,16),this.d=new BigInteger(c,16),this.p=new BigInteger(d,16),this.q=new BigInteger(f,16),this.dmp1=new BigInteger(e,16),this.dmq1=new BigInteger(h,16),this.coeff=new BigInteger(g,16);else throw Error("Invalid RSA private key");};
-RSAKey.prototype.generate=function(a,b){var c=new SecureRandom,d=a>>1;this.e=parseInt(b,16);for(var f=new BigInteger(b,16);;){for(;!(this.p=new BigInteger(a-d,1,c),0==this.p.subtract(BigInteger.ONE).gcd(f).compareTo(BigInteger.ONE)&&this.p.isProbablePrime(10)););for(;!(this.q=new BigInteger(d,1,c),0==this.q.subtract(BigInteger.ONE).gcd(f).compareTo(BigInteger.ONE)&&this.q.isProbablePrime(10)););if(0>=this.p.compareTo(this.q)){var e=this.p;this.p=this.q;this.q=e}var e=this.p.subtract(BigInteger.ONE),
-h=this.q.subtract(BigInteger.ONE),g=e.multiply(h);if(0==g.gcd(f).compareTo(BigInteger.ONE)){this.n=this.p.multiply(this.q);this.d=f.modInverse(g);this.dmp1=this.d.mod(e);this.dmq1=this.d.mod(h);this.coeff=this.q.modInverse(this.p);break}}};RSAKey.prototype.doPrivate=function(a){return a.modPow(this.d,this.n)};RSAKey.prototype.decrypt=function(a){a=this.doPrivate(new BigInteger(a,16));return null==a?null:pkcs1unpad2(a,this.n.bitLength()+7>>3)};
-SHA1=function(a){for(var a=a+"\u0080",b=Math,c=[1518500249,1859775393,2400959708,3395469782,1732584193,4023233417,2562383102,271733878,3285377520,4294967295],d=b.ceil(a.length/4)+2,d=b.ceil(d/16),f=[],e=0,h=[],g,i,l,k,o,j,m;e<d;e++){f[e]=[];for(m=0;16>m;m++)g=function(b,c){return a.charCodeAt(64*e+4*m+b)<<c},f[e][m]=g(0,24)|g(1,16)|g(2,8)|g(3,0)}g=8*a.length-8;e=d-1;f[e][14]=g/(c[9]+1);f[e][14]=b.floor(f[e][14]);f[e][15]=g&c[9];for(e=0;e<d;e++){for(j=0;16>j;j++)h[j]=f[e][j];for(j=16;80>j;j++)h[j]=
-(h[j-3]^h[j-8]^h[j-14]^h[j-16])<<1|(h[j-3]^h[j-8]^h[j-14]^h[j-16])>>>31;g=c[4];i=c[5];l=c[6];k=c[7];o=c[8];for(j=0;80>j;j++){var p=b.floor(j/20),p=(g<<5|g>>>27)+(1>p?i&l^~i&k:2==p?i&l^i&k^l&k:i^l^k)+o+c[p]+h[j]&c[9];o=k;k=l;l=i<<30|i>>>2;i=g;g=p}c[4]+=g;c[5]+=i;c[6]+=l;c[7]+=k;c[8]+=o}g="";for(z=4;9>z;z++)for(e=7;0<=e;e--)g+=((c[z]&c[9])>>>4*e&15).toString(16);return g};var _RSASIGN_DIHEAD={sha1:"3021300906052b0e03021a05000414"},_RSASIGN_HASHHEXFUNC={};_RSASIGN_HASHHEXFUNC.sha1=SHA1;
-function _rsasign_getHexPaddedDigestInfoForString(a,b,c){for(var c=c.toLowerCase(),b=b/4,a=(0,_RSASIGN_HASHHEXFUNC[c])(a),c="00"+_RSASIGN_DIHEAD[c]+a,a="",b=b-4-c.length,d=0;d<b;d+=2)a+="ff";return sPaddedMessageHex="0001"+a+c}RSAKey.prototype.signString=function(a,b){var c=_rsasign_getHexPaddedDigestInfoForString(a,this.n.bitLength(),b);return this.doPrivate(new BigInteger(c,16)).toString(16)};function _rsasign_getDecryptSignatureBI(a,b,c){var d=new RSAKey;d.setPublic(b,c);return d.doPublic(a)}
-function _rsasign_getHexDigestInfoFromSig(a,b,c){return _rsasign_getDecryptSignatureBI(a,b,c).toString(16).replace(/^1f+00/,"")}function _rsasign_getAlgNameAndHashFromHexDisgestInfo(a){for(var b in _RSASIGN_DIHEAD){var c=_RSASIGN_DIHEAD[b],d=c.length;if(a.substring(0,d)==c)return[b,a.substring(d)]}return[]}
-function _rsasign_verifySignatureWithArgs(a,b,c,d){b=_rsasign_getHexDigestInfoFromSig(b,c,d);c=_rsasign_getAlgNameAndHashFromHexDisgestInfo(b);if(0==c.length)return!1;b=c[1];a=(0,_RSASIGN_HASHHEXFUNC[c[0]])(a);return b==a}RSAKey.prototype.verifyHexSignatureForMessage=function(a,b){var c=new BigInteger(a,16);return _rsasign_verifySignatureWithArgs(b,c,this.n.toString(16),this.e.toString(16))};
-RSAKey.prototype.verifyString=function(a,b){var b=b.replace(/[ \n]+/g,""),c=this.doPublic(new BigInteger(b,16)).toString(16).replace(/^1f+00/,""),d=_rsasign_getAlgNameAndHashFromHexDisgestInfo(c);if(0==d.length)return!1;c=d[1];d=(0,_RSASIGN_HASHHEXFUNC[d[0]])(a);return c==d};function _x509_pemToBase64(a){a=a.replace("-----BEGIN CERTIFICATE-----","");a=a.replace("-----END CERTIFICATE-----","");return a=a.replace(/[ \n]+/g,"")}function _x509_pemToHex(a){a=_x509_pemToBase64(a);return b64tohex(a)}
-function _x509_getHexTbsCertificateFromCert(a){return _asnhex_getStartPosOfV_AtObj(a,0)}function _x509_getSubjectPublicKeyInfoPosFromCertHex(a){var b=_asnhex_getStartPosOfV_AtObj(a,0),b=_asnhex_getPosArrayOfChildren_AtObj(a,b);return 1>b.length?-1:"a003020102"==a.substring(b[0],b[0]+10)?6>b.length?-1:b[6]:5>b.length?-1:b[5]}
-function _x509_getSubjectPublicKeyPosFromCertHex(a){var b=_x509_getSubjectPublicKeyInfoPosFromCertHex(a);if(-1==b)return-1;b=_asnhex_getPosArrayOfChildren_AtObj(a,b);if(2!=b.length)return-1;b=b[1];if("03"!=a.substring(b,b+2))return-1;b=_asnhex_getStartPosOfV_AtObj(a,b);return"00"!=a.substring(b,b+2)?-1:b+2}
-function _x509_getPublicKeyHexArrayFromCertHex(a){var b=_x509_getSubjectPublicKeyPosFromCertHex(a),c=_asnhex_getPosArrayOfChildren_AtObj(a,b);if(2!=c.length)return[];b=_asnhex_getHexOfV_AtObj(a,c[0]);a=_asnhex_getHexOfV_AtObj(a,c[1]);return null!=b&&null!=a?[b,a]:[]}function _x509_getPublicKeyHexArrayFromCertPEM(a){a=_x509_pemToHex(a);return _x509_getPublicKeyHexArrayFromCertHex(a)}function X509(){this.subjectPublicKeyRSA_hE=this.subjectPublicKeyRSA_hN=this.subjectPublicKeyRSA=null}
-X509.prototype.readCertPEM=function(a){var a=_x509_pemToHex(a),a=_x509_getPublicKeyHexArrayFromCertHex(a),b=new RSAKey;b.setPublic(a[0],a[1]);this.subjectPublicKeyRSA=b;this.subjectPublicKeyRSA_hN=a[0];this.subjectPublicKeyRSA_hE=a[1]};X509.prototype.readCertPEMWithoutRSAInit=function(a){a=_x509_pemToHex(a);a=_x509_getPublicKeyHexArrayFromCertHex(a);this.subjectPublicKeyRSA.setPublic(a[0],a[1]);this.subjectPublicKeyRSA_hN=a[0];this.subjectPublicKeyRSA_hE=a[1]};
-function _asnhex_getByteLengthOfL_AtObj(a,b){if("8"!=a.substring(b+2,b+3))return 1;var c=parseInt(a.substring(b+3,b+4));return 0==c?-1:0<c&&10>c?c+1:-2}function _asnhex_getHexOfL_AtObj(a,b){var c=_asnhex_getByteLengthOfL_AtObj(a,b);return 1>c?"":a.substring(b+2,b+2+2*c)}function _asnhex_getIntOfL_AtObj(a,b){var c=_asnhex_getHexOfL_AtObj(a,b);return""==c?-1:(8>parseInt(c.substring(0,1))?new BigInteger(c,16):new BigInteger(c.substring(2),16)).intValue()}
-function _asnhex_getStartPosOfV_AtObj(a,b){var c=_asnhex_getByteLengthOfL_AtObj(a,b);return 0>c?c:b+2*(c+1)}function _asnhex_getHexOfV_AtObj(a,b){var c=_asnhex_getStartPosOfV_AtObj(a,b),d=_asnhex_getIntOfL_AtObj(a,b);return a.substring(c,c+2*d)}function _asnhex_getPosOfNextSibling_AtObj(a,b){var c=_asnhex_getStartPosOfV_AtObj(a,b),d=_asnhex_getIntOfL_AtObj(a,b);return c+2*d}
-function _asnhex_getPosArrayOfChildren_AtObj(a,b){var c=[],d=_asnhex_getStartPosOfV_AtObj(a,b);c.push(d);for(var f=_asnhex_getIntOfL_AtObj(a,b),e=d,h=0;;){e=_asnhex_getPosOfNextSibling_AtObj(a,e);if(null==e||e-d>=2*f)break;if(200<=h)break;c.push(e);h++}return c}function _rsapem_pemToBase64(a){a=a.replace("-----BEGIN RSA PRIVATE KEY-----","");a=a.replace("-----END RSA PRIVATE KEY-----","");return a=a.replace(/[ \n]+/g,"")}
-function _rsapem_getPosArrayOfChildrenFromHex(a){var b=[],c=_asnhex_getStartPosOfV_AtObj(a,0),d=_asnhex_getPosOfNextSibling_AtObj(a,c),f=_asnhex_getPosOfNextSibling_AtObj(a,d),e=_asnhex_getPosOfNextSibling_AtObj(a,f),h=_asnhex_getPosOfNextSibling_AtObj(a,e),g=_asnhex_getPosOfNextSibling_AtObj(a,h),i=_asnhex_getPosOfNextSibling_AtObj(a,g),l=_asnhex_getPosOfNextSibling_AtObj(a,i),a=_asnhex_getPosOfNextSibling_AtObj(a,l);b.push(c,d,f,e,h,g,i,l,a);return b}
-function _rsapem_getHexValueArrayOfChildrenFromHex(a){var b=_rsapem_getPosArrayOfChildrenFromHex(a),c=_asnhex_getHexOfV_AtObj(a,b[0]),d=_asnhex_getHexOfV_AtObj(a,b[1]),f=_asnhex_getHexOfV_AtObj(a,b[2]),e=_asnhex_getHexOfV_AtObj(a,b[3]),h=_asnhex_getHexOfV_AtObj(a,b[4]),g=_asnhex_getHexOfV_AtObj(a,b[5]),i=_asnhex_getHexOfV_AtObj(a,b[6]),l=_asnhex_getHexOfV_AtObj(a,b[7]),a=_asnhex_getHexOfV_AtObj(a,b[8]),b=[];b.push(c,d,f,e,h,g,i,l,a);return b}
-RSAKey.prototype.readPrivateKeyFromPEMString=function(a){a=_rsapem_pemToBase64(a);a=b64tohex(a);a=_rsapem_getHexValueArrayOfChildrenFromHex(a);this.setPrivateEx(a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8])};
-
-/* END ALL_LIBS.JS CODE */
-/* BEGIN WORKER.JS CODE */
-
-onmessage=function(a){switch(a.data.name){case "generatePrivateKeySign":var b=generatePrivateKeySign(a.data.exponent,a.data.zip);postMessage({name:"generatePrivateKeySign",publicKey:b.publicKey,sign:b.sign,callback:a.data.callback});break;case "generateCrx":b=packageCRXStuffings(a.data.publicKey,a.data.signature),postMessage({name:"generateCRX",crxHeader:b,callback:a.data.callback})}};
-function generatePrivateKeySign(a,b){var c=new RSAKey;c.generate(1024,a.toString(16));var d=hexZeroPad(c.n.toString(16),258),e=hexZeroPad(c.e.toString(16),6),d=formatSPKI(d,e),c=c.signString(b,"sha1");return{publicKey:d,sign:c}}function formatSPKI(a,b){return("30819F300D06092A864886F70D010101050003818D00308189028181"+a+"0203"+b).toLowerCase()}
-function packageCRXStuffings(a,b){var c;c="Cr24\u0002\x00\x00\x00"+hex2char(hex_endian_swap(hexZeroPad((a.length/2).toString(16),8))+hex_endian_swap(hexZeroPad((b.length/2).toString(16),8)));return c+=hex2char(a+b)}function hex2char(a){a=a.toLowerCase();a=a.match(/[0-9a-f]{2}/igm);a=a.map(function(a){return String.fromCharCode(parseInt(a,16))});return a.join("")}function hex_endian_swap(a){if(0!==a.length%2)throw Error();for(var b="",c=a.length;c;)b+=a.substr(c-2,2),c-=2;return b}
-function char2hex(a,b){var a=a.toString(),c=Array.prototype.map.call(a,function(a){a=a.charCodeAt(0)&255;a=a.toString(16);2>a.length&&(a="0"+a);return a}).join("");return b?c.toLowerCase():c.toUpperCase()}function hexZeroPad(a,b){for(a=a.toString();a.length<b;)a="0"+a;return a}function hex2b64(a){return window.btoa(hex2char(a))}function b64tohex(a){return char2hex(window.atob(a))}function b64toBA(a){return Array.prototype.map.call(window.atob(a),function(a){return a.charCodeAt(0)})};
-
-/* END WORKER.JS CODE */
+var JSCrx = (function(workerCode){
+var support = {
+	worker: !!window.Worker,
+	filereader: window.File && window.Blob && window.FileList && window.FileReader,
+	blobbuilder: !!window.BlobBuilder || !!window.MozBlobBuilder || !!window.WebKitBlobBuilder
+};
+var callbackStack = [];
+function callbackRun(callback,_this) {
+	if (callbackStack[callback]) {
+		callbackStack[callback].call(_this);
+		callbackStack[callback] = undefined;
+	}
 }
-/* BEGIN OBJECT URL SPASM CODE */
-
-return function(b){var c=function(){try{return new BlobBuilder}catch(a){}try{return new WebKitBlobBuilder}catch(b){}try{return new MozBlobBuilder}catch(c){}throw Error("No BlobBuilder support");}(),b=new Uint8Array(b.split("").map(function(a){return a.charCodeAt(0)}));c.append(b.buffer);return function(a){try{return window.URL.createObjectURL(a)}catch(b){}try{return window.webkitURL.createObjectURL(a)}catch(c){}try{return window.createObjectURL(a)}catch(d){}try{return window.createBlobURL(a)}catch(e){}throw Error("No support for creating object URLs");
-}(c.getBlob())}("("+worker+"())")
+function addCallback(callback) {
+	for (var i=0;i<=callbackStack.length;++i) { 
+		if (typeof callbackStack[i] === "undefined") {
+			callbackStack[i] = callback;
+			break;
+		}
+	}
+	return i;
+}
+function JSCrx() {
+	if (this === window) { return new JSCrx(); }
+	this.zip={};
+	this.zip.string="";
+	
+	this.privateKey={};
+	
+	
+	this.privateKey.der="";
+	this.publicKey={};
+	
+	
+	this.publicKey.der="";
+	this.sign={};
+	
+	this.sign.der="";
+	this.crx = {};
+	
+	
+	
+	this.worker = new Worker(workerCode);
+	this.worker.onerror = function(e) { throw e; };
+	this.worker.onmessage=(function(_this){
+		return function(e) {
+		switch(e.data.name) {
+			case "generatePrivateKeySign":
+				
+				
+				_this.publicKey.der = e.data.publicKey;
+				
+				_this.sign.der = e.data.sign;
+				callbackRun(e.data.callback,_this);
+				break;
+			
+			
+			
+			case "generateCRX":
+				_this.crx.header = e.data.crxHeader;
+				callbackRun(e.data.callback,_this);
+				break;
+			default:
+				break;
+		}
+		};
+	}(this));
+}
+JSCrx.prototype.addZip = function(zipData,encoding) {
+	switch(encoding) {
+		case "blob":
+		case "file":
+			var reader = new FileReader();
+			reader.onload = function(e) {
+				this.zip.string = e.target.result;
+			};
+			reader.readAsBinaryString();
+			break;
+		case "typedarray":
+			var buffer = zipData.buffer || zipData;
+			this.zip.string = String.fromCharCode.call(null,new Uint8Array(zipData));
+			break;
+		case "base64":
+			this.zip.string = window.btoa(zipData);
+			break;
+		case "string":
+			this.zip.string = zipData;
+			break;
+		default:
+			this.zip.string = zipData;
+			break;
+	}
+	return this;
+};
+JSCrx.prototype.generatePrivateKeySignature = function(options,callback) {
+	if (!this.zip.string) { throw new Error("Need zip file in order to sign"); }
+	var callbackIndex = addCallback(callback);
+	this.worker.postMessage({
+		name: "generatePrivateKeySign",
+		exponent: options.exponent || 65537,
+		zip: this.zip.string,
+		callback: callbackIndex
+	});
+};
+JSCrx.prototype.generateCrx = function(format,callback) {
+	if (!this.publicKey.der) { throw new Error("Need public key in order to package"); }
+	else if (!this.sign.der) { throw new Error("Need signature in order to package"); }
+	else if (!this.zip.string) { throw new Error("Need zip file in order to sign"); }
+	var callbackIndex = addCallback(callback);
+	this.worker.postMessage({
+		name:"generateCrx",
+		publicKey:this.publicKey.der,
+		signature:this.sign.der,
+		
+		callback:callbackIndex
+	});
+};
+JSCrx.prototype.terminate = function(){
+	
+		this.worker.terminate();
+	
+	
+};
+return JSCrx;
+})(function(){
+function worker() {
+function BigInteger(a,b,c) {
+  if(a != null)
+    if("number" == typeof a) this.fromNumber(a,b,c);
+    else if(b == null && "string" != typeof a) this.fromString(a,256);
+    else this.fromString(a,b);
+}
+(function(appName){
+  var test = (0xdeadbeefcafe&0xffffff)==0xefcafe;
+  if(test && (appName == "Microsoft Internet Explorer")) {
+    
+    
+    
+    BigInteger.prototype.am = function(i,x,w,j,c,n) {
+      var xl = x&0x7fff, xh = x>>15;
+      while(--n >= 0) {
+        var l = this[i]&0x7fff;
+        var h = this[i++]>>15;
+        var m = xh*l+h*xl;
+        l = xl*l+((m&0x7fff)<<15)+w[j]+(c&0x3fffffff);
+        c = (l>>>30)+(m>>>15)+xh*h+(c>>>30);
+        w[j++] = l&0x3fffffff;
+      }
+      return c;
+    };
+    BigInteger.prototype.DB = 30;
+  }
+  else if(test && (appName != "Netscape")) {
+    
+    
+    
+    function am1(i,x,w,j,c,n) {
+      while(--n >= 0) {
+        var v = x*this[i++]+w[j]+c;
+        c = Math.floor(v/0x4000000);
+        w[j++] = v&0x3ffffff;
+      }
+      return c;
+    }
+    BigInteger.prototype.DB = 26;
+  }
+  else { 
+    
+    
+    BigInteger.prototype.am = function(i,x,w,j,c,n) {
+      var xl = x&0x3fff, xh = x>>14;
+      while(--n >= 0) {
+        var l = this[i]&0x3fff;
+        var h = this[i++]>>14;
+        var m = xh*l+h*xl;
+        l = xl*l+((m&0x3fff)<<14)+w[j]+c;
+        c = (l>>28)+(m>>14)+xh*h;
+        w[j++] = l&0xfffffff;
+      }
+      return c;
+    };
+    BigInteger.prototype.DB = 28;
+  }
+}(navigator.appName));
+BigInteger.prototype.DV = 1<<BigInteger.prototype.DB;
+BigInteger.prototype.DM = BigInteger.prototype.DV-1;
+BigInteger.prototype.FV = Math.pow(2,52);
+BigInteger.prototype.F1 = 52-BigInteger.prototype.DB;
+BigInteger.prototype.F2 = 2*52-BigInteger.prototype.DB-52;
+var intAt = (function(){
+  
+  var BI_RC = [];
+  var rr,vv;
+  rr = "0".charCodeAt(0);
+  for(vv = 0; vv <= 9; ++vv) BI_RC[rr++] = vv;
+  rr = "a".charCodeAt(0);
+  for(vv = 10; vv < 36; ++vv) BI_RC[rr++] = vv;
+  rr = "A".charCodeAt(0);
+  for(vv = 10; vv < 36; ++vv) BI_RC[rr++] = vv;
+  return function(s,i){
+    var c = BI_RC[s.charCodeAt(i)];
+    return (c==null)?-1:c;
+  };
+})();
+BigInteger.prototype.copyTo = function(r) {
+  for(var i = this.t-1; i >= 0; --i) r[i] = this[i];
+  r.t = this.t;
+  r.s = this.s;
+};
+BigInteger.prototype.fromInt = function(x) {
+  this.t = 1;
+  this.s = (x<0)?-1:0;
+  if(x > 0) this[0] = x;
+  else if(x < -1) this[0] = x+DV;
+  else this.t = 0;
+  
+  return this;
+};
+BigInteger.prototype.fromString = function(s,b) {
+  var k;
+  if(b == 16) k = 4;
+  else if(b == 8) k = 3;
+  else if(b == 256) k = 8; 
+  else if(b == 2) k = 1;
+  else if(b == 32) k = 5;
+  else if(b == 4) k = 2;
+  else { this.fromRadix(s,b); return; }
+  this.t = 0;
+  this.s = 0;
+  var i = s.length, mi = false, sh = 0;
+  while(--i >= 0) {
+    var x = (k==8)?s[i]&0xff:intAt(s,i);
+    if(x < 0) {
+      if(s.charAt(i) == "-") mi = true;
+      continue;
+    }
+    mi = false;
+    if(sh == 0)
+      this[this.t++] = x;
+    else if(sh+k > this.DB) {
+      this[this.t-1] |= (x&((1<<(this.DB-sh))-1))<<sh;
+      this[this.t++] = (x>>(this.DB-sh));
+    }
+    else
+      this[this.t-1] |= x<<sh;
+    sh += k;
+    if(sh >= this.DB) sh -= this.DB;
+  }
+  if(k == 8 && (s[0]&0x80) != 0) {
+    this.s = -1;
+    if(sh > 0) this[this.t-1] |= ((1<<(this.DB-sh))-1)<<sh;
+  }
+  this.clamp();
+  if(mi) BigInteger.ZERO.subTo(this,this);
+};
+BigInteger.prototype.clamp = function() {
+  var c = this.s&this.DM;
+  while(this.t > 0 && this[this.t-1] == c) --this.t;
+};
+BigInteger.prototype.toString = function(b) {
+  if(this.s < 0) return "-"+this.negate().toString(b);
+  var k;
+  if(b == 16) k = 4;
+  else if(b == 8) k = 3;
+  else if(b == 2) k = 1;
+  else if(b == 32) k = 5;
+  else if(b == 4) k = 2;
+  else return this.toRadix(b);
+  var km = (1<<k)-1, d, m = false, r = "", i = this.t;
+  var p = this.DB-(i*this.DB)%k;
+  if(i-- > 0) {
+    if(p < this.DB && (d = this[i]>>p) > 0) {
+      m = true;
+      r = "0123456789abcdefghijklmnopqrstuvwxyz".charAt(n);
+    }
+    while(i >= 0) {
+      if(p < k) {
+        d = (this[i]&((1<<p)-1))<<(k-p);
+        d |= this[--i]>>(p+=this.DB-k);
+      }
+      else {
+        d = (this[i]>>(p-=k))&km;
+        if(p <= 0) { p += this.DB; --i; }
+      }
+      if(d > 0) m = true;
+      if(m) r += "0123456789abcdefghijklmnopqrstuvwxyz".charAt(d);
+    }
+  }
+  return m?r:"0";
+};
+BigInteger.prototype.negate = function() { var r = new BigInteger(null); BigInteger.ZERO.subTo(this,r); return r; };
+BigInteger.prototype.abs = function() { return (this.s<0)?this.negate():this; };
+BigInteger.prototype.compareTo = function(a) {
+  var r = this.s-a.s;
+  if(r != 0) return r;
+  var i = this.t;
+  r = i-a.t;
+  if(r != 0) return r;
+  while(--i >= 0) if((r=this[i]-a[i]) != 0) return r;
+  return 0;
+};
+function nbits(x) {
+  var r = 1, t;
+  if((t=x>>>16) != 0) { x = t; r += 16; }
+  if((t=x>>8) != 0) { x = t; r += 8; }
+  if((t=x>>4) != 0) { x = t; r += 4; }
+  if((t=x>>2) != 0) { x = t; r += 2; }
+  if((t=x>>1) != 0) { x = t; r += 1; }
+  return r;
+}
+BigInteger.prototype.bitLength = function() {
+  if(this.t <= 0) return 0;
+  return this.DB*(this.t-1)+nbits(this[this.t-1]^(this.s&this.DM));
+};
+BigInteger.prototype.dlShiftTo = function(n,r) {
+  var i;
+  for(i = this.t-1; i >= 0; --i) r[i+n] = this[i];
+  for(i = n-1; i >= 0; --i) r[i] = 0;
+  r.t = this.t+n;
+  r.s = this.s;
+};
+BigInteger.prototype.drShiftTo = function(n,r) {
+  for(var i = n; i < this.t; ++i) r[i-n] = this[i];
+  r.t = Math.max(this.t-n,0);
+  r.s = this.s;
+};
+BigInteger.prototype.lShiftTo = function(n,r) {
+  var bs = n%this.DB;
+  var cbs = this.DB-bs;
+  var bm = (1<<cbs)-1;
+  var ds = Math.floor(n/this.DB), c = (this.s<<bs)&this.DM, i;
+  for(i = this.t-1; i >= 0; --i) {
+    r[i+ds+1] = (this[i]>>cbs)|c;
+    c = (this[i]&bm)<<bs;
+  }
+  for(i = ds-1; i >= 0; --i) r[i] = 0;
+  r[ds] = c;
+  r.t = this.t+ds+1;
+  r.s = this.s;
+  r.clamp();
+};
+BigInteger.prototype.rShiftTo = function(n,r) {
+  r.s = this.s;
+  var ds = Math.floor(n/this.DB);
+  if(ds >= this.t) { r.t = 0; return; }
+  var bs = n%this.DB;
+  var cbs = this.DB-bs;
+  var bm = (1<<bs)-1;
+  r[0] = this[ds]>>bs;
+  for(var i = ds+1; i < this.t; ++i) {
+    r[i-ds-1] |= (this[i]&bm)<<cbs;
+    r[i-ds] = this[i]>>bs;
+  }
+  if(bs > 0) r[this.t-ds-1] |= (this.s&bm)<<cbs;
+  r.t = this.t-ds;
+  r.clamp();
+};
+BigInteger.prototype.subTo = function (a,r) {
+  var i = 0, c = 0, m = Math.min(a.t,this.t);
+  while(i < m) {
+    c += this[i]-a[i];
+    r[i++] = c&this.DM;
+    c >>= this.DB;
+  }
+  if(a.t < this.t) {
+    c -= a.s;
+    while(i < this.t) {
+      c += this[i];
+      r[i++] = c&this.DM;
+      c >>= this.DB;
+    }
+    c += this.s;
+  }
+  else {
+    c += this.s;
+    while(i < a.t) {
+      c -= a[i];
+      r[i++] = c&this.DM;
+      c >>= this.DB;
+    }
+    c -= a.s;
+  }
+  r.s = (c<0)?-1:0;
+  if(c < -1) r[i++] = this.DV+c;
+  else if(c > 0) r[i++] = c;
+  r.t = i;
+  r.clamp();
+};
+BigInteger.prototype.multiplyTo = function(a,r) {
+  var x = this.abs(), y = a.abs();
+  var i = x.t;
+  r.t = i+y.t;
+  while(--i >= 0) r[i] = 0;
+  for(i = 0; i < y.t; ++i) r[i+x.t] = x.am(0,y[i],r,i,0,x.t);
+  r.s = 0;
+  r.clamp();
+  if(this.s != a.s) BigInteger.ZERO.subTo(r,r);
+};
+BigInteger.prototype.squareTo = function(r) {
+  var x = this.abs();
+  var i = r.t = 2*x.t;
+  while(--i >= 0) r[i] = 0;
+  for(i = 0; i < x.t-1; ++i) {
+    var c = x.am(i,x[i],r,2*i,0,1);
+    if((r[i+x.t]+=x.am(i+1,2*x[i],r,2*i+1,c,x.t-i-1)) >= x.DV) {
+      r[i+x.t] -= x.DV;
+      r[i+x.t+1] = 1;
+    }
+  }
+  if(r.t > 0) r[r.t-1] += x.am(i,x[i],r,2*i,0,1);
+  r.s = 0;
+  r.clamp();
+};
+BigInteger.prototype.divRemTo = function(m,q,r) {
+  var pm = m.abs();
+  if(pm.t <= 0) return;
+  var pt = this.abs();
+  if(pt.t < pm.t) {
+    if(q != null) q.fromInt(0);
+    if(r != null) this.copyTo(r);
+    return;
+  }
+  if(r == null) r = new BigInteger(null);
+  var y = new BigInteger(null), ts = this.s, ms = m.s;
+  var nsh = this.DB-nbits(pm[pm.t-1]);	
+  if(nsh > 0) { pm.lShiftTo(nsh,y); pt.lShiftTo(nsh,r); }
+  else { pm.copyTo(y); pt.copyTo(r); }
+  var ys = y.t;
+  var y0 = y[ys-1];
+  if(y0 == 0) return;
+  var yt = y0*(1<<this.F1)+((ys>1)?y[ys-2]>>this.F2:0);
+  var d1 = this.FV/yt, d2 = (1<<this.F1)/yt, e = 1<<this.F2;
+  var i = r.t, j = i-ys, t = (q==null)?new BigInteger(null):q;
+  y.dlShiftTo(j,t);
+  if(r.compareTo(t) >= 0) {
+    r[r.t++] = 1;
+    r.subTo(t,r);
+  }
+  BigInteger.ONE.dlShiftTo(ys,t);
+  t.subTo(y,y);	
+  while(y.t < ys) y[y.t++] = 0;
+  while(--j >= 0) {
+    
+    var qd = (r[--i]==y0)?this.DM:Math.floor(r[i]*d1+(r[i-1]+e)*d2);
+    if((r[i]+=y.am(0,qd,r,j,0,ys)) < qd) {	
+      y.dlShiftTo(j,t);
+      r.subTo(t,r);
+      while(r[i] < --qd) r.subTo(t,r);
+    }
+  }
+  if(q != null) {
+    r.drShiftTo(ys,q);
+    if(ts != ms) BigInteger.ZERO.subTo(q,q);
+  }
+  r.t = ys;
+  r.clamp();
+  if(nsh > 0) r.rShiftTo(nsh,r);	
+  if(ts < 0) BigInteger.ZERO.subTo(r,r);
+};
+BigInteger.prototype.mod = function(a) {
+  var r = new BigInteger(null);
+  this.abs().divRemTo(a,null,r);
+  if(this.s < 0 && r.compareTo(BigInteger.ZERO) > 0) a.subTo(r,r);
+  return r;
+};
+function Classic(m) { this.m = m; }
+Classic.prototype.convert = function(x) {
+  if(x.s < 0 || x.compareTo(this.m) >= 0) return x.mod(this.m);
+  else return x;
+};
+Classic.prototype.revert = function(x) { return x; };
+Classic.prototype.reduce = function(x) { x.divRemTo(this.m,null,x); };
+Classic.prototype.mulTo = function(x,y,r) { x.multiplyTo(y,r); this.reduce(r); };
+Classic.prototype.sqrTo = function(x,r) { x.squareTo(r); this.reduce(r); };
+BigInteger.prototype.invDigit = function() {
+  if(this.t < 1) return 0;
+  var x = this[0];
+  if((x&1) == 0) return 0;
+  var y = x&3;		
+  y = (y*(2-(x&0xf)*y))&0xf;	
+  y = (y*(2-(x&0xff)*y))&0xff;	
+  y = (y*(2-(((x&0xffff)*y)&0xffff)))&0xffff;	
+  
+  
+  y = (y*(2-x*y%this.DV))%this.DV;		
+  
+  return (y>0)?this.DV-y:-y;
+};
+function Montgomery(m) {
+  this.m = m;
+  this.mp = m.invDigit();
+  this.mpl = this.mp&0x7fff;
+  this.mph = this.mp>>15;
+  this.um = (1<<(m.DB-15))-1;
+  this.mt2 = 2*m.t;
+}
+Montgomery.prototype.convert = function(x) {
+  var r = new BigInteger(null);
+  x.abs().dlShiftTo(this.m.t,r);
+  r.divRemTo(this.m,null,r);
+  if(x.s < 0 && r.compareTo(BigInteger.ZERO) > 0) this.m.subTo(r,r);
+  return r;
+};
+Montgomery.prototype.revert = function(x) {
+  var r = new BigInteger(null);
+  x.copyTo(r);
+  this.reduce(r);
+  return r;
+};
+Montgomery.prototype.reduce = function(x) {
+  while(x.t <= this.mt2)	
+    x[x.t++] = 0;
+  for(var i = 0; i < this.m.t; ++i) {
+    
+    var j = x[i]&0x7fff;
+    var u0 = (j*this.mpl+(((j*this.mph+(x[i]>>15)*this.mpl)&this.um)<<15))&x.DM;
+    
+    j = i+this.m.t;
+    x[j] += this.m.am(0,u0,x,i,0,this.m.t);
+    
+    while(x[j] >= x.DV) { x[j] -= x.DV; x[++j]++; }
+  }
+  x.clamp();
+  x.drShiftTo(this.m.t,x);
+  if(x.compareTo(this.m) >= 0) x.subTo(this.m,x);
+};
+Montgomery.prototype.sqrTo = function(x,r) { x.squareTo(r); this.reduce(r); };
+Montgomery.prototype.mulTo = function(x,y,r) { x.multiplyTo(y,r); this.reduce(r); };
+BigInteger.prototype.isEven = function() { return ((this.t>0)?(this[0]&1):this.s) == 0; };
+BigInteger.prototype.exp = function(e,z) {
+  if(e > 0xffffffff || e < 1) return BigInteger.ONE;
+  var r = new BigInteger(null), r2 = new BigInteger(null), g = z.convert(this), i = nbits(e)-1;
+  g.copyTo(r);
+  while(--i >= 0) {
+    z.sqrTo(r,r2);
+    if((e&(1<<i)) > 0) z.mulTo(r2,g,r);
+    else { var t = r; r = r2; r2 = t; }
+  }
+  return z.revert(r);
+};
+BigInteger.prototype.modPowInt = function(e,m) {
+  var z;
+  if(e < 256 || m.isEven()) z = new Classic(m); else z = new Montgomery(m);
+  return this.exp(e,z);
+};
+BigInteger.ZERO = new BigInteger(null).fromInt(0);
+BigInteger.ONE = new BigInteger(null).fromInt(1);
+BigInteger.prototype.clone = function() { var r = new BigInteger(null); this.copyTo(r); return r; };
+BigInteger.prototype.intValue = function() {
+  if(this.s < 0) {
+    if(this.t == 1) return this[0]-this.DV;
+    else if(this.t == 0) return -1;
+  }
+  else if(this.t == 1) return this[0];
+  else if(this.t == 0) return 0;
+  
+  return ((this[1]&((1<<(32-this.DB))-1))<<this.DB)|this[0];
+};
+BigInteger.prototype.byteValue = function() { return (this.t==0)?this.s:(this[0]<<24)>>24; };
+BigInteger.prototype.shortValue = function() { return (this.t==0)?this.s:(this[0]<<16)>>16; };
+BigInteger.prototype.chunkSize = function(r) { return Math.floor(Math.LN2*this.DB/Math.log(r)); };
+BigInteger.prototype.signum = function() {
+  if(this.s < 0) return -1;
+  else if(this.t <= 0 || (this.t == 1 && this[0] <= 0)) return 0;
+  else return 1;
+};
+BigInteger.prototype.toRadix = function(b) {
+  if(b == null) b = 10;
+  if(this.signum() == 0 || b < 2 || b > 36) return "0";
+  var cs = this.chunkSize(b);
+  var a = Math.pow(b,cs);
+  var d = new BigInteger(null).fromInt(a), y = new BigInteger(null), z = new BigInteger(null), r = "";
+  this.divRemTo(d,y,z);
+  while(y.signum() > 0) {
+    r = (a+z.intValue()).toString(b).substr(1) + r;
+    y.divRemTo(d,y,z);
+  }
+  return z.intValue().toString(b) + r;
+};
+BigInteger.prototype.fromRadix = function(s,b) {
+  this.fromInt(0);
+  if(b == null) b = 10;
+  var cs = this.chunkSize(b);
+  var d = Math.pow(b,cs), mi = false, j = 0, w = 0;
+  for(var i = 0; i < s.length; ++i) {
+    var x = intAt(s,i);
+    if(x < 0) {
+      if(s.charAt(i) == "-" && this.signum() == 0) mi = true;
+      continue;
+    }
+    w = b*w+x;
+    if(++j >= cs) {
+      this.dMultiply(d);
+      this.dAddOffset(w,0);
+      j = 0;
+      w = 0;
+    }
+  }
+  if(j > 0) {
+    this.dMultiply(Math.pow(b,j));
+    this.dAddOffset(w,0);
+  }
+  if(mi) BigInteger.ZERO.subTo(this,this);
+};
+BigInteger.prototype.fromNumber = function(a,b,c) {
+  if("number" == typeof b) {
+    
+    if(a < 2) this.fromInt(1);
+    else {
+      this.fromNumber(a,c);
+      if(!this.testBit(a-1))	
+        this.bitwiseTo(BigInteger.ONE.shiftLeft(a-1),function(x,y){return x|y;},this);
+      if(this.isEven()) this.dAddOffset(1,0); 
+      while(!this.isProbablePrime(b)) {
+        this.dAddOffset(2,0);
+        if(this.bitLength() > a) this.subTo(BigInteger.ONE.shiftLeft(a-1),this);
+      }
+    }
+  }
+  else {
+    
+    var x = new Array(), t = a&7;
+    x.length = (a>>3)+1;
+    b.nextBytes(x);
+    if(t > 0) x[0] &= ((1<<t)-1); else x[0] = 0;
+    this.fromString(x,256);
+  }
+};
+BigInteger.prototype.toByteArray = function() {
+  var i = this.t, r = new Array();
+  r[0] = this.s;
+  var p = this.DB-(i*this.DB)%8, d, k = 0;
+  if(i-- > 0) {
+    if(p < this.DB && (d = this[i]>>p) != (this.s&this.DM)>>p)
+      r[k++] = d|(this.s<<(this.DB-p));
+    while(i >= 0) {
+      if(p < 8) {
+        d = (this[i]&((1<<p)-1))<<(8-p);
+        d |= this[--i]>>(p+=this.DB-8);
+      }
+      else {
+        d = (this[i]>>(p-=8))&0xff;
+        if(p <= 0) { p += this.DB; --i; }
+      }
+      if((d&0x80) != 0) d |= -256;
+      if(k == 0 && (this.s&0x80) != (d&0x80)) ++k;
+      if(k > 0 || d != this.s) r[k++] = d;
+    }
+  }
+  return r;
+};
+BigInteger.prototype.equals = function(a) { return(this.compareTo(a)==0); };
+BigInteger.prototype.min = function(a) { return(this.compareTo(a)<0)?this:a; };
+BigInteger.prototype.max = function(a) { return(this.compareTo(a)>0)?this:a; };
+BigInteger.prototype.bitwiseTo = function(a,op,r) {
+  var i, f, m = Math.min(a.t,this.t);
+  for(i = 0; i < m; ++i) r[i] = op(this[i],a[i]);
+  if(a.t < this.t) {
+    f = a.s&this.DM;
+    for(i = m; i < this.t; ++i) r[i] = op(this[i],f);
+    r.t = this.t;
+  }
+  else {
+    f = this.s&this.DM;
+    for(i = m; i < a.t; ++i) r[i] = op(f,a[i]);
+    r.t = a.t;
+  }
+  r.s = op(this.s,a.s);
+  r.clamp();
+};
+BigInteger.prototype.and = function(a) { var r = new BigInteger(null); this.bitwiseTo(a,function(x,y){return x&y;},r); return r; };
+BigInteger.prototype.or = function(a) { var r = new BigInteger(null); this.bitwiseTo(a,function(x,y){return x|y;},r); return r; };
+BigInteger.prototype.xor = function(a) { var r = new BigInteger(null); this.bitwiseTo(a,function(x,y){return x^y;},r); return r; };
+BigInteger.prototype.andNot = function(a) { var r = new BigInteger(null); this.bitwiseTo(a,function(x,y){return x&~y;},r); return r; };
+BigInteger.prototype.not = function() {
+  var r = new BigInteger(null);
+  for(var i = 0; i < this.t; ++i) r[i] = this.DM&~this[i];
+  r.t = this.t;
+  r.s = ~this.s;
+  return r;
+};
+BigInteger.prototype.shiftLeft = function(n) {
+  var r = new BigInteger(null);
+  if(n < 0) this.rShiftTo(-n,r); else this.lShiftTo(n,r);
+  return r;
+};
+BigInteger.prototype.shiftRight = function(n) {
+  var r = new BigInteger(null);
+  if(n < 0) this.lShiftTo(-n,r); else this.rShiftTo(n,r);
+  return r;
+};
+BigInteger.prototype.getLowestSetBit = (function(lbit){
+  return function() {
+    for(var i = 0; i < this.t; ++i)
+      if(this[i] != 0) return i*this.DB+lbit(this[i]);
+    if(this.s < 0) return this.t*this.DB;
+    return -1;
+  };
+  
+})(function(x) {
+  if(x == 0) return -1;
+  var r = 0;
+  if((x&0xffff) == 0) { x >>= 16; r += 16; }
+  if((x&0xff) == 0) { x >>= 8; r += 8; }
+  if((x&0xf) == 0) { x >>= 4; r += 4; }
+  if((x&3) == 0) { x >>= 2; r += 2; }
+  if((x&1) == 0) ++r;
+  return r;
+});
+BigInteger.prototype.bitCount = (function(cbit){
+  return function(){
+    var r = 0, x = this.s&this.DM;
+    for(var i = 0; i < this.t; ++i) r += cbit(this[i]^x);
+    return r;
+  };
+  
+})(function(x){
+  var r = 0;
+  while(x != 0) { x &= x-1; ++r; }
+  return r;
+});
+BigInteger.prototype.testBit = function(n) {
+  var j = Math.floor(n/this.DB);
+  if(j >= this.t) return(this.s!=0);
+  return((this[j]&(1<<(n%this.DB)))!=0);
+};
+BigInteger.prototype.changeBit = function(n,op) {
+  var r = BigInteger.ONE.shiftLeft(n);
+  this.bitwiseTo(r,op,r);
+  return r;
+};
+BigInteger.prototype.setBit = function(n) { return this.changeBit(n,function(x,y){return x|y;}); };
+BigInteger.prototype.clearBit = function(n) { return this.changeBit(n,function(x,y){return x&~y;}); };
+BigInteger.prototype.flipBit = function(n) { return this.changeBit(n,function(x,y){return x^y;}); };
+BigInteger.prototype.addTo = function(a,r) {
+  var i = 0, c = 0, m = Math.min(a.t,this.t);
+  while(i < m) {
+    c += this[i]+a[i];
+    r[i++] = c&this.DM;
+    c >>= this.DB;
+  }
+  if(a.t < this.t) {
+    c += a.s;
+    while(i < this.t) {
+      c += this[i];
+      r[i++] = c&this.DM;
+      c >>= this.DB;
+    }
+    c += this.s;
+  }
+  else {
+    c += this.s;
+    while(i < a.t) {
+      c += a[i];
+      r[i++] = c&this.DM;
+      c >>= this.DB;
+    }
+    c += a.s;
+  }
+  r.s = (c<0)?-1:0;
+  if(c > 0) r[i++] = c;
+  else if(c < -1) r[i++] = this.DV+c;
+  r.t = i;
+  r.clamp();
+};
+BigInteger.prototype.add = function(a) { var r = new BigInteger(null); this.addTo(a,r); return r; };
+BigInteger.prototype.subtract = function(a) { var r = new BigInteger(null); this.subTo(a,r); return r; };
+BigInteger.prototype.multiply = function(a) { var r = new BigInteger(null); this.multiplyTo(a,r); return r; };
+BigInteger.prototype.square = function() { var r = new BigInteger(null); this.squareTo(r); return r; };
+BigInteger.prototype.divide = function(a) { var r = new BigInteger(null); this.divRemTo(a,r,null); return r; };
+BigInteger.prototype.remainder = function(a) { var r = new BigInteger(null); this.divRemTo(a,null,r); return r; };
+BigInteger.prototype.divideAndRemainder = function(a) {
+  var q = new BigInteger(null), r = new BigInteger(null);
+  this.divRemTo(a,q,r);
+  return new Array(q,r);
+};
+BigInteger.prototype.dMultiply = function(n) {
+  this[this.t] = this.am(0,n-1,this,0,0,this.t);
+  ++this.t;
+  this.clamp();
+};
+BigInteger.prototype.dAddOffset = function(n,w) {
+  if(n == 0) return;
+  while(this.t <= w) this[this.t++] = 0;
+  this[w] += n;
+  while(this[w] >= this.DV) {
+    this[w] -= this.DV;
+    if(++w >= this.t) this[this.t++] = 0;
+    ++this[w];
+  }
+};
+function NullExp() {}
+NullExp.prototype.convert = function(x){return x;};
+NullExp.prototype.revert = function(x){return x;};
+NullExp.prototype.mulTo = function(x,y,r){x.multiplyTo(y,r);};
+NullExp.prototype.sqrTo = function(x,r){x.squareTo(r);};
+BigInteger.prototype.pow = function(e) { return this.exp(e,new NullExp()); };
+BigInteger.prototype.multiplyLowerTo = function(a,n,r) {
+  var i = Math.min(this.t+a.t,n);
+  r.s = 0; 
+  r.t = i;
+  while(i > 0) r[--i] = 0;
+  var j;
+  for(j = r.t-this.t; i < j; ++i) r[i+this.t] = this.am(0,a[i],r,i,0,this.t);
+  for(j = Math.min(a.t,n); i < j; ++i) this.am(0,a[i],r,i,0,n-i);
+  r.clamp();
+};
+BigInteger.prototype.multiplyUpperTo = function(a,n,r) {
+  --n;
+  var i = r.t = this.t+a.t-n;
+  r.s = 0; 
+  while(--i >= 0) r[i] = 0;
+  for(i = Math.max(n-this.t,0); i < a.t; ++i)
+    r[this.t+i-n] = this.am(n-i,a[i],r,0,0,this.t+i-n);
+  r.clamp();
+  r.drShiftTo(1,r);
+};
+function Barrett(m) {
+  
+  this.r2 = new BigInteger(null);
+  this.q3 = new BigInteger(null);
+  BigInteger.ONE.dlShiftTo(2*m.t,this.r2);
+  this.mu = this.r2.divide(m);
+  this.m = m;
+}
+Barrett.prototype.convert = function(x) {
+  if(x.s < 0 || x.t > 2*this.m.t) return x.mod(this.m);
+  else if(x.compareTo(this.m) < 0) return x;
+  else { var r = new BigInteger(null); x.copyTo(r); this.reduce(r); return r; }
+};
+Barrett.prototype.revert = function(x) { return x; };
+Barrett.prototype.reduce = function(x) {
+  x.drShiftTo(this.m.t-1,this.r2);
+  if(x.t > this.m.t+1) { x.t = this.m.t+1; x.clamp(); }
+  this.mu.multiplyUpperTo(this.r2,this.m.t+1,this.q3);
+  this.m.multiplyLowerTo(this.q3,this.m.t+1,this.r2);
+  while(x.compareTo(this.r2) < 0) x.dAddOffset(1,this.m.t+1);
+  x.subTo(this.r2,x);
+  while(x.compareTo(this.m) >= 0) x.subTo(this.m,x);
+};
+Barrett.prototype.sqrTo = function(x,r) { x.squareTo(r); this.reduce(r); };
+Barrett.prototype.mulTo = function(x,y,r) { x.multiplyTo(y,r); this.reduce(r); };
+BigInteger.prototype.modPow = function(e,m) {
+  var i = e.bitLength(), k, r = new BigInteger(null).fromInt(1), z;
+  if(i <= 0) return r;
+  else if(i < 18) k = 1;
+  else if(i < 48) k = 3;
+  else if(i < 144) k = 4;
+  else if(i < 768) k = 5;
+  else k = 6;
+  if(i < 8)
+    z = new Classic(m);
+  else if(m.isEven())
+    z = new Barrett(m);
+  else
+    z = new Montgomery(m);
+  
+  var g = new Array(), n = 3, k1 = k-1, km = (1<<k)-1;
+  g[1] = z.convert(this);
+  if(k > 1) {
+    var g2 = new BigInteger(null);
+    z.sqrTo(g[1],g2);
+    while(n <= km) {
+      g[n] = new BigInteger(null);
+      z.mulTo(g2,g[n-2],g[n]);
+      n += 2;
+    }
+  }
+  var j = e.t-1, w, is1 = true, r2 = new BigInteger(null), t;
+  i = nbits(e[j])-1;
+  while(j >= 0) {
+    if(i >= k1) w = (e[j]>>(i-k1))&km;
+    else {
+      w = (e[j]&((1<<(i+1))-1))<<(k1-i);
+      if(j > 0) w |= e[j-1]>>(this.DB+i-k1);
+    }
+    n = k;
+    while((w&1) == 0) { w >>= 1; --n; }
+    if((i -= n) < 0) { i += this.DB; --j; }
+    if(is1) {	
+      g[w].copyTo(r);
+      is1 = false;
+    }
+    else {
+      while(n > 1) { z.sqrTo(r,r2); z.sqrTo(r2,r); n -= 2; }
+      if(n > 0) z.sqrTo(r,r2); else { t = r; r = r2; r2 = t; }
+      z.mulTo(r2,g[w],r);
+    }
+    while(j >= 0 && (e[j]&(1<<i)) == 0) {
+      z.sqrTo(r,r2); t = r; r = r2; r2 = t;
+      if(--i < 0) { i = this.DB-1; --j; }
+    }
+  }
+  return z.revert(r);
+};
+BigInteger.prototype.gcd = function(a) {
+  var x = (this.s<0)?this.negate():this.clone();
+  var y = (a.s<0)?a.negate():a.clone();
+  if(x.compareTo(y) < 0) { var t = x; x = y; y = t; }
+  var i = x.getLowestSetBit(), g = y.getLowestSetBit();
+  if(g < 0) return x;
+  if(i < g) g = i;
+  if(g > 0) {
+    x.rShiftTo(g,x);
+    y.rShiftTo(g,y);
+  }
+  while(x.signum() > 0) {
+    if((i = x.getLowestSetBit()) > 0) x.rShiftTo(i,x);
+    if((i = y.getLowestSetBit()) > 0) y.rShiftTo(i,y);
+    if(x.compareTo(y) >= 0) {
+      x.subTo(y,x);
+      x.rShiftTo(1,x);
+    }
+    else {
+      y.subTo(x,y);
+      y.rShiftTo(1,y);
+    }
+  }
+  if(g > 0) y.lShiftTo(g,y);
+  return y;
+};
+BigInteger.prototype.modInt = function(n) {
+  if(n <= 0) return 0;
+  var d = this.DV%n, r = (this.s<0)?n-1:0;
+  if(this.t > 0)
+    if(d == 0) r = this[0]%n;
+    else for(var i = this.t-1; i >= 0; --i) r = (d*r+this[i])%n;
+  return r;
+};
+BigInteger.prototype.modInverse = function(m) {
+  var ac = m.isEven();
+  if((this.isEven() && ac) || m.signum() == 0) return BigInteger.ZERO;
+  var u = m.clone(), v = this.clone();
+  var a = new BigInteger(null).fromInt(1), b = new BigInteger(null).fromInt(0),
+      c = new BigInteger(null).fromInt(0), d = new BigInteger(null).fromInt(1);
+  while(u.signum() != 0) {
+    while(u.isEven()) {
+      u.rShiftTo(1,u);
+      if(ac) {
+        if(!a.isEven() || !b.isEven()) { a.addTo(this,a); b.subTo(m,b); }
+        a.rShiftTo(1,a);
+      }
+      else if(!b.isEven()) b.subTo(m,b);
+      b.rShiftTo(1,b);
+    }
+    while(v.isEven()) {
+      v.rShiftTo(1,v);
+      if(ac) {
+        if(!c.isEven() || !d.isEven()) { c.addTo(this,c); d.subTo(m,d); }
+        c.rShiftTo(1,c);
+      }
+      else if(!d.isEven()) d.subTo(m,d);
+      d.rShiftTo(1,d);
+    }
+    if(u.compareTo(v) >= 0) {
+      u.subTo(v,u);
+      if(ac) a.subTo(c,a);
+      b.subTo(d,b);
+    }
+    else {
+      v.subTo(u,v);
+      if(ac) c.subTo(a,c);
+      d.subTo(b,d);
+    }
+  }
+  if(v.compareTo(BigInteger.ONE) != 0) return BigInteger.ZERO;
+  if(d.compareTo(m) >= 0) return d.subtract(m);
+  if(d.signum() < 0) d.addTo(m,d); else return d;
+  if(d.signum() < 0) return d.add(m); else return d;
+};
+(function(){ 
+  var lowprimes=[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103,107,109,
+    113,127,131,137,139,149,151,157,163,167,173,179,181,191,193,197,199,211,223,227,229,233,239,241,251,
+    257,263,269,271,277,281,283,293,307,311,313,317,331,337,347,349,353,359,367,373,379,383,389,397,401,
+    409,419,421,431,433,439,443,449,457,461,463,467,479,487,491,499,503,509,521,523,541,547,557,563,569,
+    571,577,587,593,599,601,607,613,617,619,631,641,643,647,653,659,661,673,677,683,691,701,709,719,727,
+    733,739,743,751,757,761,769,773,787,797,809,811,821,823,827,829,839,853,857,859,863,877,881,883,887,
+    907,911,919,929,937,941,947,953,967,971,977,983,991,997],
+    lplim = (1<<26)/lowprimes[lowprimes.length-1];
+  
+  BigInteger.prototype.isProbablePrime = function(t) {
+    var i, x = this.abs();
+    if(x.t == 1 && x[0] <= lowprimes[lowprimes.length-1]) {
+      for(i = 0; i < lowprimes.length; ++i)
+        if(x[0] == lowprimes[i]) return true;
+      return false;
+    }
+    if(x.isEven()) return false;
+    i = 1;
+    while(i < lowprimes.length) {
+      var m = lowprimes[i], j = i+1;
+      while(j < lowprimes.length && m < lplim) m *= lowprimes[j++];
+      m = x.modInt(m);
+      while(i < j) if(m%lowprimes[i++] == 0) return false;
+    }
+    return x.millerRabin(t);
+  };
+  
+  BigInteger.prototype.millerRabin = function(t) {
+    var n1 = this.subtract(BigInteger.ONE);
+    var k = n1.getLowestSetBit();
+    if(k <= 0) return false;
+    var r = n1.shiftRight(k);
+    t = (t+1)>>1;
+    if(t > lowprimes.length) t = lowprimes.length;
+    var a = new BigInteger(null);
+    for(var i = 0; i < t; ++i) {
+      
+      a.fromInt(lowprimes[Math.floor(Math.random()*lowprimes.length)]);
+      var y = a.modPow(r,this);
+      if(y.compareTo(BigInteger.ONE) != 0 && y.compareTo(n1) != 0) {
+        var j = 1;
+        while(j++ < k && y.compareTo(n1) != 0) {
+          y = y.modPowInt(2,this);
+          if(y.compareTo(BigInteger.ONE) == 0) return false;
+        }
+        if(y.compareTo(n1) != 0) return false;
+      }
+    }
+    return true;
+  };
+})();
+var rng_state,rng_pool,rng_pptr;function rng_seed_int(b){rng_pool[rng_pptr++]^=b&255;rng_pool[rng_pptr++]^=b>>8&255;rng_pool[rng_pptr++]^=b>>16&255;rng_pool[rng_pptr++]^=b>>24&255;rng_pptr>=rng_psize&&(rng_pptr-=rng_psize)}function rng_seed_time(){rng_seed_int((new Date).getTime())}
+if(rng_pool==null){rng_pool=[];rng_pptr=0;var t;if(navigator.appName=="Netscape"&&navigator.appVersion<"5"&&window.crypto){var z=window.crypto.random(32);for(t=0;t<z.length;++t)rng_pool[rng_pptr++]=z.charCodeAt(t)&255}for(;rng_pptr<rng_psize;)t=Math.floor(65536*Math.random()),rng_pool[rng_pptr++]=t>>>8,rng_pool[rng_pptr++]=t&255;rng_pptr=0;rng_seed_time()}
+function rng_get_byte(){if(rng_state==null){rng_seed_time();rng_state=prng_newstate();rng_state.init(rng_pool);for(rng_pptr=0;rng_pptr<rng_pool.length;++rng_pptr)rng_pool[rng_pptr]=0;rng_pptr=0}return rng_state.next()}function rng_get_bytes(b){var a;for(a=0;a<b.length;++a)b[a]=rng_get_byte()}function SecureRandom(){}SecureRandom.prototype.nextBytes=rng_get_bytes;function Arcfour(){this.j=this.i=0;this.S=[]}
+function ARC4init(b){var a,c,d;for(a=0;a<256;++a)this.S[a]=a;for(a=c=0;a<256;++a)c=c+this.S[a]+b[a%b.length]&255,d=this.S[a],this.S[a]=this.S[c],this.S[c]=d;this.j=this.i=0}function ARC4next(){var b;this.i=this.i+1&255;this.j=this.j+this.S[this.i]&255;b=this.S[this.i];this.S[this.i]=this.S[this.j];this.S[this.j]=b;return this.S[b+this.S[this.i]&255]}Arcfour.prototype.init=ARC4init;Arcfour.prototype.next=ARC4next;function prng_newstate(){return new Arcfour}var rng_psize=256;
+function pkcs1pad2(s,n) {
+  if(n < s.length + 11) { 
+    throw new Error("Message too long for RSA");
+    return null;
+  }
+  var ba = new Array();
+  var i = s.length - 1;
+  while(i >= 0 && n > 0) {
+    var c = s.charCodeAt(i--);
+    if(c < 128) { 
+      ba[--n] = c;
+    }
+    else if((c > 127) && (c < 2048)) {
+      ba[--n] = (c & 63) | 128;
+      ba[--n] = (c >> 6) | 192;
+    }
+    else {
+      ba[--n] = (c & 63) | 128;
+      ba[--n] = ((c >> 6) & 63) | 128;
+      ba[--n] = (c >> 12) | 224;
+    }
+  }
+  ba[--n] = 0;
+  var rng = new SecureRandom();
+  var x = new Array();
+  while(n > 2) { 
+    x[0] = 0;
+    while(x[0] == 0) rng.nextBytes(x);
+    ba[--n] = x[0];
+  }
+  ba[--n] = 2;
+  ba[--n] = 0;
+  return new BigInteger(ba);
+}
+function RSAKey() {
+  this.n = null;
+  this.e = 0;
+  this.d = null;
+  this.p = null;
+  this.q = null;
+  this.dmp1 = null;
+  this.dmq1 = null;
+  this.coeff = null;
+}
+RSAKey.prototype.setPublic = function(N,E) {
+  if(N != null && E != null && N.length > 0 && E.length > 0) {
+    this.n = new BigInteger(N,16);
+    this.e = parseInt(E,16);
+  }
+  else
+    throw new Error("Invalid RSA public key");
+};
+RSAKey.prototype.doPublic = function(x) {
+  return x.modPowInt(this.e, this.n);
+};
+RSAKey.prototype.encrypt = function(text) {
+  var m = pkcs1pad2(text,(this.n.bitLength()+7)>>3);
+  if(m == null) return null;
+  var c = this.doPublic(m);
+  if(c == null) return null;
+  var h = c.toString(16);
+  if((h.length & 1) == 0) return h; else return "0" + h;
+};
+function pkcs1unpad2(d,n) {
+  var b = d.toByteArray();
+  var i = 0;
+  while(i < b.length && b[i] == 0) ++i;
+  if(b.length-i != n-1 || b[i] != 2)
+    return null;
+  ++i;
+  while(b[i] != 0)
+    if(++i >= b.length) return null;
+  var ret = "";
+  while(++i < b.length) {
+    var c = b[i] & 255;
+    if(c < 128) { 
+      ret += String.fromCharCode(c);
+    }
+    else if((c > 191) && (c < 224)) {
+      ret += String.fromCharCode(((c & 31) << 6) | (b[i+1] & 63));
+      ++i;
+    }
+    else {
+      ret += String.fromCharCode(((c & 15) << 12) | ((b[i+1] & 63) << 6) | (b[i+2] & 63));
+      i += 2;
+    }
+  }
+  return ret;
+}
+RSAKey.prototype.setPrivate = function(N,E,D) {
+  if(N != null && E != null && N.length > 0 && E.length > 0) {
+    this.n = new BigInteger(N,16);
+    this.e = parseInt(E,16);
+    this.d = new BigInteger(D,16);
+  }
+  else
+    throw new Error("Invalid RSA private key");
+};
+RSAKey.prototype.setPrivateEx = function(N,E,D,P,Q,DP,DQ,C) {
+  if(N != null && E != null && N.length > 0 && E.length > 0) {
+    this.n = new BigInteger(N,16);
+    this.e = parseInt(E,16);
+    this.d = new BigInteger(D,16);
+    this.p = new BigInteger(P,16);
+    this.q = new BigInteger(Q,16);
+    this.dmp1 = new BigInteger(DP,16);
+    this.dmq1 = new BigInteger(DQ,16);
+    this.coeff = new BigInteger(C,16);
+  }
+  else
+    throw new Error("Invalid RSA private key");
+};
+RSAKey.prototype.generate = function(B,E) {
+  var rng = new SecureRandom();
+  var qs = B>>1;
+  this.e = parseInt(E,16);
+  var ee = new BigInteger(E,16);
+  for(;;) {
+    for(;;) {
+      this.p = new BigInteger(B-qs,1,rng);
+      if(this.p.subtract(BigInteger.ONE).gcd(ee).compareTo(BigInteger.ONE) == 0 && this.p.isProbablePrime(10)) break;
+    }
+    for(;;) {
+      this.q = new BigInteger(qs,1,rng);
+      if(this.q.subtract(BigInteger.ONE).gcd(ee).compareTo(BigInteger.ONE) == 0 && this.q.isProbablePrime(10)) break;
+    }
+    if(this.p.compareTo(this.q) <= 0) {
+      var t = this.p;
+      this.p = this.q;
+      this.q = t;
+    }
+    var p1 = this.p.subtract(BigInteger.ONE);
+    var q1 = this.q.subtract(BigInteger.ONE);
+    var phi = p1.multiply(q1);
+    if(phi.gcd(ee).compareTo(BigInteger.ONE) == 0) {
+      this.n = this.p.multiply(this.q);
+      this.d = ee.modInverse(phi);
+      this.dmp1 = this.d.mod(p1);
+      this.dmq1 = this.d.mod(q1);
+      this.coeff = this.q.modInverse(this.p);
+      break;
+    }
+  }
+};
+RSAKey.prototype.doPrivate = function(x) {
+  if(this.p == null || this.q == null)
+    return x.modPow(this.d, this.n);
+  
+  var xp = x.mod(this.p).modPow(this.dmp1, this.p);
+  var xq = x.mod(this.q).modPow(this.dmq1, this.q);
+  while(xp.compareTo(xq) < 0)
+    xp = xp.add(this.p);
+  return xp.subtract(xq).multiply(this.coeff).mod(this.p).multiply(this.q).add(xq);
+}
+RSAKey.prototype.decrypt = function(ctext) {
+  var c = new BigInteger(ctext, 16);
+  var m = this.doPrivate(c);
+  if(m == null) return null;
+  return pkcs1unpad2(m, (this.n.bitLength()+7)>>3);
+}
+SHA1=function(l){function p(b,a){return b<<a|b>>>32-a}l+="";for(var n=Math,c=[1518500249,1859775393,2400959708,3395469782,1732584193,4023233417,2562383102,271733878,3285377520,4294967295],s=n.ceil(l.length/4)+2,q=n.ceil(s/16),g=[],a=0,h=[],j,d,e,f,m,i,b,k;a<q;a++){g[a]=[];for(k=0;k<16;k++){function o(b,c){return l.charCodeAt(a*64+k*4+b)<<c}g[a][k]=o(0,24)|o(1,16)|o(2,8)|o(3,0)}}i=l.length*8-8;a=q-1;g[a][14]=i/(c[9]+1);g[a][14]=n.floor(g[a][14]);g[a][15]=i&c[9];for(a=0;a<q;a++){for(b=0;b<16;b++)h[b]=g[a][b];for(b=16;b<80;b++)h[b]=p(h[b-3]^h[b-8]^h[b-14]^h[b-16],1);j=c[4];d=c[5];e=c[6];f=c[7];m=c[8];for(b=0;b<80;b++){var r=n.floor(b/20),t=p(j,5)+(r<1?d&e^~d&f:r==2?d&e^d&f^e&f:d^e^f)+m+c[r]+h[b]&c[9];m=f;f=e;e=p(d,30);d=j;j=t}c[4]+=j;c[5]+=d;c[6]+=e;c[7]+=f;c[8]+=m}i="";for(z=4;z<9;z++)for(a=7;a>=0;a--)i+=((c[z]&c[9])>>>a*4&15).toString(16);return i};
+var _RSASIGN_DIHEAD = {
+	"sha1": "3021300906052b0e03021a05000414"
+	
+};
+var _RSASIGN_HASHHEXFUNC = {
+	
+	
+	"sha1": SHA1
+};
+function _rsasign_getHexPaddedDigestInfoForString(s, keySize, hashAlg) {
+  hashAlg = hashAlg.toLowerCase();
+  var pmStrLen = keySize / 4;
+  var hashFunc = _RSASIGN_HASHHEXFUNC[hashAlg];
+  var sHashHex = hashFunc(s);
+  var sHead = "0001";
+  var sTail = "00" + _RSASIGN_DIHEAD[hashAlg] + sHashHex;
+  var sMid = "";
+  var fLen = pmStrLen - sHead.length - sTail.length;
+  for (var i = 0; i < fLen; i += 2) {
+    sMid += "ff";
+  }
+  sPaddedMessageHex = sHead + sMid + sTail;
+  return sPaddedMessageHex;
+}
+RSAKey.prototype.signString = function(s, hashAlg) {
+  var hPM = _rsasign_getHexPaddedDigestInfoForString(s, this.n.bitLength(), hashAlg);
+  var biPaddedMessage = new BigInteger(hPM, 16);
+  var biSign = this.doPrivate(biPaddedMessage);
+  var hexSign = biSign.toString(16);
+  return hexSign;
+}
+function _rsasign_getDecryptSignatureBI(biSig, hN, hE) {
+  var rsa = new RSAKey();
+  rsa.setPublic(hN, hE);
+  var biDecryptedSig = rsa.doPublic(biSig);
+  return biDecryptedSig;
+}
+function _rsasign_getHexDigestInfoFromSig(biSig, hN, hE) {
+  var biDecryptedSig = _rsasign_getDecryptSignatureBI(biSig, hN, hE);
+  var hDigestInfo = biDecryptedSig.toString(16).replace(/^1f+00/, '');
+  return hDigestInfo;
+}
+function _rsasign_getAlgNameAndHashFromHexDisgestInfo(hDigestInfo) {
+  for (var algName in _RSASIGN_DIHEAD) {
+    var head = _RSASIGN_DIHEAD[algName];
+    var len = head.length;
+    if (hDigestInfo.substring(0, len) == head) {
+      var a = [algName, hDigestInfo.substring(len)];
+      return a;
+    }
+  }
+  return [];
+}
+function _rsasign_verifySignatureWithArgs(sMsg, biSig, hN, hE) {
+  var hDigestInfo = _rsasign_getHexDigestInfoFromSig(biSig, hN, hE);
+  var digestInfoAry = _rsasign_getAlgNameAndHashFromHexDisgestInfo(hDigestInfo);
+  if (digestInfoAry.length == 0) return false;
+  var algName = digestInfoAry[0];
+  var diHashValue = digestInfoAry[1];
+  var ff = _RSASIGN_HASHHEXFUNC[algName];
+  var msgHashValue = ff(sMsg);
+  return (diHashValue == msgHashValue);
+}
+RSAKey.prototype.verifyHexSignatureForMessage = function(hSig, sMsg) {
+  var biSig = new BigInteger(hSig, 16);
+  var result = _rsasign_verifySignatureWithArgs(sMsg, biSig,
+						this.n.toString(16),
+						this.e.toString(16));
+  return result;
+}
+RSAKey.prototype.verifyString = function(sMsg, hSig) {
+  hSig = hSig.replace(/[ \n]+/g, "");
+  var biSig = new BigInteger(hSig, 16);
+  var biDecryptedSig = this.doPublic(biSig);
+  var hDigestInfo = biDecryptedSig.toString(16).replace(/^1f+00/, '');
+  var digestInfoAry = _rsasign_getAlgNameAndHashFromHexDisgestInfo(hDigestInfo);
+  
+  if (digestInfoAry.length == 0) return false;
+  var algName = digestInfoAry[0];
+  var diHashValue = digestInfoAry[1];
+  var ff = _RSASIGN_HASHHEXFUNC[algName];
+  var msgHashValue = ff(sMsg);
+  return (diHashValue == msgHashValue);
+}
+function _x509_pemToBase64(sCertPEM) {
+  var s = sCertPEM;
+  s = s.replace("-----BEGIN CERTIFICATE-----", "");
+  s = s.replace("-----END CERTIFICATE-----", "");
+  s = s.replace(/[ \n]+/g, "");
+  return s;
+}
+function _x509_pemToHex(sCertPEM) {
+  var b64Cert = _x509_pemToBase64(sCertPEM);
+  var hCert = b64tohex(b64Cert);
+  return hCert;
+}
+function _x509_getHexTbsCertificateFromCert(hCert) {
+  var pTbsCert = _asnhex_getStartPosOfV_AtObj(hCert, 0);
+  return pTbsCert;
+}
+function _x509_getSubjectPublicKeyInfoPosFromCertHex(hCert) {
+  var pTbsCert = _asnhex_getStartPosOfV_AtObj(hCert, 0);
+  var a = _asnhex_getPosArrayOfChildren_AtObj(hCert, pTbsCert); 
+  if (a.length < 1) return -1;
+  if (hCert.substring(a[0], a[0] + 10) == "a003020102") { 
+    if (a.length < 6) return -1;
+    return a[6];
+  } else {
+    if (a.length < 5) return -1;
+    return a[5];
+  }
+}
+function _x509_getSubjectPublicKeyPosFromCertHex(hCert) {
+  var pInfo = _x509_getSubjectPublicKeyInfoPosFromCertHex(hCert);
+  if (pInfo == -1) return -1;    
+  var a = _asnhex_getPosArrayOfChildren_AtObj(hCert, pInfo); 
+  if (a.length != 2) return -1;
+  var pBitString = a[1];
+  if (hCert.substring(pBitString, pBitString + 2) != '03') return -1;
+  var pBitStringV = _asnhex_getStartPosOfV_AtObj(hCert, pBitString);
+  if (hCert.substring(pBitStringV, pBitStringV + 2) != '00') return -1;
+  return pBitStringV + 2;
+}
+function _x509_getPublicKeyHexArrayFromCertHex(hCert) {
+  var p = _x509_getSubjectPublicKeyPosFromCertHex(hCert);
+  var a = _asnhex_getPosArrayOfChildren_AtObj(hCert, p); 
+  if (a.length != 2) return [];
+  var hN = _asnhex_getHexOfV_AtObj(hCert, a[0]);
+  var hE = _asnhex_getHexOfV_AtObj(hCert, a[1]);
+  if (hN != null && hE != null) {
+    return [hN, hE];
+  } else {
+    return [];
+  }
+}
+function _x509_getPublicKeyHexArrayFromCertPEM(sCertPEM) {
+  var hCert = _x509_pemToHex(sCertPEM);
+  var a = _x509_getPublicKeyHexArrayFromCertHex(hCert);
+  return a;
+}
+function X509() {
+  this.subjectPublicKeyRSA = null;
+  this.subjectPublicKeyRSA_hN = null;
+  this.subjectPublicKeyRSA_hE = null;
+}
+X509.prototype.readCertPEM = function(sCertPEM) {
+  var hCert = _x509_pemToHex(sCertPEM);
+  var a = _x509_getPublicKeyHexArrayFromCertHex(hCert);
+  var rsa = new RSAKey();
+  rsa.setPublic(a[0], a[1]);
+  this.subjectPublicKeyRSA = rsa;
+  this.subjectPublicKeyRSA_hN = a[0];
+  this.subjectPublicKeyRSA_hE = a[1];
+}
+X509.prototype.readCertPEMWithoutRSAInit = function(sCertPEM) {
+  var hCert = _x509_pemToHex(sCertPEM);
+  var a = _x509_getPublicKeyHexArrayFromCertHex(hCert);
+  this.subjectPublicKeyRSA.setPublic(a[0], a[1]);
+  this.subjectPublicKeyRSA_hN = a[0];
+  this.subjectPublicKeyRSA_hE = a[1];
+}
+function _asnhex_getByteLengthOfL_AtObj(s, pos) {
+  if (s.substring(pos + 2, pos + 3) != '8') return 1;
+  var i = parseInt(s.substring(pos + 3, pos + 4));
+  if (i == 0) return -1; 		
+  if (0 < i && i < 10) return i + 1;	
+  return -2;				
+}
+function _asnhex_getHexOfL_AtObj(s, pos) {
+  var len = _asnhex_getByteLengthOfL_AtObj(s, pos);
+  if (len < 1) return '';
+  return s.substring(pos + 2, pos + 2 + len * 2);
+}
+function _asnhex_getIntOfL_AtObj(s, pos) {
+  var hLength = _asnhex_getHexOfL_AtObj(s, pos);
+  if (hLength == '') return -1;
+  var bi;
+  if (parseInt(hLength.substring(0, 1)) < 8) {
+     bi = new BigInteger(hLength, 16);
+  } else {
+     bi = new BigInteger(hLength.substring(2), 16);
+  }
+  return bi.intValue();
+}
+function _asnhex_getStartPosOfV_AtObj(s, pos) {
+  var l_len = _asnhex_getByteLengthOfL_AtObj(s, pos);
+  if (l_len < 0) return l_len;
+  return pos + (l_len + 1) * 2;
+}
+function _asnhex_getHexOfV_AtObj(s, pos) {
+  var pos1 = _asnhex_getStartPosOfV_AtObj(s, pos);
+  var len = _asnhex_getIntOfL_AtObj(s, pos);
+  return s.substring(pos1, pos1 + len * 2);
+}
+function _asnhex_getPosOfNextSibling_AtObj(s, pos) {
+  var pos1 = _asnhex_getStartPosOfV_AtObj(s, pos);
+  var len = _asnhex_getIntOfL_AtObj(s, pos);
+  return pos1 + len * 2;
+}
+function _asnhex_getPosArrayOfChildren_AtObj(h, pos) {
+  var a = [];
+  var p0 = _asnhex_getStartPosOfV_AtObj(h, pos);
+  a.push(p0);
+  var len = _asnhex_getIntOfL_AtObj(h, pos);
+  var p = p0;
+  var k = 0;
+  while (1) {
+    var pNext = _asnhex_getPosOfNextSibling_AtObj(h, p);
+    if (pNext == null || (pNext - p0  >= (len * 2))) break;
+    if (k >= 200) break;
+    a.push(pNext);
+    p = pNext;
+    k++;
+  }
+  return a;
+}
+function _rsapem_pemToBase64(sPEMPrivateKey) {
+  var s = sPEMPrivateKey;
+  s = s.replace("-----BEGIN RSA PRIVATE KEY-----", "");
+  s = s.replace("-----END RSA PRIVATE KEY-----", "");
+  s = s.replace(/[ \n]+/g, "");
+  return s;
+}
+function _rsapem_getPosArrayOfChildrenFromHex(hPrivateKey) {
+  var a = [];
+  var v1 = _asnhex_getStartPosOfV_AtObj(hPrivateKey, 0);
+  var n1 = _asnhex_getPosOfNextSibling_AtObj(hPrivateKey, v1);
+  var e1 = _asnhex_getPosOfNextSibling_AtObj(hPrivateKey, n1);
+  var d1 = _asnhex_getPosOfNextSibling_AtObj(hPrivateKey, e1);
+  var p1 = _asnhex_getPosOfNextSibling_AtObj(hPrivateKey, d1);
+  var q1 = _asnhex_getPosOfNextSibling_AtObj(hPrivateKey, p1);
+  var dp1 = _asnhex_getPosOfNextSibling_AtObj(hPrivateKey, q1);
+  var dq1 = _asnhex_getPosOfNextSibling_AtObj(hPrivateKey, dp1);
+  var co1 = _asnhex_getPosOfNextSibling_AtObj(hPrivateKey, dq1);
+  a.push(v1, n1, e1, d1, p1, q1, dp1, dq1, co1);
+  return a;
+}
+function _rsapem_getHexValueArrayOfChildrenFromHex(hPrivateKey) {
+  var posArray = _rsapem_getPosArrayOfChildrenFromHex(hPrivateKey);
+  var v =  _asnhex_getHexOfV_AtObj(hPrivateKey, posArray[0]);
+  var n =  _asnhex_getHexOfV_AtObj(hPrivateKey, posArray[1]);
+  var e =  _asnhex_getHexOfV_AtObj(hPrivateKey, posArray[2]);
+  var d =  _asnhex_getHexOfV_AtObj(hPrivateKey, posArray[3]);
+  var p =  _asnhex_getHexOfV_AtObj(hPrivateKey, posArray[4]);
+  var q =  _asnhex_getHexOfV_AtObj(hPrivateKey, posArray[5]);
+  var dp = _asnhex_getHexOfV_AtObj(hPrivateKey, posArray[6]);
+  var dq = _asnhex_getHexOfV_AtObj(hPrivateKey, posArray[7]);
+  var co = _asnhex_getHexOfV_AtObj(hPrivateKey, posArray[8]);
+  var a = [];
+  a.push(v, n, e, d, p, q, dp, dq, co);
+  return a;
+}
+RSAKey.prototype.readPrivateKeyFromPEMString = function(keyPEM) {
+  var keyB64 = _rsapem_pemToBase64(keyPEM);
+  var keyHex = b64tohex(keyB64) 
+  var a = _rsapem_getHexValueArrayOfChildrenFromHex(keyHex);
+  this.setPrivateEx(a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8]);
+}
+elf.onmessage=function(e) {
+witch(e.data.name) {
+	case "generatePrivateKeySign":
+		var data = generatePrivateKeySign(e.data.exponent,e.data.zip);
+		postMessage({
+			name: "generatePrivateKeySign",
+			publicKey:data.publicKey,
+			
+			sign:data.sign,
+			callback:e.data.callback
+		});
+		break;
+	case "generateCrx":
+		var data = packageCRXStuffings(e.data.publicKey,e.data.signature);
+		postMessage({
+			name: "generateCRX", 
+			crxHeader:data,
+			callback:e.data.callback
+		});
+		break;
+	default:
+		break;
+}
+};
+function generatePrivateKeySign(exponent,zip) {
+	var rsa = new RSAKey();
+	
+	rsa.generate(1024,exponent.toString(16));
+	
+	
+	var modulus = hexZeroPad(rsa.n.toString(16),129*2);
+	var exp = hexZeroPad(rsa.e.toString(16),3*2); 
+	var publicKey = formatSPKI(modulus,exp);
+	
+	var sign = rsa.signString(zip,"sha1"); 
+	return {publicKey:publicKey,sign:sign}; 
+}
+function formatSPKI(modulus,exponent) { 
+	
+	var output = "30819F300D06092A864886F70D010101050003818D00308189028181";
+	output += modulus; 
+	output += "0203";
+	output += exponent;
+	return output.toLowerCase();
+}
+function packageCRXStuffings(publicKey,signature) {
+	var output = "Cr24\x02\x00\x00\x00";
+	output += hex2char(
+		hex_endian_swap(hexZeroPad((publicKey.length/2).toString(16),8)) +
+		hex_endian_swap(hexZeroPad((signature.length/2).toString(16),8))
+	);
+	output += hex2char(publicKey + signature);
+	return output;
+}
+function hex2char(hex) { 
+	hex = hex.toLowerCase().match(/[0-9a-f]{2}/igm);
+	hex = hex.map(function(el){
+		return String.fromCharCode(parseInt(el,16));
+	});
+	return hex.join("");
+}
+function hex_endian_swap(x) {
+	if (x.length % 2 !== 0) { throw new Error(); }
+	var output = "", pos = x.length;
+	while (pos) {
+		output += x.substr(pos-2,2);
+		pos -= 2;
+	}
+	return output;
+}
+function char2hex(chars,lowercase) { 
+	chars += "";
+	var hexstring = chars.split("").map(function(el){
+		el = el.charCodeAt(0) & 0xff; 
+		var hex = el.toString(16);
+		if (hex.length<2) { hex = "0"+hex; }
+		return hex;
+	}).join("");
+	if (lowercase) {
+		return hexstring.toLowerCase();
+	} else {
+		return hexstring.toUpperCase();
+	}
+}
+function hexZeroPad(hex,len) {
+	hex += ""; 
+	while(hex.length < len) {
+		hex = "0" + hex;
+	}
+	return hex;
+}
+function hex2b64(hex) {
+	return window.btoa(hex2char(hex));
+}
+function b64tohex(b64) {
+	return char2hex(window.atob(b64));
+}
+function b64toBA(string) {
+	return window.atob(string).split("").map(function(x){return x.charCodeAt(0);});
+}
+}
+function stringToObjectUrl(string) {
+	function createBlobBuilder() {
+		try { return new BlobBuilder(); } catch(e) {}
+		try { return new WebKitBlobBuilder(); } catch(e) {}
+		try { return new MozBlobBuilder(); } catch(e) {}
+		throw new Error("No BlobBuilder support");
+	}
+	
+	function makeObjectURL(f){
+		try { return window.URL.createObjectURL(f); } catch(e) {}
+		try { return window.webkitURL.createObjectURL(f); } catch(e) {}
+		try { return window.createObjectURL(f); } catch(e) {}
+		try { return window.createBlobURL(f); } catch(e) {}
+		throw new Error("No support for creating object URLs");
+	}
+	
+	var bb = createBlobBuilder();
+	var array = new Uint8Array(string.split("").map(function(el) {
+		return el.charCodeAt(0);
+	}));
+	bb.append(array.buffer);
+	return makeObjectURL(bb.getBlob());
+}
+var debug = false;  
+if (debug) return "worker.js";
+else return stringToObjectUrl("(" + worker.toString() + "())");
 }());
