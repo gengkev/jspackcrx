@@ -52,7 +52,7 @@ RSAKey.prototype.setPrivate = function(N,E,D) {
   }
   else
     throw new Error("Invalid RSA private key");
-}
+};
 
 // Set the private key fields N, e, d and CRT params from hex strings
 RSAKey.prototype.setPrivateEx = function(N,E,D,P,Q,DP,DQ,C) {
@@ -68,7 +68,7 @@ RSAKey.prototype.setPrivateEx = function(N,E,D,P,Q,DP,DQ,C) {
   }
   else
     throw new Error("Invalid RSA private key");
-}
+};
 
 // Generate a new random private key B bits long, using public expt E
 RSAKey.prototype.generate = function(B,E) {
@@ -102,11 +102,11 @@ RSAKey.prototype.generate = function(B,E) {
       break;
     }
   }
-}
+};
 
 // Perform raw private operation on "x": return x^d (mod n)
 RSAKey.prototype.doPrivate = function(x) {
-  //if(this.p == null || this.q == null)
+  if(this.p == null || this.q == null)
     return x.modPow(this.d, this.n);
 
   // TODO: re-calculate any missing CRT params

@@ -95,12 +95,12 @@ RSAKey.prototype.setPublic = function(N,E) {
   }
   else
     throw new Error("Invalid RSA public key");
-}
+};
 
 // Perform raw public operation on "x": return x^e (mod n)
 RSAKey.prototype.doPublic = function(x) {
   return x.modPowInt(this.e, this.n);
-}
+};
 
 // Return the PKCS#1 RSA encryption of "text" as an even-length hex string
 RSAKey.prototype.encrypt = function(text) {
@@ -110,7 +110,7 @@ RSAKey.prototype.encrypt = function(text) {
   if(c == null) return null;
   var h = c.toString(16);
   if((h.length & 1) == 0) return h; else return "0" + h;
-}
+};
 
 // Return the PKCS#1 RSA encryption of "text" as a Base64-encoded string
 //function RSAEncryptB64(text) {

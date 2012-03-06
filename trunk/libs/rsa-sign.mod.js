@@ -45,16 +45,16 @@ var _RSASIGN_HASHHEXFUNC = {
 // ========================================================================
 
 function _rsasign_getHexPaddedDigestInfoForString(s, keySize, hashAlg) {
-  hashAlg = hashAlg.toLowerCase();
-
-  var pmStrLen = keySize / 4;
-  var hashFunc = _RSASIGN_HASHHEXFUNC[hashAlg];
-  var sHashHex = hashFunc(s);
-
-  var sHead = "0001";
-  var sTail = "00" + _RSASIGN_DIHEAD[hashAlg] + sHashHex;
-  var sMid = "";
-  var fLen = pmStrLen - sHead.length - sTail.length;
+	hashAlg = hashAlg.toLowerCase();
+	
+	var pmStrLen = keySize / 4;
+	var hashFunc = _RSASIGN_HASHHEXFUNC[hashAlg];
+	var sHashHex = hashFunc(s);
+	
+	var sHead = "0001";
+	var sTail = "00" + _RSASIGN_DIHEAD[hashAlg] + sHashHex;
+	var sMid = "";
+	var fLen = pmStrLen - sHead.length - sTail.length;
   for (var i = 0; i < fLen; i += 2) {
     sMid += "ff";
   }
@@ -68,7 +68,9 @@ RSAKey.prototype.signString = function(s, hashAlg) {
   var biSign = this.doPrivate(biPaddedMessage);
   var hexSign = biSign.toString(16);
   return hexSign;
-}
+};
+
+// Removed _rsasign_signStringWithSHA(1|256)
 
 // ========================================================================
 // Signature Verification
@@ -102,7 +104,7 @@ function _rsasign_getAlgNameAndHashFromHexDisgestInfo(hDigestInfo) {
 function _rsasign_verifySignatureWithArgs(sMsg, biSig, hN, hE) {
   var hDigestInfo = _rsasign_getHexDigestInfoFromSig(biSig, hN, hE);
   var digestInfoAry = _rsasign_getAlgNameAndHashFromHexDisgestInfo(hDigestInfo);
-  if (digestInfoAry.length == 0) return false;
+  if (digestInfoAry.length === 0) return false;
   var algName = digestInfoAry[0];
   var diHashValue = digestInfoAry[1];
   var ff = _RSASIGN_HASHHEXFUNC[algName];
@@ -125,13 +127,15 @@ RSAKey.prototype.verifyString = function(sMsg, hSig) {
   var hDigestInfo = biDecryptedSig.toString(16).replace(/^1f+00/, '');
   var digestInfoAry = _rsasign_getAlgNameAndHashFromHexDisgestInfo(hDigestInfo);
   
-  if (digestInfoAry.length == 0) return false;
+  if (digestInfoAry.length === 0) return false;
   var algName = digestInfoAry[0];
   var diHashValue = digestInfoAry[1];
   var ff = _RSASIGN_HASHHEXFUNC[algName];
   var msgHashValue = ff(sMsg);
   return (diHashValue == msgHashValue);
-}
+};
+
+// removed VerifySHA1String and verifySHA2
 
 
 // 
@@ -233,7 +237,7 @@ X509.prototype.readCertPEM = function(sCertPEM) {
   this.subjectPublicKeyRSA = rsa;
   this.subjectPublicKeyRSA_hN = a[0];
   this.subjectPublicKeyRSA_hE = a[1];
-}
+};
 
 X509.prototype.readCertPEMWithoutRSAInit = function(sCertPEM) {
   var hCert = _x509_pemToHex(sCertPEM);
@@ -241,7 +245,7 @@ X509.prototype.readCertPEMWithoutRSAInit = function(sCertPEM) {
   this.subjectPublicKeyRSA.setPublic(a[0], a[1]);
   this.subjectPublicKeyRSA_hN = a[0];
   this.subjectPublicKeyRSA_hE = a[1];
-}
+};
 
 //
 // asn1hex.js - Hexadecimal represented ASN.1 string library
@@ -273,17 +277,17 @@ X509.prototype.readCertPEMWithoutRSAInit = function(sCertPEM) {
 //     (i.e. ASN.1 primitives like SET, SEQUENCE, INTEGER, OCTETSTRING ...)
 //   - 
 function _asnhex_getByteLengthOfL_AtObj(s, pos) {
-  if (s.substring(pos + 2, pos + 3) != '8') return 1;
-  var i = parseInt(s.substring(pos + 3, pos + 4));
-  if (i == 0) return -1; 		// length octet '80' indefinite length
-  if (0 < i && i < 10) return i + 1;	// including '8?' octet;
-  return -2;				// malformed format
+	if (s.substring(pos + 2, pos + 3) != '8') return 1;
+	var i = parseInt(s.substring(pos + 3, pos + 4));
+	if (i == 0) return -1;				// length octet '80' indefinite length
+	if (0 < i && i < 10) return i + 1;	// including '8?' octet;
+	return -2;							// malformed format
 }
 
 function _asnhex_getHexOfL_AtObj(s, pos) {
-  var len = _asnhex_getByteLengthOfL_AtObj(s, pos);
-  if (len < 1) return '';
-  return s.substring(pos + 2, pos + 2 + len * 2);
+	var len = _asnhex_getByteLengthOfL_AtObj(s, pos);
+	if (len < 1) return '';
+	return s.substring(pos + 2, pos + 2 + len * 2);
 }
 
 //
@@ -295,15 +299,15 @@ function _asnhex_getHexOfL_AtObj(s, pos) {
 //   f('0203001...', 0) ... 03 ... 3
 //   f('02818003...', 0) ... 8180 ... 128
 function _asnhex_getIntOfL_AtObj(s, pos) {
-  var hLength = _asnhex_getHexOfL_AtObj(s, pos);
-  if (hLength == '') return -1;
-  var bi;
-  if (parseInt(hLength.substring(0, 1)) < 8) {
-     bi = new BigInteger(hLength, 16);
-  } else {
-     bi = new BigInteger(hLength.substring(2), 16);
-  }
-  return bi.intValue();
+	var hLength = _asnhex_getHexOfL_AtObj(s, pos);
+	if (hLength == '') return -1;
+	var bi;
+	if (parseInt(hLength.substring(0, 1)) < 8) {
+		bi = new BigInteger(hLength, 16);
+	} else {
+		bi = new BigInteger(hLength.substring(2), 16);
+	}
+	return bi.intValue();
 }
 
 //
@@ -311,9 +315,9 @@ function _asnhex_getIntOfL_AtObj(s, pos) {
 // for ASN.1 object refered by index 'idx'.
 //
 function _asnhex_getStartPosOfV_AtObj(s, pos) {
-  var l_len = _asnhex_getByteLengthOfL_AtObj(s, pos);
-  if (l_len < 0) return l_len;
-  return pos + (l_len + 1) * 2;
+	var l_len = _asnhex_getByteLengthOfL_AtObj(s, pos);
+	if (l_len < 0) return l_len;
+	return pos + (l_len + 1) * 2;
 }
 
 function _asnhex_getHexOfV_AtObj(s, pos) {
@@ -329,7 +333,7 @@ function _asnhex_getPosOfNextSibling_AtObj(s, pos) {
 }
 
 function _asnhex_getPosArrayOfChildren_AtObj(h, pos) {
-  var a = new Array();
+  var a = [];
   var p0 = _asnhex_getStartPosOfV_AtObj(h, pos);
   a.push(p0);
 
@@ -383,7 +387,7 @@ function _rsapem_pemToBase64(sPEMPrivateKey) {
 }
 
 function _rsapem_getPosArrayOfChildrenFromHex(hPrivateKey) {
-  var a = new Array();
+  var a = [];
   var v1 = _asnhex_getStartPosOfV_AtObj(hPrivateKey, 0);
   var n1 = _asnhex_getPosOfNextSibling_AtObj(hPrivateKey, v1);
   var e1 = _asnhex_getPosOfNextSibling_AtObj(hPrivateKey, n1);
@@ -408,14 +412,14 @@ function _rsapem_getHexValueArrayOfChildrenFromHex(hPrivateKey) {
   var dp = _asnhex_getHexOfV_AtObj(hPrivateKey, posArray[6]);
   var dq = _asnhex_getHexOfV_AtObj(hPrivateKey, posArray[7]);
   var co = _asnhex_getHexOfV_AtObj(hPrivateKey, posArray[8]);
-  var a = new Array();
+  var a = [];
   a.push(v, n, e, d, p, q, dp, dq, co);
   return a;
 }
 
 RSAKey.prototype.readPrivateKeyFromPEMString = function(keyPEM) {
   var keyB64 = _rsapem_pemToBase64(keyPEM);
-  var keyHex = b64tohex(keyB64) // depends base64.js
+  var keyHex = b64tohex(keyB64); // depends base64.js
   var a = _rsapem_getHexValueArrayOfChildrenFromHex(keyHex);
   this.setPrivateEx(a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8]);
-}
+};
