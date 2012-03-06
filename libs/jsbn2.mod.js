@@ -562,15 +562,20 @@ BigInteger.prototype.modInverse = function(m) {
 };
 
 (function(){ //too lazy to indent!
-
-  var lowprimes=[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103,107,109,
-    113,127,131,137,139,149,151,157,163,167,173,179,181,191,193,197,199,211,223,227,229,233,239,241,251,
-    257,263,269,271,277,281,283,293,307,311,313,317,331,337,347,349,353,359,367,373,379,383,389,397,401,
-    409,419,421,431,433,439,443,449,457,461,463,467,479,487,491,499,503,509,521,523,541,547,557,563,569,
-    571,577,587,593,599,601,607,613,617,619,631,641,643,647,653,659,661,673,677,683,691,701,709,719,727,
-    733,739,743,751,757,761,769,773,787,797,809,811,821,823,827,829,839,853,857,859,863,877,881,883,887,
-    907,911,919,929,937,941,947,953,967,971,977,983,991,997],
-    lplim = (1<<26)/lowprimes[lowprimes.length-1];
+	// saves spae ever so slightly, heh
+	var lowprimes = [];
+	
+	("020305070b0d0h0j0n0t0v1115171b1h1n1p1v1z21272b2h2p2t2v2z31353j3n3t3v45474"
+		+"d4j4n4t4z515b5d5h5j5v676b6d6h6n6p6z757b7h7j7p7t7v858j8n8p8t979d9n9p9t"
+		+"9za7adajanatb1b5bdbnbpbzc1c7cbchcpctcvczdbdjdndvdze5ehejf1f7fhfnftfvg"
+		+"1gbghgngpgvh1h5h7hjhthvhzi5ibidipitizj7jhjpjzk7kdkjknkvl1l5ldlhlvm5mh"
+		+"mjmtmvmzn1nbnpntnvnzodohojonp7pbpjptq1q5qbqhqvqzr5rbrjrp")
+		.split("").reduce(function(pr,el,i){
+			if (i%2==1) lowprimes.push(parseInt(pr+el,36));return el;
+		});
+	//for (var i=0;i<336;i+=2){ //no i!!!
+	//	lowprimes.push(parseInt(lpstr.substring(i,i+2),36));
+	//}
 
   // (public) test primality with certainty >= 1-.5^t
   BigInteger.prototype.isProbablePrime = function(t) {

@@ -55,11 +55,11 @@ function _rsasign_getHexPaddedDigestInfoForString(s, keySize, hashAlg) {
 	var sTail = "00" + _RSASIGN_DIHEAD[hashAlg] + sHashHex;
 	var sMid = "";
 	var fLen = pmStrLen - sHead.length - sTail.length;
-  for (var i = 0; i < fLen; i += 2) {
-    sMid += "ff";
-  }
-  sPaddedMessageHex = sHead + sMid + sTail;
-  return sPaddedMessageHex;
+	for (var i = 0; i < fLen; i += 2) {
+		sMid += "ff";
+	}
+	sPaddedMessageHex = sHead + sMid + sTail;
+	return sPaddedMessageHex;
 }
 
 RSAKey.prototype.signString = function(s, hashAlg) {
