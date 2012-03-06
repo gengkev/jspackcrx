@@ -38,6 +38,8 @@ function BigInteger(a,b,c) {
 // c is initial carry, returns final carry.
 // c < 3*dvalue, x < 2*dvalue, this_i < dvalue
 // We need to select the fastest one that works in this environment.
+
+/* heh no more browser detection - randomly pick!
 (function(appName){
   var test = (0xdeadbeefcafe&0xffffff)==0xefcafe;
 
@@ -63,7 +65,7 @@ function BigInteger(a,b,c) {
     // am1: use a single mult and divide to get the high bits,
     // max digit bits should be 26 because
     // max internal value = 2*dvalue^2-2*dvalue (< 2^53)
-    function am1(i,x,w,j,c,n) {
+    BigInteger.prototype.am = function(i,x,w,j,c,n) {
       while(--n >= 0) {
         var v = x*this[i++]+w[j]+c;
         c = Math.floor(v/0x4000000);
@@ -76,6 +78,7 @@ function BigInteger(a,b,c) {
   else { // Mozilla/Netscape seems to prefer am3
     // Alternately, set max digit bits to 28 since some
     // browsers slow down when dealing with 32-bit numbers.
+*/
     BigInteger.prototype.am = function(i,x,w,j,c,n) {
       var xl = x&0x3fff, xh = x>>14;
       while(--n >= 0) {
@@ -89,8 +92,8 @@ function BigInteger(a,b,c) {
       return c;
     };
     BigInteger.prototype.DB = 28;
-  }
-}(navigator.appName));
+//  }
+//}(navigator.appName));
 
 BigInteger.prototype.DV = 1<<BigInteger.prototype.DB;
 BigInteger.prototype.DM = BigInteger.prototype.DV-1;
