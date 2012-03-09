@@ -115,7 +115,7 @@ function b64toBA(string) {
 	return window.atob(string).split("").map(function(x){return x.charCodeAt(0);});
 }
 /**/ // will exclude in build
-if (!BigInteger || !RSAKey) { // :-/
+if (!self.BigInteger || !selfRSAKey) { // :-/
 	importScripts.apply(null,[
 		"jsbn.mod",
 		"jsbn2.mod",
