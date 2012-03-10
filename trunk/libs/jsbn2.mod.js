@@ -573,6 +573,8 @@ BigInteger.prototype.modInverse = function(m) {
 		.split("").reduce(function(pr,el,i){
 			if (i%2==1) lowprimes.push(parseInt(pr+el,36));return el;
 		});
+	var lplim = (1<<26)/lowprimes[lowprimes.length-1];
+	
 	//for (var i=0;i<336;i+=2){ //no i!!!
 	//	lowprimes.push(parseInt(lpstr.substring(i,i+2),36));
 	//}
