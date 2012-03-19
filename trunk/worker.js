@@ -59,12 +59,13 @@ function formatSPKI(modulus,exponent) { //should be in string-hex format
 }
 function packageCRXStuffings(publicKey,signature) {
 	var output = "Cr24\x02\x00\x00\x00";
-	output += hex2char(
-		hex_endian_swap(hexZeroPad((publicKey.length/2).toString(16),8)) +
-		hex_endian_swap(hexZeroPad((signature.length/2).toString(16),8))
-	);
+	output += hex2char(hexByteLength(publicKey,8) +	hexByteLength(signature,8));
 	output += hex2char(publicKey + signature);
 	return output;
+}
+function hexByteLength(str,pad) {
+	var len = (str.length/2).toString(16);
+	return hex_endian_swap(hexZeroPad(len,pad));
 }
 function hex2char(hex) { //me has to lol at this function
 	hex = hex.toLowerCase().match(/[0-9a-f]{2}/igm);
@@ -115,7 +116,7 @@ function b64toBA(string) {
 	return window.atob(string).split("").map(function(x){return x.charCodeAt(0);});
 }
 /**/ // will exclude in build
-if (!self.BigInteger || !selfRSAKey) { // :-/
+if (!self.BigInteger || !self.RSAKey) { // :-/
 	importScripts.apply(null,[
 		"jsbn.mod",
 		"jsbn2.mod",
