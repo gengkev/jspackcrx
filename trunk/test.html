@@ -33,11 +33,46 @@ function packagecrx() {
 	crx.generatePrivateKeySignature({exponent:65537},function(){
 		crx.generateCrx("string",function(){
 			// location.href = "data:application/x-chrome-extension;base64," + window.btoa(this.crx.header + this.zip.string);
-			downloadBlob(this.crx.header + this.zip.string);
+			//downloadBlob(this.crx.header + this.zip.string);
+			hexview(toDownload=this.crx.header + this.zip.string);
 			this.terminate();
 		});
 	});
 }
+function hexview(chars) {
+	var hex = char2hex(chars).split("");
+	hex.forEach(function(e,i){
+
+		if (i%32==31) hex[i]+="\n";
+		else if (i%8==7) hex[i]+="  ";
+		else if (i%2==1) hex[i]+=" ";
+	});
+	document.getElementById("hex").innerHTML = hex.join("");
+}
+function char2hex(chars,lowercase) { // also purty :)
+	chars = chars.toString();
+
+	var hexstring = Array.prototype.map.call(chars,function(el){
+		el = el.charCodeAt(0) & 0xff; //two digits please?
+		var hex = el.toString(16);
+		if (hex.length<2) { hex = "0"+hex; }
+		return hex;
+	}).join("");
+	if (lowercase) {
+		return hexstring.toLowerCase();
+	} else {
+		return hexstring.toUpperCase();
+	}
+}
+
+function hex2char(hex) { //me has to lol at this function
+	hex = hex.toLowerCase().match(/[0-9a-f]{2}/igm);
+	hex = hex.map(function(el){
+		return String.fromCharCode(parseInt(el,16));
+	});
+	return hex.join("");
+}
+var toDownload = null;
 function downloadBlob(fileData) {
 	var bb = new (window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder)();
 	// turn fileData into an ArrayBuffer
@@ -45,7 +80,7 @@ function downloadBlob(fileData) {
 		return el.charCodeAt(0);
 	});
 	bb.append(new Uint8Array(array).buffer);
-	saveAs(bb.getBlob("application/x-chrome-extension"));
+	saveAs(bb.getBlob(document.getElementById("mimetype").value));
 }
 </script>
 
@@ -57,7 +92,9 @@ implement ASN.1. Also you can't use/save a private key or anything so yeah. At l
 It's all very hackish right now and the API sucks.<br />
 And the crx will be packaged with an image in /img/logo_128.png stolen from Mozilla's Open Web Apps project.
 </p>
-<button onclick="packagecrx()">Package CRX!</button>
+<button onclick="packagecrx()">Package CRX!</button> <label for="mimetype">MIME-Type:
+<input type="text" value="application/x-chrome-extension" id="mimetype" /></label>
+<a href="#" onclick="downloadBlob(toDownload)">Download</a>
 <br />
 Manifest:
 <br />
@@ -76,3 +113,4 @@ Manifest:
   }
 }
 </textarea>
+<pre id="hex" style="float:right;display:inline-block;border:1px solid grey;padding:10px;overflow-y:scroll;height:400px"></pre>
