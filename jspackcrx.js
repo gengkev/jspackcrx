@@ -115,7 +115,7 @@ JSCrx.prototype.addZip = function(zipData,encoding) {
 			this.zip.string = zipData;
 			break;
 		default:
-			this.zip.string = zipData;
+			this.zip.string = zipData.toString();
 			break;
 	}
 
