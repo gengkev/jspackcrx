@@ -30,9 +30,10 @@ function packagecrx() {
 	JSCrx.libdir = "libs/";
 	var crx = new JSCrx();
 	crx.addZip(zip.generate(true),"string");
+
 	crx.generatePrivateKeySignature({exponent:65537},function(){
+
 		crx.generateCrx("string",function(){
-			// location.href = "data:application/x-chrome-extension;base64," + window.btoa(this.crx.header + this.zip.string);
 			//downloadBlob(this.crx.header + this.zip.string);
 			hexview(toDownload=this.crx.header + this.zip.string);
 			this.terminate();
@@ -107,10 +108,8 @@ Manifest:
     "launch": {
 	  "web_url": "http://appmanifest.org/"
 	}
-  },
-  "icons": {
+  },  "icons": {
     "128": "/img/logo_128.png"
   }
 }
-</textarea>
 <pre id="hex" style="float:right;display:inline-block;border:1px solid grey;padding:10px;overflow-y:scroll;height:400px"></pre>
