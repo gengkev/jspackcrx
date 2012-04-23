@@ -50,12 +50,17 @@ function generatePrivateKeySign(exponent,zip) {
 	return {publicKey:publicKey,sign:sign}; //I don't believe it's that easy
 }
 function formatSPKI(modulus,exponent) { //should be in string-hex format
+	modulus = "00" + modulus;
+	modulus = "02" + hexByteLength(modulus) + modulus;
+
+	exponent = "00" + exponent;
+	exponent = "02" + hexByteLengh(exponent) + exponent;
+
+	var sequence = "3081" + hexByteLength(modulus + exponent) + modulus + exponent;
+
 	// some asn.1 stuff at the beginning
-	var output = "30819F300D06092A864886F70D010101050003818D00308189028181";
-	output += modulus; //umm this will only work with a 1024 bit key probably...
-	output += "0203";
-	output += exponent;
-	return output.toLowerCase();
+	//var output = "30819F300D06092A864886F70D010101050003818D0030818902";
+	return sequence.toLowerCase();
 }
 function packageCRXStuffings(publicKey,signature) {
 	var output = "Cr24\x02\x00\x00\x00";

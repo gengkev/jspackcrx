@@ -23,13 +23,13 @@ var support = {
 	blobbuilder: !!window.BlobBuilder || !!window.MozBlobBuilder || !!window.WebKitBlobBuilder
 };
 var callbackStack = [];
-function callbackRun(callback,_this) {
+callbackStack.run = function(callback,_this) {
 	if (callbackStack[callback]) {
 		callbackStack[callback].call(_this);
 		callbackStack[callback] = undefined;
 	}
 }
-function addCallback(callback) {
+callbackStack.add = function(callback) {
 	for (var i=0;i<=callbackStack.length;++i) { //index callbackStack.length will always be available
 		if (typeof callbackStack[i] === "undefined") {
 			callbackStack[i] = callback;
@@ -76,14 +76,11 @@ function JSCrx() {
 				_this.publicKey.der = e.data.publicKey;
 				// this.privateKey.string = e.data.privateKey;
 				_this.sign.der = e.data.sign;
-				callbackRun(e.data.callback,_this);
+				callbackStack.run(e.data.callback,_this);
 				break;
-			//case "generateSignature":
-			//	_this.sign.der = e.data.der;
-			//	callbackRun(e.data.callback,_this);
 			case "generateCRX":
 				_this.crx.header = e.data.crxHeader;
-				callbackRun(e.data.callback,_this);
+				callbackStack.run(e.data.callback,_this);
 				break;
 			default:
 				break;
@@ -124,7 +121,7 @@ JSCrx.prototype.addZip = function(zipData,encoding) {
 JSCrx.prototype.generatePrivateKeySignature = function(options,callback) {
 	if (!this.zip.string) { throw new Error("Need zip file in order to sign"); }
 
-	var callbackIndex = addCallback(callback);
+	var callbackIndex = callbackStack.add(callback);
 	this.worker.postMessage({
 		name: "generatePrivateKeySign",
 		exponent: options.exponent || 65537,
@@ -137,7 +134,7 @@ JSCrx.prototype.generateCrx = function(format,callback) {
 	else if (!this.sign.der) { throw new Error("Need signature in order to package"); }
 	else if (!this.zip.string) { throw new Error("Need zip file in order to sign"); }
 
-	var callbackIndex = addCallback(callback);
+	var callbackIndex = callbackStack.add(callback);
 	this.worker.postMessage({
 		name:"generateCrx",
 		publicKey:this.publicKey.der,
