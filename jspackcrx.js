@@ -188,8 +188,7 @@ function stringToObjectUrl(string) {
 	bb.append(array.buffer);
 	return makeObjectURL(bb.getBlob());
 }
-var debug = false; /**/ debug = true; /**/ // will be removed by compiler
+/**/ return "worker.js"; /**/ // will be removed by compiler
 
-if (debug) return "worker.js";
-else return stringToObjectUrl("(" + worker.toString() + "())");
+return stringToObjectUrl("(" + worker.toString() + "())");
 }());
