@@ -37,6 +37,7 @@ jspackcrx = jspackcrx.replace(/(\/\*\sINSERT\s)(.+)(\s\*\/)/gm,function(str,p1,p
 });
 
 console.timeEnd("insert-scripts");
+
 console.time("remove-comments");
 
 // argh, replace BOM
@@ -49,11 +50,10 @@ jspackcrx = jspackcrx.replace(/(\/\*)([\s\S]+?)(\*\/)/gm,"");
 jspackcrx = jspackcrx.replace(/\/\/.*?[\n\r]+/gm,"\n");
 
 // oh and random extra whitespace (bonus)
-jspackcrx = jspackcrx.replace(/[\n\r]+\s*/gm,"\n");
+jspackcrx = jspackcrx.replace(/([\n\r]+\s*)/gm,"\n");
 console.timeEnd("remove-comments");
 
 fs.writeFileSync("jspackcrx_include.js",jspackcrx,"utf-8"); //redundant, in case
-
 
 
 if (jsp !== null && pro !== null) {
