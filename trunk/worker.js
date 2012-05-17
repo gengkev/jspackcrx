@@ -47,20 +47,26 @@ function generatePrivateKeySign(exponent,zip) {
 
 	// so time to sign?
 	var sign = rsa.signString(zip,"sha1"); //umm...zip might be a little big
+	//console.log(publicKey);
+	//console.log(sign);
 	return {publicKey:publicKey,sign:sign}; //I don't believe it's that easy
 }
 function formatSPKI(modulus,exponent) { //should be in string-hex format
-	modulus = "00" + modulus;
-	modulus = "02" + hexByteLength(modulus) + modulus;
 
-	exponent = "00" + exponent;
-	exponent = "02" + hexByteLengh(exponent) + exponent;
+	//modulus = "00" + modulus;
+	modulus = "0281" + hexByteLength(modulus) + modulus;
+
+	exponent = "02" + hexByteLength(exponent) + exponent;
 
 	var sequence = "3081" + hexByteLength(modulus + exponent) + modulus + exponent;
 
-	// some asn.1 stuff at the beginning
-	//var output = "30819F300D06092A864886F70D010101050003818D0030818902";
-	return sequence.toLowerCase();
+	//sequence = "00" + sequence;
+	var bitstring = "0381" + hexByteLength(sequence) + sequence;
+
+	var output = "300D06092A864886F70D0101010500" + bitstring;
+	output = "3081" + hexByteLength(output) + output;
+
+	return output.toLowerCase();
 }
 function packageCRXStuffings(publicKey,signature) {
 	var output = "Cr24\x02\x00\x00\x00";
@@ -80,7 +86,7 @@ function hex2char(hex) { //me has to lol at this function
 	return hex.join("");
 }
 function hex_endian_swap(x) {
-	if (x.length % 2 !== 0) { throw new Error(); }
+	if (x.length % 2 !== 0) { x = "0" + x; }
 
 	var output = "", pos = x.length;
 	while (pos) {
