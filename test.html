@@ -26,12 +26,11 @@ function packagecrx() {
 	zip.add("manifest.json",manifest);
 	zip.folder("img");
 	zip.add("img/logo_128.png",image,{base64:true});
-
-	JSCrx.libdir = "libs/";
+	
 	var crx = new JSCrx();
 	crx.addZip(zip.generate(true),"string");
 
-	crx.generatePrivateKeySignature({exponent:65537},function(){
+	crx.generatePrivateKeySignature({exponent:3},function(){
 
 		crx.generateCrx("string",function(){
 			//downloadBlob(this.crx.header + this.zip.string);

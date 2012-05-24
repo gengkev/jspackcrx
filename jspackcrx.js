@@ -96,9 +96,9 @@ JSCrx.prototype.addZip = function(zipData,encoding) {
 		case "blob":
 		case "file":
 			var reader = new FileReader();
-			reader.onload = function(e) {
+			reader.onload = (function(e) {
 				this.zip.string = e.target.result;
-			};
+			}).bind(this); // make sure this is THIS
 			reader.readAsBinaryString();
 			break;
 		case "typedarray":
@@ -109,8 +109,6 @@ JSCrx.prototype.addZip = function(zipData,encoding) {
 			this.zip.string = window.btoa(zipData);
 			break;
 		case "string":
-			this.zip.string = zipData;
-			break;
 		default:
 			this.zip.string = zipData.toString();
 			break;

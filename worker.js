@@ -47,22 +47,24 @@ function generatePrivateKeySign(exponent,zip) {
 
 	// so time to sign?
 	var sign = rsa.signString(zip,"sha1"); //umm...zip might be a little big
-	//console.log(publicKey);
-	//console.log(sign);
-	return {publicKey:publicKey,sign:sign}; //I don't believe it's that easy
+	
+	return {publicKey:publicKey,sign:sign};
 }
 function formatSPKI(modulus,exponent) { //should be in string-hex format
-
-	//modulus = "00" + modulus;
+	// waiting on a *real* js asn1 library
+	
 	modulus = "0281" + hexByteLength(modulus) + modulus;
 
 	exponent = "02" + hexByteLength(exponent) + exponent;
 
 	var sequence = "3081" + hexByteLength(modulus + exponent) + modulus + exponent;
-
-	//sequence = "00" + sequence;
-	var bitstring = "3081" + hexByteLength(sequence) + sequence;
-
+	
+	// idk why, is this needed for encapsulation? I guess
+	sequence = "00" + sequence;
+	
+	var bitstring = "0381" + hexByteLength(sequence) + sequence;
+	
+	// some object id stuff blablabla
 	var output = "300D06092A864886F70D0101010500" + bitstring;
 	output = "3081" + hexByteLength(output) + output;
 
