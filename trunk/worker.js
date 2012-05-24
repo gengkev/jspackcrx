@@ -61,7 +61,7 @@ function formatSPKI(modulus,exponent) { //should be in string-hex format
 	var sequence = "3081" + hexByteLength(modulus + exponent) + modulus + exponent;
 
 	//sequence = "00" + sequence;
-	var bitstring = "0381" + hexByteLength(sequence) + "00" + sequence;
+	var bitstring = "3081" + hexByteLength(sequence) + sequence;
 
 	var output = "300D06092A864886F70D0101010500" + bitstring;
 	output = "3081" + hexByteLength(output) + output;
