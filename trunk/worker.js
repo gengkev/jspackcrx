@@ -73,11 +73,11 @@ function formatSPKI(modulus,exponent) { //should be in string-hex format
 function packageCRXStuffings(publicKey,signature) {
 	var publicKeyLen = publicKey.byteLength, signatureLen = signature.byteLength;
 	var arr = new Uint8Array(8 + 4 + 4 + publicKeyLen + signatureLen);
-	arr.set(char2ab("Cr24\x02\x00\x00\x00"));
-	arr.set(char2ab(hex_endian_swap(hexZeroPad(publicKeyLen.toString(16),8))),8);
-	arr.set(char2ab(hex_endian_swap(hexZeroPad(signatureLen.toString(16),8))),8 + 4);
-	arr.set(publicKey, 8 + 4 + 4);
-	arr.set(signature, 8 + 4 + 4 + publicKeyLen);
+	arr.set(new Uint8Array(char2ab("Cr24\x02\x00\x00\x00")),0);
+	arr.set(new Uint8Array(char2ab(hex_endian_swap(hexZeroPad(publicKeyLen.toString(16),8)))),8);
+	arr.set(new Uint8Array(char2ab(hex_endian_swap(hexZeroPad(signatureLen.toString(16),8)))),8 + 4);
+	arr.set(new Uint8Array(publicKey), 8 + 4 + 4);
+	arr.set(new Uint8Array(signature), 8 + 4 + 4 + publicKeyLen);
 	return arr.buffer;
 }
 function hexByteLength(str,pad) {
