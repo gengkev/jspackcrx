@@ -41,7 +41,7 @@ var _RSASIGN_HASHHEXFUNC = {
 };
 
 // ========================================================================
-// Signature Generation
+// Signature Gener"maybe"ation
 // ========================================================================
 
 function _rsasign_getHexPaddedDigestInfoForString(s, keySize, hashAlg) {

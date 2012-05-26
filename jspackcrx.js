@@ -25,7 +25,7 @@ var support = {
 var callbackStack = [];
 callbackStack.run = function(callback,_this) {
 	if (callbackStack[callback]) {
-		callbackStack[callback].call(_this);
+		callbackStack[callback].call(null,{target:_this});
 		callbackStack[callback] = undefined;
 	}
 }
@@ -42,51 +42,54 @@ callbackStack.add = function(callback) {
 function JSCrx() {
 	if (this === window) { return new JSCrx(); }
 	this.zip={};
-	this.zip.string="";
-	//this.zip.blob = null;
+	this.zip.full = null;
 
 	this.privateKey={};
-	// this.privateKey.string="";
-	// this.privateKey.pem="";
-	this.privateKey.der="";
+	this.privateKey.der = null;
+	this.privateKey.pem = "";
 
 	this.publicKey={};
-	// this.publicKey.modulus="";
-	// this.publicKey.exponent=0;
-	this.publicKey.der="";
+	this.publicKey.modulus = null;
+	this.publicKey.exponent = null;
+	this.publicKey.der = null;
+	this.publicKey.pem = "";
 
 	this.sign={};
-	// this.sign.string="";
-	this.sign.der="";
+	this.sign.der = null;
 
 	this.crx = {};
-	//this.crx.string = "";
-	//this.crx.hex = "";
-	//this.crx.base64 = "";
+	this.crx.header = null;
+	Object.defineProperty(this.crx,"full",{
+		get: (function() {
+			var crx = new Uint8Array(this.crx.header.byteLength + this.zip.full.byteLength);
+			crx.set(this.crx.header,0);
+			crx.set(this.zip.full,this.crx.header.byteLength);
+			return crx.buffer;
+		}).bind(this),
+		enumerable: true
+	});
 
 	this.worker = new Worker(workerCode);
 	this.worker.onerror = function(e) { throw e; };
 
-	this.worker.onmessage=(function(_this){
-		return function(e) {
+	this.worker.onmessage = (function(e) {
 		switch(e.data.name) {
 			case "generatePrivateKeySign":
 				// _this.publicKey.modulus = e.data.modulus;
 				// _this.publicKey.exponent = e.data.exponent;
-				_this.publicKey.der = e.data.publicKey;
+				this.publicKey.der = e.data.publicKey;
 				// this.privateKey.string = e.data.privateKey;
-				_this.sign.der = e.data.sign;
-				callbackStack.run(e.data.callback,_this);
+				this.sign.der = e.data.sign;
+				callbackStack.run(e.data.callback,this);
 				break;
 			case "generateCRX":
-				_this.crx.header = e.data.crxHeader;
-				callbackStack.run(e.data.callback,_this);
+				this.crx.header = e.data.crxHeader;
+				callbackStack.run(e.data.callback,this);
 				break;
 			default:
 				break;
 		}
-		};
-	}(this));
+	}).bind(this);
 }
 
 
@@ -97,49 +100,52 @@ JSCrx.prototype.addZip = function(zipData,encoding) {
 		case "file":
 			var reader = new FileReader();
 			reader.onload = (function(e) {
-				this.zip.string = e.target.result;
+				this.zip.full = e.target.result;
 			}).bind(this); // make sure this is THIS
-			reader.readAsBinaryString();
+			reader.readAsArrayBuffer();
+			break;
+		case "base64":
+			this.addZip(window.btoa(zipData));
+			break;
+		case "string":
+			this.zip.full = new Uint8Array(
+				zipData.toString().split("").map(function(n){
+					return n.charCodeAt(0)
+				})).buffer;
 			break;
 		case "typedarray":
 			var buffer = zipData.buffer || zipData;
-			this.zip.string = String.fromCharCode.call(null,new Uint8Array(zipData));
+			this.zip.full = buffer;
 			break;
-		case "base64":
-			this.zip.string = window.btoa(zipData);
-			break;
-		case "string":
 		default:
-			this.zip.string = zipData.toString();
 			break;
 	}
 
 	return this;
 };
 JSCrx.prototype.generatePrivateKeySignature = function(options,callback) {
-	if (!this.zip.string) { throw new Error("Need zip file in order to sign"); }
+	if (!this.zip.full) { throw new Error("Need zip file in order to sign"); }
 
 	var callbackIndex = callbackStack.add(callback);
 	this.worker.postMessage({
 		name: "generatePrivateKeySign",
-		exponent: options.exponent || 65537,
-		zip: this.zip.string,
+		exponent: options.exponent || 0x10001,
+		zip: this.zip.full,
 		callback: callbackIndex
-	});
+	}, [this.zip.full]);
 };
-JSCrx.prototype.generateCrx = function(format,callback) {
+JSCrx.prototype.generateCrx = function(callback) {
 	if (!this.publicKey.der) { throw new Error("Need public key in order to package"); }
 	else if (!this.sign.der) { throw new Error("Need signature in order to package"); }
-	else if (!this.zip.string) { throw new Error("Need zip file in order to sign"); }
+	else if (!this.zip.full) { throw new Error("Need zip file in order to sign"); }
 
 	var callbackIndex = callbackStack.add(callback);
 	this.worker.postMessage({
 		name:"generateCrx",
 		publicKey:this.publicKey.der,
 		signature:this.sign.der,
-		// zip:this.zip.string,
 		callback:callbackIndex
-	});
+	}, [this.publicKey.der, this.sign.der]);
 };
 JSCrx.prototype.terminate = function(){
 	//try {

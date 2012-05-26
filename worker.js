@@ -6,7 +6,7 @@
  * It also contains code from other projects: see /docs/licence.txt
  * See http://jspackcrx.googlecode.com/svn/LICENSE.html for details.
  */
-
+if (self.webkitPostMessage) { self.postMessage = self.webkitPostMessage; }
 self.onmessage=function(e) {
 switch(e.data.name) {
 	case "generatePrivateKeySign":
@@ -17,7 +17,7 @@ switch(e.data.name) {
 			// privateKey:data.privateKey,
 			sign:data.sign,
 			callback:e.data.callback
-		});
+		}, [data.publicKey, data.sign]);
 		break;
 	case "generateCrx":
 		var data = packageCRXStuffings(e.data.publicKey,e.data.signature);
@@ -25,7 +25,7 @@ switch(e.data.name) {
 			name: "generateCRX", // Crx or CRX? lol
 			crxHeader:data,
 			callback:e.data.callback
-		});
+		}, [data]);
 		break;
 	default:
 		break;
@@ -41,12 +41,12 @@ function generatePrivateKeySign(exponent,zip) {
 	
 	// idk, zero-pad or not?!
 
-	var modulus = hexZeroPad(rsa.n.toString(16),129*2);
-	var exp = hexZeroPad(rsa.e.toString(16),3*2); //or exponent.toString(16)
+	var modulus = rsa.n.toString(16);
+	var exp = exponent.toString(16);
 	var publicKey = formatSPKI(modulus,exp);
 
 	// so time to sign?
-	var sign = rsa.signString(zip,"sha1"); //umm...zip might be a little big
+	var sign = hex2ab(rsa.signString(zip,"sha1")); //umm...zip might be a little big
 	
 	return {publicKey:publicKey,sign:sign};
 }
@@ -68,20 +68,24 @@ function formatSPKI(modulus,exponent) { //should be in string-hex format
 	var output = "300D06092A864886F70D0101010500" + bitstring;
 	output = "3081" + hexByteLength(output) + output;
 
-	return output.toLowerCase();
+	return hex2ab(output);
 }
 function packageCRXStuffings(publicKey,signature) {
-	var output = "Cr24\x02\x00\x00\x00";
-	output += hex2char(hexByteLength(publicKey,8) +	hexByteLength(signature,8));
-	output += hex2char(publicKey + signature);
-	return output;
+	var publicKeyLen = publicKey.byteLength, signatureLen = signature.byteLength;
+	var arr = new Uint8Array(8 + 4 + 4 + publicKeyLen + signatureLen);
+	arr.set(char2ab("Cr24\x02\x00\x00\x00"));
+	arr.set(char2ab(hex_endian_swap(hexZeroPad(publicKeyLen.toString(16),8))),8);
+	arr.set(char2ab(hex_endian_swap(hexZeroPad(signatureLen.toString(16),8))),8 + 4);
+	arr.set(publicKey, 8 + 4 + 4);
+	arr.set(signature, 8 + 4 + 4 + publicKeyLen);
+	return arr.buffer;
 }
 function hexByteLength(str,pad) {
 	var len = (str.length/2).toString(16);
 	return hex_endian_swap(hexZeroPad(len,pad));
 }
 function hex2char(hex) { //me has to lol at this function
-	hex = hex.toLowerCase().match(/[0-9a-f]{2}/igm);
+	hex = hex.match(/[0-9a-f]{2}/igm);
 	hex = hex.map(function(el){
 		return String.fromCharCode(parseInt(el,16));
 	});
@@ -97,6 +101,15 @@ function hex_endian_swap(x) {
 	}
 	return output;
 }
+// @antimatter15
+function endian_swap(x){
+  return (
+    (x>>>24) | 
+    ((x<<8) & 0x00FF0000) |
+    ((x>>>8) & 0x0000FF00) |
+    (x<<24)
+  )
+}
 function char2hex(chars,lowercase) { // also purty :)
 	chars += "";
 
@@ -111,6 +124,16 @@ function char2hex(chars,lowercase) { // also purty :)
 	} else {
 		return hexstring.toUpperCase();
 	}
+}
+function char2ab(chars) {
+	return new Uint8Array(chars.split("").map(function(n){return n.charCodeAt(0)})).buffer;
+}
+function hex2ab(hex) { //me has to lol at this function
+	hex = hex.match(/[0-9a-f]{2}/igm);
+	hex = hex.map(function(el){
+		return parseInt(el,16);
+	});
+	return new Uint8Array(hex).buffer;
 }
 function hexZeroPad(hex,len) {
 	hex += ""; //implicit toString
@@ -128,6 +151,17 @@ function b64tohex(b64) {
 function b64toBA(string) {
 	return window.atob(string).split("").map(function(x){return x.charCodeAt(0);});
 }
+function abConcat() {
+	var arrayBuffers = [].slice.call(arguments);
+	
+	return arrayBuffers.reduce(function(prev,cur) {
+		var newAb = new Uint8Array(prev.length + cur.length);
+		newAb.set(prev,0);
+		newAb.set(cur,prev.length);
+		return newAb;
+	},new Uint8Array());
+}
+	
 /**/ // will exclude in build
 if (!self.BigInteger || !self.RSAKey) { // :-/
 	importScripts.apply(null,[
