@@ -62,8 +62,8 @@ function JSCrx() {
 	Object.defineProperty(this.crx,"full",{
 		get: (function() {
 			var crx = new Uint8Array(this.crx.header.byteLength + this.zip.full.byteLength);
-			crx.set(this.crx.header,0);
-			crx.set(this.zip.full,this.crx.header.byteLength);
+			crx.set(new Uint8Array(this.crx.header),0);
+			crx.set(new Uint8Array(this.zip.full),this.crx.header.byteLength);
 			return crx.buffer;
 		}).bind(this),
 		enumerable: true
