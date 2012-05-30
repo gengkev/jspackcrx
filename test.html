@@ -38,8 +38,10 @@ function packagecrx() {
 		});
 	});
 }
-function hexview(chars) {
-	var hex = ab2hex(chars);
+var toDownload = null;
+function hexview(ab) {
+	toDownload = ab;
+	var hex = ab2hex(ab);
 	hex.forEach(function(e,i){
 
 		if (i%16==15) hex[i]+="\n";
@@ -79,15 +81,11 @@ function hex2char(hex) { //me has to lol at this function
 	});
 	return hex.join("");
 }
-var toDownload = null;
 function downloadBlob(fileData) {
 	var bb = new (window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder)();
-	// turn fileData into an ArrayBuffer
-	var array = Array.prototype.map.call(fileData,function(el) {
-		return el.charCodeAt(0);
-	});
-	bb.append(new Uint8Array(array).buffer);
-	saveAs(bb.getBlob(document.getElementById("mimetype").value));
+	bb.append(fileData);
+	var bla = (window.URL || window.webkitURL).createObjectURL(bb.getBlob("application/x-chrome-extension"));
+	location.assign(bla);
 }
 </script>
 
