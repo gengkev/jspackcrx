@@ -73,9 +73,13 @@ function formatSPKI(modulus,exponent) { //should be in string-hex format
 function packageCRXStuffings(publicKey,signature) {
 	var publicKeyLen = publicKey.byteLength, signatureLen = signature.byteLength;
 	var arr = new Uint8Array(8 + 4 + 4 + publicKeyLen + signatureLen);
+	
 	arr.set(new Uint8Array(char2ab("Cr24\x02\x00\x00\x00")),0);
-	arr.set(new Uint8Array(char2ab(hex_endian_swap(hexZeroPad(publicKeyLen.toString(16),8)))),8);
-	arr.set(new Uint8Array(char2ab(hex_endian_swap(hexZeroPad(signatureLen.toString(16),8)))),8 + 4);
+	
+	arr.set(new Uint8Array(int2ab(publicKeyLen)),8);
+	arr.set(new Uint8Array(int2ab(signatureLen)),8 + 4);
+	
+	
 	arr.set(new Uint8Array(publicKey), 8 + 4 + 4);
 	arr.set(new Uint8Array(signature), 8 + 4 + 4 + publicKeyLen);
 	return arr.buffer;
@@ -90,6 +94,14 @@ function hex2char(hex) { //me has to lol at this function
 		return String.fromCharCode(parseInt(el,16));
 	});
 	return hex.join("");
+}
+function int2ab(n) {
+	var arr = new Uint8Array(4);
+	arr[0] = n >>>  0 & 0xff;
+	arr[1] = n >>>  8 & 0xff;
+	arr[2] = n >>> 16 & 0xff;
+	arr[3] = n >>> 24 & 0xff;
+	return arr.buffer;
 }
 function hex_endian_swap(x) {
 	if (x.length % 2 !== 0) { x = "0" + x; }
@@ -110,6 +122,7 @@ function endian_swap(x){
     (x<<24)
   )
 }
+
 function char2hex(chars,lowercase) { // also purty :)
 	chars += "";
 
