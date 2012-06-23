@@ -10,21 +10,29 @@ if (self.webkitPostMessage) { self.postMessage = self.webkitPostMessage; }
 self.onmessage=function(e) {
 switch(e.data.name) {
 	case "generatePrivateKeySign":
-		var data = generatePrivateKeySign(e.data.exponent,e.data.zip);
+		var data = generatePrivateKeySign(
+			e.data.exponent,
+			e.data.zip
+		);
+		
 		postMessage({
-			name: "generatePrivateKeySign",
-			publicKey:data.publicKey,
-			// privateKey:data.privateKey,
-			sign:data.sign,
-			callback:e.data.callback
+			name:       "generatePrivateKeySign",
+			publicKey:  data.publicKey,
+			// privateKey: data.privateKey,
+			sign:       data.sign,
+			callback:   e.data.callback
 		}, [data.publicKey, data.sign]);
 		break;
 	case "generateCrx":
-		var data = packageCRXStuffings(e.data.publicKey,e.data.signature);
+		var data = packageCRXStuffings(
+			e.data.publicKey,
+			e.data.signature
+		);
+		
 		postMessage({
-			name: "generateCRX", // Crx or CRX? lol
-			crxHeader:data,
-			callback:e.data.callback
+			name:     "generateCRX", // Crx or CRX? lol
+			crxHeader: data,
+			callback:  e.data.callback
 		}, [data]);
 		break;
 	default:
@@ -35,25 +43,35 @@ switch(e.data.name) {
 
 function generatePrivateKeySign(exponent,zip) {
 	var rsa = new RSAKey();
-	// var publicKeyPEM,publicKeyRaw,privateKeyPEM = pemFile,privateKeyRaw;
 
 	rsa.generate(1024,exponent.toString(16));
 	
 	// idk, zero-pad or not?!
 
-	//var modulus = rsa.n.toString(16);
-	//var exp = exponent.toString(16);
-	var modulus = hexZeroPad(rsa.n.toString(16),129*2);
-	var exp = hexZeroPad(rsa.e.toString(16),3*2);
+	var modulus = rsa.n.toString(16);
+	var exp = exponent.toString(16);
+	//var modulus = hexZeroPad(rsa.n.toString(16),129*2);
+	//var exp = hexZeroPad(rsa.e.toString(16),3*2);
 	var publicKey = formatSPKI(modulus,exp);
 
 	// so time to sign?
-	var sign = hex2ab(rsa.signStringWithSHA1(zip)); //umm...zip might be a little big
+	var sign = hex2ui8( // convert result to Uint8Array
+		rsa.signString( // sign string
+			ui82char( new Uint8Array(zip) ) // convert arraybuffer to string
+		,"sha1")
+	);
 	
-	return {publicKey:publicKey,sign:sign};
+	return {publicKey:publicKey.buffer,sign:sign.buffer};
 }
 function formatSPKI(modulus,exponent) { //should be in string-hex format
 	// waiting on a *real* js asn1 library
+	
+	if (modulus.length % 2 == 1) {
+		modulus = "0" + modulus;
+	}
+	if (exponent.length % 2 == 1) {
+		exponent = "0" + exponent;
+	}
 	
 	modulus = "0281" + hexByteLength(modulus) + modulus;
 
@@ -70,16 +88,16 @@ function formatSPKI(modulus,exponent) { //should be in string-hex format
 	var output = "300D06092A864886F70D0101010500" + bitstring;
 	output = "3081" + hexByteLength(output) + output;
 
-	return hex2ab(output);
+	return hex2ui8(output);
 }
 function packageCRXStuffings(publicKey,signature) {
 	var publicKeyLen = publicKey.byteLength, signatureLen = signature.byteLength;
 	var arr = new Uint8Array(8 + 4 + 4 + publicKeyLen + signatureLen);
 	
-	arr.set(new Uint8Array(char2ab("Cr24\x02\x00\x00\x00")),0);
+	arr.set(char2ui8("Cr24\x02\x00\x00\x00"),0);
 	
-	arr.set(new Uint8Array(int2ab(publicKeyLen)),8);
-	arr.set(new Uint8Array(int2ab(signatureLen)),8 + 4);
+	arr.set(int2ui8(publicKeyLen),8);
+	arr.set(int2ui8(signatureLen),8 + 4);
 	
 	
 	arr.set(new Uint8Array(publicKey), 8 + 4 + 4);
@@ -97,13 +115,13 @@ function hex2char(hex) { //me has to lol at this function
 	});
 	return hex.join("");
 }
-function int2ab(n) {
+function int2ui8(n) {
 	var arr = new Uint8Array(4);
 	arr[0] = n >>>  0 & 0xff;
 	arr[1] = n >>>  8 & 0xff;
 	arr[2] = n >>> 16 & 0xff;
 	arr[3] = n >>> 24 & 0xff;
-	return arr.buffer;
+	return arr;
 }
 function hex_endian_swap(x) {
 	if (x.length % 2 !== 0) { x = "0" + x; }
@@ -140,15 +158,24 @@ function char2hex(chars,lowercase) { // also purty :)
 		return hexstring.toUpperCase();
 	}
 }
-function char2ab(chars) {
-	return new Uint8Array(chars.split("").map(function(n){return n.charCodeAt(0)})).buffer;
+function char2ui8(chars) {
+	return new Uint8Array(
+		chars.split("").map(function(n){
+			return n.charCodeAt(0)
+		})
+	);
 }
-function hex2ab(hex) { //me has to lol at this function
+function hex2ui8(hex) { //me has to lol at this function
 	hex = hex.match(/[0-9a-f]{2}/igm);
 	hex = hex.map(function(el){
 		return parseInt(el,16);
 	});
-	return new Uint8Array(hex).buffer;
+	return new Uint8Array(hex);
+}
+function ui82char(arr) {
+	return [].map.call(arr,function(n) {
+		return String.fromCharCode(n);
+	}).join("");
 }
 function hexZeroPad(hex,len) {
 	hex += ""; //implicit toString
@@ -163,18 +190,20 @@ function hex2b64(hex) {
 function b64tohex(b64) {
 	return char2hex(window.atob(b64));
 }
-function b64toBA(string) {
-	return window.atob(string).split("").map(function(x){return x.charCodeAt(0);});
-}
+//function b64toBA(string) {
+//	return window.atob(string).split("").map(function(x){return x.charCodeAt(0);});
+//}
 function abConcat() {
 	var arrayBuffers = [].slice.call(arguments);
 	
 	return arrayBuffers.reduce(function(prev,cur) {
+		cur = new Uint8Array(cur);
+		
 		var newAb = new Uint8Array(prev.length + cur.length);
 		newAb.set(prev,0);
 		newAb.set(cur,prev.length);
 		return newAb;
-	},new Uint8Array(0));
+	},new Uint8Array(0)).buffer;
 }
 	
 /**/ // will exclude in build

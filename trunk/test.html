@@ -82,11 +82,12 @@ function hex2char(hex) { //me has to lol at this function
 	return hex.join("");
 }
 function downloadBlob(fileData) {
-	var bb = new (window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder)();
-	bb.append(fileData);
 	var bla = (window.URL || window.webkitURL).createObjectURL(
-		bb.getBlob(
-			document.getElementById("mimetype").value
+		new Blob(
+			[new Uint8Array(fileData)],
+			{
+				type: document.getElementById("mimetype").value
+			}
 		)
 	);
 	location.assign(bla);

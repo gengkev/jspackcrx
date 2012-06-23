@@ -124,11 +124,8 @@ JSCrx.prototype.addZip = function(zipData,encoding) {
 			var reader = new FileReader();
 			reader.onload = (function(e) {
 				this.zip.full = e.target.result;
-			}).bind(this); // make sure this is THIS
+			}).bind(this);
 			reader.readAsArrayBuffer();
-			break;
-		case "base64":
-			this.addZip(window.btoa(zipData));
 			break;
 		case "string":
 			this.zip.full = new Uint8Array(
