@@ -41,12 +41,14 @@ function generatePrivateKeySign(exponent,zip) {
 	
 	// idk, zero-pad or not?!
 
-	var modulus = rsa.n.toString(16);
-	var exp = exponent.toString(16);
+	//var modulus = rsa.n.toString(16);
+	//var exp = exponent.toString(16);
+	var modulus = hexZeroPad(rsa.n.toString(16),129*2);
+	var exp = hexZeroPad(rsa.e.toString(16),3*2);
 	var publicKey = formatSPKI(modulus,exp);
 
 	// so time to sign?
-	var sign = hex2ab(rsa.signString(zip,"sha1")); //umm...zip might be a little big
+	var sign = hex2ab(rsa.signStringWithSHA1(zip)); //umm...zip might be a little big
 	
 	return {publicKey:publicKey,sign:sign};
 }
@@ -172,7 +174,7 @@ function abConcat() {
 		newAb.set(prev,0);
 		newAb.set(cur,prev.length);
 		return newAb;
-	},new Uint8Array());
+	},new Uint8Array(0));
 }
 	
 /**/ // will exclude in build
