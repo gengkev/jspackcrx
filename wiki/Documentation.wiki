@@ -3,33 +3,10 @@
 
 = Documentation =
 
-This stuff is outdated.
-
 
 == Embedding the script ==
 
-  * Link to embed.js as an external script, wither on your own server or on our project at http://jspackcrx.googlecode.com/svn/trunk/embed.js for the latest version.
+  * Link to jspackcrx_include.js as an external script, whether on your own server or on the project site at http://jspackcrx.googlecode.com/svn/branches/stable/jspackcrx_include.js for the latest version.
   * You may choose to load the script asynchronously, but make sure you don't call JSPackCrx before it loads!
 
 == How to use JSPackCrx ==
-
-JSPackCrx's API is an extension to [http://jszip.stuartk.co.uk/ stuartk's JSZip library]. The only addition is a new `_JSZip_.generateCRX()` function that can be used instead of the standard generate(), *but is asynchronous!*
-
-=== generateCRX(pemFile, callback [, fileFormat]) ===
-Generates the complete crx file. This is an asynchronous function and will return the JSZip object immediately.
-
-Options:
-  * `pemFile`, string OR File OR Blob. Pass a pem file to be used in creating the crx. If it's invalid, JSPackCrx will generate one.
-  * `fileFormat`, the format the CRX output will be returned as:
-    * `"base64"` (default), a base64 encoding in a string.
-    * `"byteString"`, the raw bytes in a string.
-    * `"Blob"`, as a Blob object.
-    * `"objectURL"`, returns a object URL of the file as a string.
-    * any other string: this will download the finished CRX file automatically when it is done.
-  * `callback`, function. Called when the operation is complete, with the data as a string in the specified format.
-
-{{{
-crx.generate(null,"base64",function(data) {
-  location.href = "data:application/x-chrome-extension;base64," + data;
-});
-}}}
