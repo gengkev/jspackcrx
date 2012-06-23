@@ -84,7 +84,11 @@ function hex2char(hex) { //me has to lol at this function
 function downloadBlob(fileData) {
 	var bb = new (window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder)();
 	bb.append(fileData);
-	var bla = (window.URL || window.webkitURL).createObjectURL(bb.getBlob("application/x-chrome-extension"));
+	var bla = (window.URL || window.webkitURL).createObjectURL(
+		bb.getBlob(
+			document.getElementById("mimetype").value
+		)
+	);
 	location.assign(bla);
 }
 </script>

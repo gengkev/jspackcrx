@@ -39,6 +39,28 @@ callbackStack.add = function(callback) {
 	return i;
 }
 
+function abConcat() {
+	var arrayBuffers = [].slice.call(arguments);
+	
+	return arrayBuffers.reduce(function(prev,cur) {
+		cur = new Uint8Array(cur);
+		
+		var newAb = new Uint8Array(prev.length + cur.length);
+		newAb.set(prev,0);
+		newAb.set(cur,prev.length);
+		return newAb;
+	},new Uint8Array(0)).buffer;
+}
+function abCopy(ab) {
+	var arr = new Uint8Array(ab);
+	var copy = new Uint8Array(ab.byteLength);
+	
+	for (var i=0;i<arr.length;i++) {
+		copy[i] = arr[i];
+	}
+	return copy.buffer;
+}
+
 function JSCrx() {
 	if (this === window) { return new JSCrx(); }
 	this.zip={};
@@ -61,10 +83,11 @@ function JSCrx() {
 	this.crx.header = null;
 	Object.defineProperty(this.crx,"full",{
 		get: (function() {
-			var crx = new Uint8Array(this.crx.header.byteLength + this.zip.full.byteLength);
-			crx.set(new Uint8Array(this.crx.header),0);
-			crx.set(new Uint8Array(this.zip.full),this.crx.header.byteLength);
-			return crx.buffer;
+			//var crx = new Uint8Array(this.crx.header.byteLength + this.zip.full.byteLength);
+			//crx.set(new Uint8Array(this.crx.header),0);
+			//crx.set(new Uint8Array(this.zip.full),this.crx.header.byteLength);
+			//return crx.buffer;
+			return abConcat(this.crx.header,this.zip.full);
 		}).bind(this),
 		enumerable: true
 	});
@@ -109,9 +132,10 @@ JSCrx.prototype.addZip = function(zipData,encoding) {
 			break;
 		case "string":
 			this.zip.full = new Uint8Array(
-				zipData.toString().split("").map(function(n){
-					return n.charCodeAt(0)
-				})).buffer;
+				(zipData+ "").split("").map(function(n){
+					return n.charCodeAt(0);
+				})
+			).buffer;
 			break;
 		case "typedarray":
 			var buffer = zipData.buffer || zipData;
@@ -125,27 +149,32 @@ JSCrx.prototype.addZip = function(zipData,encoding) {
 };
 JSCrx.prototype.generatePrivateKeySignature = function(options,callback) {
 	if (!this.zip.full) { throw new Error("Need zip file in order to sign"); }
-
+	
+	var tempZipFull = abCopy(this.zip.full);
+	
 	var callbackIndex = callbackStack.add(callback);
 	this.worker.postMessage({
-		name: "generatePrivateKeySign",
+		name:     "generatePrivateKeySign",
 		exponent: options.exponent || 0x10001,
-		zip: this.zip.full,
+		zip:      tempZipFull,
 		callback: callbackIndex
-	}, [this.zip.full]);
+	}, [tempZipFull]);
 };
 JSCrx.prototype.generateCrx = function(callback) {
 	if (!this.publicKey.der) { throw new Error("Need public key in order to package"); }
 	else if (!this.sign.der) { throw new Error("Need signature in order to package"); }
 	else if (!this.zip.full) { throw new Error("Need zip file in order to sign"); }
+	
+	var tempPublicKeyDer = abCopy(this.publicKey.der),
+	    tempSignDer      = abCopy(this.sign.der);
 
 	var callbackIndex = callbackStack.add(callback);
 	this.worker.postMessage({
-		name:"generateCrx",
-		publicKey:this.publicKey.der,
-		signature:this.sign.der,
-		callback:callbackIndex
-	}, [this.publicKey.der, this.sign.der]);
+		name:      "generateCrx",
+		publicKey: tempPublicKeyDer,
+		signature: tempSignDer,
+		callback:  callbackIndex
+	}, [tempPublicKeyDer,tempSignDer]);
 };
 JSCrx.prototype.terminate = function(){
 	//try {
