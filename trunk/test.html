@@ -30,7 +30,7 @@ function packagecrx() {
 	var crx = new JSCrx();
 	crx.addZip(zip.generate(true),"string");
 
-	crx.generatePrivateKeySignature({exponent:3},function(){
+	crx.generatePrivateKeySignature({exponent:0x10001},function(){
 
 		crx.generateCrx(function(e){
 			hexview(e.target.crx.full);

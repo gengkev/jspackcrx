@@ -83,10 +83,6 @@ function JSCrx() {
 	this.crx.header = null;
 	Object.defineProperty(this.crx,"full",{
 		get: (function() {
-			//var crx = new Uint8Array(this.crx.header.byteLength + this.zip.full.byteLength);
-			//crx.set(new Uint8Array(this.crx.header),0);
-			//crx.set(new Uint8Array(this.zip.full),this.crx.header.byteLength);
-			//return crx.buffer;
 			return abConcat(this.crx.header,this.zip.full);
 		}).bind(this),
 		enumerable: true
@@ -98,10 +94,7 @@ function JSCrx() {
 	this.worker.onmessage = (function(e) {
 		switch(e.data.name) {
 			case "generatePrivateKeySign":
-				// _this.publicKey.modulus = e.data.modulus;
-				// _this.publicKey.exponent = e.data.exponent;
 				this.publicKey.der = e.data.publicKey;
-				// this.privateKey.string = e.data.privateKey;
 				this.sign.der = e.data.sign;
 				callbackStack.run(e.data.callback,this);
 				break;
@@ -110,6 +103,7 @@ function JSCrx() {
 				callbackStack.run(e.data.callback,this);
 				break;
 			default:
+				console.log(e.data.name+": "+e.data.value);
 				break;
 		}
 	}).bind(this);
@@ -174,10 +168,7 @@ JSCrx.prototype.generateCrx = function(callback) {
 	}, [tempPublicKeyDer,tempSignDer]);
 };
 JSCrx.prototype.terminate = function(){
-	//try {
-		this.worker.terminate();
-	//	this = null;
-	//} catch(e) { } //swallowed! because it doesn't really matter
+	this.worker.terminate();
 };
 
 return JSCrx;
@@ -187,11 +178,15 @@ return JSCrx;
 function worker() {
 /* INSERT libs/jsbn.mod.js */
 /* INSERT libs/jsbn2.mod.js */
-/* INSERT libs/rng.min.js */
 /* INSERT libs/rsa.mod.js */
 /* INSERT libs/rsa2.mod.js */
 /* INSERT libs/sha1.js */
 /* INSERT libs/rsa-sign.mod.js */
+/* INSERT libs/asn1hex-1.1.min.js */
+/* INSERT libs/rsapem-1.1.min.js */
+/* INSERT libs/rsasign-1.2.min.js */
+/* INSERT libs/x509-1.1.min.js */
+/* INSERT libs/filler.js */
 
 /* INSERT worker.js */
 }
