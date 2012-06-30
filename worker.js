@@ -48,11 +48,12 @@ function generatePrivateKeySign(exponent,zip) {
 	
 	// idk, zero-pad or not?!
 
-	var modulus = rsa.n.toString(16);
-	var exp = exponent.toString(16);
-	//var modulus = hexZeroPad(rsa.n.toString(16),129*2);
-	//var exp = hexZeroPad(rsa.e.toString(16),3*2);
+	var modulus = padToByte(rsa.n.toString(16));
+	var exp = padToByte(exponent.toString(16));
 	var publicKey = formatSPKI(modulus,exp);
+	// DEBUG
+	postMessage({name:"log",value:modulus});
+	postMessage({name:"log",value:exp});
 
 	// so time to sign?
 	var sign = hex2ui8( // convert result to Uint8Array
@@ -66,13 +67,9 @@ function generatePrivateKeySign(exponent,zip) {
 function formatSPKI(modulus,exponent) { //should be in string-hex format
 	// waiting on a *real* js asn1 library
 	
-	if (modulus.length % 2 == 1) {
-		modulus = "0" + modulus;
-	}
-	if (exponent.length % 2 == 1) {
-		exponent = "0" + exponent;
-	}
-	
+	modulus = padToByte(modulus);
+	exponent = padToByte(exponent);
+
 	modulus = "0281" + hexByteLength(modulus) + modulus;
 
 	exponent = "02" + hexByteLength(exponent) + exponent;
@@ -87,7 +84,10 @@ function formatSPKI(modulus,exponent) { //should be in string-hex format
 	// some object id stuff blablabla
 	var output = "300D06092A864886F70D0101010500" + bitstring;
 	output = "3081" + hexByteLength(output) + output;
-
+	
+	// DEBUG
+	postMessage({name:"log",value:output});
+	
 	return hex2ui8(output);
 }
 function packageCRXStuffings(publicKey,signature) {
@@ -110,6 +110,8 @@ function hexByteLength(str,pad) {
 }
 function hex2char(hex) { //me has to lol at this function
 	hex = hex.match(/[0-9a-f]{2}/igm);
+	if (!hex) { return ""; }
+	
 	hex = hex.map(function(el){
 		return String.fromCharCode(parseInt(el,16));
 	});
@@ -184,14 +186,20 @@ function hexZeroPad(hex,len) {
 	}
 	return hex;
 }
+function padToByte(hex) {
+	if (hex.length % 2 == 1) {
+		return "0" + hex;
+	}
+	return hex;
+}
 function hex2b64(hex) {
-	return window.btoa(hex2char(hex));
+	return btoa(hex2char(hex));
 }
 function b64tohex(b64) {
-	return char2hex(window.atob(b64));
+	return char2hex(atob(b64));
 }
 //function b64toBA(string) {
-//	return window.atob(string).split("").map(function(x){return x.charCodeAt(0);});
+//	return atob(string).split("").map(function(x){return x.charCodeAt(0);});
 //}
 function abConcat() {
 	var arrayBuffers = [].slice.call(arguments);
@@ -211,11 +219,14 @@ if (!self.BigInteger || !self.RSAKey) { // :-/
 	importScripts.apply(null,[
 		"jsbn.mod",
 		"jsbn2.mod",
-		"rng.min",
 		"rsa.mod",
 		"rsa2.mod",
 		"sha1",
-		"rsa-sign.mod"
+		"asn1hex-1.1.min",
+		"rsapem-1.1.min",
+		"rsasign-1.2.min",
+		"x509-1.1.min",
+		"filler"
 	].map(function(x){
 		return "libs/" + x + ".js";
 	}));
