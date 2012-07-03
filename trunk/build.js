@@ -71,6 +71,7 @@ try {
 	console.timeEnd("uglifyjs-squeeze");
 	
 	console.time("uglifyjs-compile");
+	//final_code = pro.gen_code(ast,{beautify:true});
 	final_code = pro.gen_code(ast);
 	console.timeEnd("uglifyjs-compile");
 } catch(e) {

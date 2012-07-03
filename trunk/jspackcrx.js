@@ -110,30 +110,41 @@ function JSCrx() {
 }
 
 
-JSCrx.prototype.addZip = function(zipData,encoding) {
-
-	switch(encoding) {
-		case "blob":
-		case "file":
-			var reader = new FileReader();
-			reader.onload = (function(e) {
-				this.zip.full = e.target.result;
-			}).bind(this);
-			reader.readAsArrayBuffer();
-			break;
-		case "string":
-			this.zip.full = new Uint8Array(
-				(zipData+ "").split("").map(function(n){
-					return n.charCodeAt(0);
-				})
-			).buffer;
-			break;
-		case "typedarray":
-			var buffer = zipData.buffer || zipData;
-			this.zip.full = buffer;
-			break;
-		default:
-			break;
+JSCrx.prototype.addZip = function(zipData) {
+	var stringData = zipData + "";
+	
+	switch(stringData) {
+	
+	case "[object Blob]":
+	case "[object File]":
+		var reader = new FileReader();
+		reader.onload = (function(e) {
+			this.zip.full = e.target.result;
+		}).bind(this);
+		reader.readAsArrayBuffer(zipData);
+		break;
+	case "[object ArrayBuffer]":
+		this.zip.full = zipData;
+		break;
+	case "[object Int8Array]":
+	case "[object Uint8Array]":
+	case "[object Uint8ClampedArray]":
+	case "[object Int16Array]":
+	case "[object Uint16Array]":
+	case "[object Int32Array]":
+	case "[object Uint32Array]":
+	case "[object Float32Array]":
+	case "[object Float64Array]":
+		this.zip.full = zipData.buffer;
+		break;
+	default:
+		this.zip.full = new Uint8Array(
+			stringData.split("").map(function(n){
+				return n.charCodeAt(0);
+			})
+		).buffer;
+		break;
+	
 	}
 
 	return this;
@@ -175,13 +186,16 @@ return JSCrx;
 
 })(function(){
 
-function worker() {
+/**/ return "worker.js"; /**/ // will be removed by compiler
+
+return (window.URL || window.webkitURL).createObjectURL(new Blob(["(" + 
+(function(){
+
 /* INSERT libs/jsbn.mod.js */
 /* INSERT libs/jsbn2.mod.js */
 /* INSERT libs/rsa.mod.js */
 /* INSERT libs/rsa2.mod.js */
 /* INSERT libs/sha1.js */
-/* INSERT libs/rsa-sign.mod.js */
 /* INSERT libs/asn1hex-1.1.min.js */
 /* INSERT libs/rsapem-1.1.min.js */
 /* INSERT libs/rsasign-1.2.min.js */
@@ -189,31 +203,7 @@ function worker() {
 /* INSERT libs/filler.js */
 
 /* INSERT worker.js */
-}
-function stringToObjectUrl(string) {
-	function createBlobBuilder() {
-		try { return new BlobBuilder(); } catch(e) {}
-		try { return new WebKitBlobBuilder(); } catch(e) {}
-		try { return new MozBlobBuilder(); } catch(e) {}
-		throw new Error("No BlobBuilder support");
-	}
-	
-	function makeObjectURL(f){
-		try { return window.URL.createObjectURL(f); } catch(e) {}
-		try { return window.webkitURL.createObjectURL(f); } catch(e) {}
-		try { return window.createObjectURL(f); } catch(e) {}
-		try { return window.createBlobURL(f); } catch(e) {}
-		throw new Error("No support for creating object URLs");
-	}
-	
-	var bb = createBlobBuilder();
-	var array = new Uint8Array(string.split("").map(function(el) {
-		return el.charCodeAt(0);
-	}));
-	bb.append(array.buffer);
-	return makeObjectURL(bb.getBlob());
-}
-/**/ return "worker.js"; /**/ // will be removed by compiler
 
-return stringToObjectUrl("(" + worker.toString() + "())");
+}).toString()
++ "())"]));
 }());

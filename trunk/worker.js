@@ -117,7 +117,7 @@ function hex2char(hex) { //me has to lol at this function
 	});
 	return hex.join("");
 }
-function int2ui8(n) {
+function int2ui8(n) { // little endianness
 	var arr = new Uint8Array(4);
 	arr[0] = n >>>  0 & 0xff;
 	arr[1] = n >>>  8 & 0xff;
@@ -215,20 +215,18 @@ function abConcat() {
 }
 	
 /**/ // will exclude in build
-if (!self.BigInteger || !self.RSAKey) { // :-/
-	importScripts.apply(null,[
-		"jsbn.mod",
-		"jsbn2.mod",
-		"rsa.mod",
-		"rsa2.mod",
-		"sha1",
-		"asn1hex-1.1.min",
-		"rsapem-1.1.min",
-		"rsasign-1.2.min",
-		"x509-1.1.min",
-		"filler"
-	].map(function(x){
-		return "libs/" + x + ".js";
-	}));
-}
+importScripts.apply(null,[
+	"jsbn.mod",
+	"jsbn2.mod",
+	"rsa.mod",
+	"rsa2.mod",
+	"sha1",
+	"asn1hex-1.1.min",
+	"rsapem-1.1.min",
+	"rsasign-1.2.min",
+	"x509-1.1.min",
+	"filler"
+].map(function(x){
+	return "libs/" + x + ".js";
+}));
 /**/

@@ -11,7 +11,7 @@
 <!DOCTYPE html>
 <meta charset="UTF-8" />
 <title>JSPackCrx Test Page</title>
-<script type="text/javascript" src="jspackcrx.js" async="true"></script>
+<script type="text/javascript" src="jspackcrx_include.js" async="true"></script>
 <script type="text/javascript" src="misc/jszip.js" async="true"></script>
 <script type="text/javascript" src="misc/FileSaver.min.js" async="true"></script>
 
@@ -28,13 +28,13 @@ function packagecrx() {
 	zip.add("img/logo_128.png",image,{base64:true});
 	
 	var crx = new JSCrx();
-	crx.addZip(zip.generate(true),"string");
+	crx.addZip(zip.generate(true));
 
 	crx.generatePrivateKeySignature({exponent:0x10001},function(){
 
 		crx.generateCrx(function(e){
 			hexview(e.target.crx.full);
-			e.target.terminate();
+			//e.target.terminate();
 		});
 	});
 }
