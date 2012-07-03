@@ -1,0 +1,127 @@
+<!--
+  -- JSPackCrx packages Chrome extension files using JavaScript.
+  -- http://code.google.com/p/jspackcrx
+  -- Copyright (C) 2011-12 gengkev.
+  --
+  -- This software is licensed under the terms of the GPLv3.
+  -- It also contains code from other projects: see /docs/licence.txt
+  -- See http://jspackcrx.googlecode.com/svn/LICENSE.html for details.
+  --
+  -->
+<!DOCTYPE html>
+<meta charset="UTF-8" />
+<title>JSPackCrx Test Page</title>
+<script type="text/javascript" src="jspackcrx_include.js" async="true"></script>
+<script type="text/javascript" src="misc/jszip.js" async="true"></script>
+<script type="text/javascript" src="misc/FileSaver.min.js" async="true"></script>
+
+<script type="text/javascript">
+//load JSPackCrx asyncronously
+function packagecrx() {
+	// woah there
+	var image = "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";
+	var manifest=document.getElementById("manifest").value;
+
+	var zip = new JSZip();
+	zip.add("manifest.json",manifest);
+	zip.folder("img");
+	zip.add("img/logo_128.png",image,{base64:true});
+	
+	var crx = new JSCrx();
+	crx.addZip(zip.generate(true));
+
+	crx.generatePrivateKeySignature({exponent:0x10001},function(){
+
+		crx.generateCrx(function(e){
+			hexview(e.target.crx.full);
+			//e.target.terminate();
+		});
+	});
+}
+var toDownload = null;
+function hexview(ab) {
+	toDownload = ab;
+	var hex = ab2hex(ab);
+	hex.forEach(function(e,i){
+
+		if (i%16==15) hex[i]+="\n";
+		else if (i%4==3) hex[i]+="  ";
+		else hex[i]+=" ";
+	});
+	document.getElementById("hex").innerHTML = hex.join("");
+}
+function ab2hex(arrayBuffer) {
+	var arr = new Uint8Array(arrayBuffer);
+	return [].map.call(arr,function(n) {
+		n = n.toString(16);
+		if (n.length < 2) n = "0" + n;
+		return n;
+	});
+}
+function char2hex(chars,lowercase) { // also purty :)
+	chars = chars.toString();
+
+	var hexstring = Array.prototype.map.call(chars,function(el){
+		el = el.charCodeAt(0) & 0xff; //two digits please?
+		var hex = el.toString(16);
+		if (hex.length<2) { hex = "0"+hex; }
+		return hex;
+	}).join("");
+	if (lowercase) {
+		return hexstring.toLowerCase();
+	} else {
+		return hexstring.toUpperCase();
+	}
+}
+
+function hex2char(hex) { //me has to lol at this function
+	hex = hex.toLowerCase().match(/[0-9a-f]{2}/igm);
+	hex = hex.map(function(el){
+		return String.fromCharCode(parseInt(el,16));
+	});
+	return hex.join("");
+}
+function downloadBlob(fileData) {
+	var bla = (window.URL || window.webkitURL).createObjectURL(
+		new Blob(
+			[new Uint8Array(fileData)],
+			{
+				type: document.getElementById("mimetype").value
+			}
+		)
+	);
+	location.assign(bla);
+}
+</script>
+
+<h2>A kind of functional demo of jspackcrx</h2>
+<p>
+(Note that this will give an error once in a while due to its hackishness and me being too lazy to properly
+implement ASN.1. Also you can't use/save a private key or anything so yeah. At least it kind of works.)
+<br />
+It's all very hackish right now and the API sucks.<br />
+And the crx will be packaged with an image in /img/logo_128.png stolen from Mozilla's Open Web Apps project.
+</p>
+<button onclick="packagecrx()">Package CRX!</button> <label for="mimetype">MIME-Type:
+<input type="text" value="application/x-chrome-extension" id="mimetype" /></label>
+<a href="#" onclick="downloadBlob(toDownload)">Download</a>
+<br />
+Manifest:
+<br />
+<textarea id="manifest" rows="20" cols="50">
+{
+  "name": "Manifest Checker",
+  "description": "A development tool and demonstration app that helps you check your open web app manifests.",
+  "version": "1",
+  "app": {
+    "launch": {
+	  "web_url": "http://appmanifest.org/"
+	}
+  },
+  "icons": {
+    "128": "/img/logo_128.png"
+  }
+}
+</textarea>
+
+<pre id="hex" style="float:right;display:inline-block;border:1px solid grey;padding:10px;overflow-y:scroll;height:400px"></pre>
