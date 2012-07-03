@@ -8,8 +8,9 @@ hi! here's a nice list of the other libraries that jspackcrx depends on. Though 
 = Details =
 
 Core library:
-  * [http://www-cs-students.stanford.edu/~tjw/jsbn/ jsbn] (modified) A really big part of what happens in the library
-  * [http://www9.atwiki.jp/kurushima/pub/jsrsa/ RSA-Sign] (modified) I could have written the proper functions myself :P
+  * [http://www-cs-students.stanford.edu/~tjw/jsbn/ jsbn] (modified) A really big part of what happens in the library, I rewrote a large portion of it to remove global scope pollution but I might just stick it in a closure
+    * Instead of using its RNG library I just switched it to a simple `Math.random()` call, which is cryptographically secure in WebKit
+  * [http://www9.atwiki.jp/kurushima/pub/jsrsa/ RSA-Sign] (modified) Maybe not exactly good JS practice either, but hey, it's implemented, and I'm too lazy to write it myself :c
   * [http://antimatter15.com/wp/2010/01/javascript-sha1-and-sha256-in-1-kb/ antimatter15's SHA1] / [https://gist.github.com/267720 gist] Well, it's good it doesn't have UTF-8 encoding which is what caused jshash to not work
 
 Demo page:
