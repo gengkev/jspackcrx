@@ -63,37 +63,33 @@ function abCopy(ab) {
 
 function JSCrx() {
 	if (this === window) { return new JSCrx(); }
-	this.zip={
-     full: null
-   };
-
-	this.privateKey={
-     der: null,
-     pem: ""
-   };
-
-	this.publicKey={
-     modulus: null,
-     exponent: null,
-     der: null,
-     pem: ""
-   };
-   
-	this.sign={
-     der: null
-   }
-
+	this.zip = {
+		full: null
+	};
+	
+	this.privateKey = {
+		der: null,
+		pem: ""
+	};
+	
+	this.publicKey = {
+		modulus: null,
+		exponent: null,
+		der: null,
+		pem: ""
+	};
+	
+	this.sign = {
+		der: null
+	};
+	
 	this.crx = {
-     header: null
-   };
-   
-	Object.defineProperty(this.crx,"full",{
-		get: (function() {
+		header: null,
+		get full() {
 			return abConcat(this.crx.header,this.zip.full);
-		}).bind(this),
-		enumerable: true
-	});
-
+		}
+	};
+	
 	this.worker = new Worker(workerCode);
 	this.worker.onerror = function(e) { throw e; };
 
