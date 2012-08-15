@@ -63,31 +63,33 @@ function abCopy(ab) {
 
 function JSCrx() {
 	if (this === window) { return new JSCrx(); }
-	this.zip={};
-	this.zip.full = null;
-
-	this.privateKey={};
-	this.privateKey.der = null;
-	this.privateKey.pem = "";
-
-	this.publicKey={};
-	this.publicKey.modulus = null;
-	this.publicKey.exponent = null;
-	this.publicKey.der = null;
-	this.publicKey.pem = "";
-
-	this.sign={};
-	this.sign.der = null;
-
-	this.crx = {};
-	this.crx.header = null;
-	Object.defineProperty(this.crx,"full",{
-		get: (function() {
+	this.zip = {
+		full: null
+	};
+	
+	this.privateKey = {
+		der: null,
+		pem: ""
+	};
+	
+	this.publicKey = {
+		modulus: null,
+		exponent: null,
+		der: null,
+		pem: ""
+	};
+	
+	this.sign = {
+		der: null
+	};
+	
+	this.crx = {
+		header: null,
+		get full() {
 			return abConcat(this.crx.header,this.zip.full);
-		}).bind(this),
-		enumerable: true
-	});
-
+		}
+	};
+	
 	this.worker = new Worker(workerCode);
 	this.worker.onerror = function(e) { throw e; };
 
