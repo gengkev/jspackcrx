@@ -1,0 +1,57 @@
+<!doctype html>
+<meta charset="UTF-8" />
+<title>HTML5 Hex Viewer</title>
+<script>
+function $(d){return document.getElementById(d)}
+function update(file) {
+	$("name").textContent = file.name;
+	$("size").textContent = file.size + " bytes";
+
+	var reader = new FileReader();
+	reader.onload = function(e) {
+		var arr = new Uint8Array(e.target.result);
+		var hexString = Array.prototype.map.call(arr,function(el,i) {
+			el = el.toString(16);
+			while (el.length < 2) {
+				el = "0" + el;
+			}
+
+			if (i%8==7) el += " ";
+			if (i%2==1) el += " ";
+			
+			el += " ";
+
+			if (i%16 == 15) el += "\n";
+
+			return el;
+		}).join("");
+		$("view").textContent = hexString;
+	}
+	reader.onerror = function(e) {
+		alert("Error: "+e.toString());
+	}
+	reader.readAsArrayBuffer(file);
+}
+</script>
+<style>
+body {
+	font-family: sans-serif;
+}
+#view {
+	border: 1px solid grey;
+	overflow-y: scroll;
+	overflow-x: visible;
+	white-space: pre;
+	word-wrap: break-word;
+	height: 400px;
+	padding: 10px;
+	resize: both;
+}
+</style>
+<section>
+<input type="file" id="input" onchange="update(this.files[0])" />
+</section>
+<section>
+<div><b>Name:</b> <span id="name"></span> <b>Size:</b> <span id="size"></size></div>
+<pre id="view"></pre>
+</section>

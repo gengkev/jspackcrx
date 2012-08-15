@@ -1,0 +1,109 @@
+<!doctype html>
+<meta http-equiv="Content-Type" value="text/html;charset=UTF-8" />
+<title>RSA Blah</title>
+
+
+<script type="text/javascript" src="../libs/jsbn.mod.js"></script>
+<script type="text/javascript" src="../libs/jsbn2.mod.js"></script>
+<script type="text/javascript" src="../libs/rsa.mod.js"></script>
+<script type="text/javascript" src="../libs/rsa2.mod.js"></script>
+<script type="text/javascript" src="../libs/sha1.js"></script>
+<script type="text/javascript" src="../libs/asn1hex-1.1.min.js"></script>
+<script type="text/javascript" src="../libs/rsapem-1.1.min.js"></script>
+<script type="text/javascript" src="../libs/rsasign-1.2.min.js"></script>
+<script type="text/javascript" src="../libs/x509-1.1.min.js"></script>
+<script type="text/javascript" src="../libs/filler.js"></script>
+
+<script type="text/javascript">
+/* auxiliary functions */
+function hex2char(hex) { //me has to lol at this function
+	hex = hex.match(/[0-9a-f]{2}/igm);
+	if (!hex) { return ""; }
+	
+	hex = hex.map(function(el){
+		return String.fromCharCode(parseInt(el,16));
+	});
+	return hex.join("");
+}
+function hex_endian_swap(x) {
+	if (x.length % 2 !== 0) { x = "0" + x; }
+
+	var output = "", pos = x.length;
+	while (pos) {
+		output += x.substr(pos-2,2);
+		pos -= 2;
+	}
+	return output;
+}
+function char2hex(chars,lowercase) { // also purty :)
+	chars += "";
+
+	var hexstring = chars.split("").map(function(el){
+		el = el.charCodeAt(0) & 0xff; //two digits please?
+		var hex = el.toString(16);
+		if (hex.length<2) { hex = "0"+hex; }
+		return hex;
+	}).join("");
+	if (lowercase) {
+		return hexstring.toLowerCase();
+	} else {
+		return hexstring.toUpperCase();
+	}
+}
+function hexZeroPad(hex,len) {
+	hex += ""; //implicit toString
+	while(hex.length < len) {
+		hex = "0" + hex;
+	}
+	return hex;
+}
+function padToByte(hex) {
+	if (hex.length % 2 == 1) {
+		return "0" + hex;
+	}
+	return hex;
+}
+function hex2b64(hex) {
+	return btoa(hex2char(hex));
+}
+function b64tohex(b64) {
+	return char2hex(atob(b64));
+}
+
+
+/* yay */
+function $(id){return document.getElementById(id);}
+function validate() {
+	var modulus   = hex2b64 ($("modulus")  .value),
+	    exponent  =         ($("exponent") .value),
+	    signature =         ($("signature").value),
+	    data      = hex2char($("data")     .value);
+	
+	var rsa = new RSAKey();
+	rsa.setPublic(modulus,exponent);
+	var result = rsa.verifyString(data,signature);
+	
+	$("result").textContent = result;
+}
+</script>
+
+<form onsubmit="return false">
+<fieldset>
+<legend>Public key (hex):</legend>
+<textarea id="modulus"></textarea>
+<br />
+<label for="exponent">Exponent: 
+<input type="text" value="10001" id="exponent" /></label>
+</fieldset>
+<fieldset>
+<legend>Signature (hex):</legend>
+<textarea id="signature"></textarea>
+</fieldset>
+<fieldset>
+<legend>Data to sign (hex):</legend>
+<textarea id="data"></textarea>
+</fieldset>
+<input type="submit" value="Submit" onclick="validate()" />
+<div id="result"></div>
+
+</form>
