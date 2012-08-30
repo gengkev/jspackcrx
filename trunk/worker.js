@@ -82,7 +82,7 @@ function formatSPKI(modulus,exponent) { //should be in string-hex format
 	var bitstring = "0381" + hexByteLength(sequence) + sequence;
 	
 	// some object id stuff blablabla
-	var output = "300D06092A864886F70D0101010500" + bitstring;
+	var output = "300d06092a864886f70d0101010500" + bitstring;
 	output = "3081" + hexByteLength(output) + output;
 	
 	// DEBUG
@@ -106,7 +106,7 @@ function packageCRXStuffings(publicKey,signature) {
 }
 function hexByteLength(str,pad) {
 	var len = (str.length/2).toString(16);
-	return hex_endian_swap(hexZeroPad(len,pad));
+	return hexEndianSwap(hexZeroPad(len, pad*2));
 }
 function hex2char(hex) { //me has to lol at this function
 	hex = hex.match(/[0-9a-f]{2}/igm);
@@ -125,8 +125,8 @@ function int2ui8(n) { // little endianness
 	arr[3] = n >>> 24 & 0xff;
 	return arr;
 }
-function hex_endian_swap(x) {
-	if (x.length % 2 !== 0) { x = "0" + x; }
+function hexEndianSwap(x) {
+	x = padToByte(x);
 
 	var output = "", pos = x.length;
 	while (pos) {
@@ -137,22 +137,19 @@ function hex_endian_swap(x) {
 }
 // @antimatter15
 function endian_swap(x){
-  return (
-    (x>>>24) | 
-    ((x<<8) & 0x00FF0000) |
-    ((x>>>8) & 0x0000FF00) |
-    (x<<24)
-  )
+	return (
+		(x>>>24) | 
+		((x<<8) & 0x00ff0000) |
+		((x>>>8) & 0x0000ff00) |
+		(x<<24)
+	);
 }
 
 function char2hex(chars,lowercase) { // also purty :)
 	chars += "";
 
 	var hexstring = chars.split("").map(function(el){
-		el = el.charCodeAt(0) & 0xff; //two digits please?
-		var hex = el.toString(16);
-		if (hex.length<2) { hex = "0"+hex; }
-		return hex;
+		return padToByte((el.charCodeAt(0) & 0xff).toString(16));
 	}).join("");
 	if (lowercase) {
 		return hexstring.toLowerCase();
@@ -187,10 +184,7 @@ function hexZeroPad(hex,len) {
 	return hex;
 }
 function padToByte(hex) {
-	if (hex.length % 2 == 1) {
-		return "0" + hex;
-	}
-	return hex;
+	return (hex.length % 2 == 1 ? "0" : "") + hex;
 }
 function hex2b64(hex) {
 	return btoa(hex2char(hex));
