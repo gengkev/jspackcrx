@@ -1,0 +1,9 @@
+# Documentation #
+
+
+## Embedding the script ##
+
+  * Link to jspackcrx\_include.js as an external script, whether on your own server or on the project site at http://jspackcrx.googlecode.com/svn/branches/stable/jspackcrx_include.js for the latest version.
+  * You may choose to load the script asynchronously, but make sure you don't call JSPackCrx before it loads!
+
+## How to use JSPackCrx ##
